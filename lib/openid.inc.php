@@ -47,7 +47,7 @@ class ZfThrowableResponse extends Exception {
   }
 }
 
-class k_SessionIdentityLoader implements k_IdentityLoader {
+class SessionIdentityLoader implements k_IdentityLoader {
   function load(k_Context $context) {
     if ($context->session('identity')) {
       return $context->session('identity');

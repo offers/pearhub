@@ -1,8 +1,10 @@
 <?php
 class components_Login extends k_Component {
+  protected $templates;
   protected $zend_auth;
   protected $errors;
-  function __construct(Zend_Auth $zend_auth) {
+  function __construct(k_TemplateFactory $templates, Zend_Auth $zend_auth) {
+    $this->templates = $templates;
     $this->zend_auth = $zend_auth;
     $this->errors = array();
   }
@@ -27,23 +29,13 @@ class components_Login extends k_Component {
     return $this->render();
   }
   function renderHtml() {
+    $this->document->setTitle('Authentication required');
+    $t = $this->templates->create("login");
     $response = new k_HtmlResponse(
-      "<html><head><title>Authentication required</title></head><body><form method='post' action='" . htmlspecialchars($this->url()) . "'>
-  <h1>Authentication required</h1>
-  <h2>OpenID Login</h2>
-  <p>
-" . implode("<br/>", array_map('htmlspecialchars', $this->errors)) . "
-  </p>
-  <p>
-    <label>
-      open-id url:
-      <input type='text' name='openid_identifier' value='' />
-    </label>
-  </p>
-  <p>
-    <input type='submit' value='Login' />
-  </p>
-</form></body></html>");
+      $t->render(
+        $this,
+        array(
+          'errors' => $this->errors)));
     $response->setStatus(401);
     return $response;
   }

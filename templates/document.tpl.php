@@ -9,7 +9,16 @@
 <?php endforeach; ?>
   </head>
   <body>
-    <?php echo $content; ?>
+
+<?php if (!$context->identity()->anonymous()): ?>
+<form method="post" action="<?= e(url('/logout')) ?>">
+  <p>
+    Hello <strong><?= e($context->identity()->user()) ?></strong>
+    <input type="submit" value="Log out" />
+  </p>
+</form>
+<?php endif; ?>
+<?php echo $content; ?>
   </body>
 <?php foreach ($onload as $javascript): ?>
     <script type="text/javascript">

@@ -1,12 +1,8 @@
 #!/usr/bin/env bash
 
-# Pull Konstrukt
+# Pull thirdparty libraries
 svn export http://konstrukt.googlecode.com/svn/trunk thirdparty/konstrukt
-
-# Pull pdoext
 svn export http://pdoext.googlecode.com/svn/trunk thirdparty/pdoext
-
-# Pull ZF
 svn export http://framework.zend.com/svn/framework/standard/tags/release-1.9.5/library/ thirdparty/zf
 
 # Set file permissions

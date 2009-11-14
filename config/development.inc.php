@@ -15,6 +15,6 @@ function create_container() {
   $factory->pdo_dsn = 'mysql:host=localhost;dbname=pearhub';
   $factory->pdo_username = 'root';
   $container->registerImplementation('k_DefaultNotAuthorizedComponent', 'NotAuthorizedComponent');
-  $container->registerImplementation('k_IdentityLoader', 'k_SessionIdentityLoader');
+  $container->registerImplementation('k_IdentityLoader', 'SessionIdentityLoader');
   return $container;
 }
