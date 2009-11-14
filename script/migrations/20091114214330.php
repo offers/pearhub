@@ -26,8 +26,8 @@ create table maintainers (
   user varchar(64),
   name varchar(255),
   email varchar(255),
-  index (manifest_id)
-  foreign key (manifest_id) references manifest(id)
+  index (manifest_id),
+  foreign key (manifest_id) references manifests(id)
 )
 '
 );
