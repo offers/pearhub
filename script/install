@@ -1,0 +1,25 @@
+#!/bin/sh
+
+# git submodule git://github.com/troelskn/bucket.git thirdparty/bucket
+
+mkdir thirdparty
+
+# Pull Konstrukt
+svn export http://konstrukt.googlecode.com/svn/trunk thirdparty/konstrukt
+
+# Pull pdoext
+svn export http://pdoext.googlecode.com/svn/trunk thirdparty/pdoext
+
+# Set file permissions
+chmod 777 log
+chmod 777 var
+
+# create var/channel
+pushd www || exit -1
+ln -s ../var/channel/channel.xml channel.xml
+ln -s ../var/channel/get get
+ln -s ../var/channel/rest rest
+popd
+mkdir var/channel && chmod 777 var/channel
+
+
