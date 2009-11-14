@@ -1,8 +1,4 @@
-#!/bin/sh
-
-# git submodule git://github.com/troelskn/bucket.git thirdparty/bucket
-
-mkdir thirdparty
+#!/bin/bash
 
 # Pull Konstrukt
 svn export http://konstrukt.googlecode.com/svn/trunk thirdparty/konstrukt
@@ -12,7 +8,6 @@ svn export http://pdoext.googlecode.com/svn/trunk thirdparty/pdoext
 
 # Set file permissions
 chmod 777 log
-chmod 777 var
 
 # create var/channel
 pushd www || exit -1
