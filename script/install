@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
 # Pull Konstrukt
 svn export http://konstrukt.googlecode.com/svn/trunk thirdparty/konstrukt
