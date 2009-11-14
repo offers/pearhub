@@ -1,6 +1,6 @@
 <?php
 
-class components_RestrictedController extends k_Component {
+class components_Account extends k_Component {
   function dispatch() {
     if ($this->identity()->anonymous()) {
       throw new k_NotAuthorized();

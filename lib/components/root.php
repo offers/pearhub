@@ -1,6 +1,4 @@
 <?php
-require_once 'openid.inc.php';
-
 class components_Root extends k_Component {
   protected $templates;
   function __construct(k_TemplateFactory $templates) {

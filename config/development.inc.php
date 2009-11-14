@@ -14,5 +14,7 @@ function create_container() {
   $factory->template_dir = realpath(dirname(__FILE__) . '/../templates');
   $factory->pdo_dsn = 'mysql:host=localhost;dbname=pearhub';
   $factory->pdo_username = 'root';
+  $container->registerImplementation('k_DefaultNotAuthorizedComponent', 'NotAuthorizedComponent');
+  $container->registerImplementation('k_IdentityLoader', 'k_SessionIdentityLoader');
   return $container;
 }

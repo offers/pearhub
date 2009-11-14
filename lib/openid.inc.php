@@ -59,6 +59,6 @@ class k_SessionIdentityLoader implements k_IdentityLoader {
 class NotAuthorizedComponent extends k_Component {
   function dispatch() {
     // redirect to login-page
-    throw new k_TemporaryRedirect($this->url('/login', array('continue' => $this->requestUri())));
+    return new k_TemporaryRedirect($this->url('/login', array('continue' => $this->requestUri())));
   }
 }

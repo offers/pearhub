@@ -3,8 +3,8 @@ require_once 'openid.inc.php';
 
 class components_Logout extends k_Component {
   protected $zend_auth;
-  function __construct() {
-    $this->zend_auth = Zend_Auth::getInstance();
+  function __construct(Zend_Auth $zend_auth) {
+    $this->zend_auth = $zend_auth;
   }
   function execute() {
     $this->url_state->init("continue", $this->url('/'));
@@ -15,6 +15,6 @@ class components_Logout extends k_Component {
       $this->zend_auth->clearIdentity();
     }
     $this->session()->set('identity', null);
-    throw new k_SeeOther($this->query('continue'));
+    return new k_SeeOther($this->query('continue'));
   }
 }

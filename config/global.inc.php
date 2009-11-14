@@ -14,6 +14,7 @@ set_include_path(
 require_once 'konstrukt/konstrukt.inc.php';
 set_error_handler('k_exceptions_error_handler');
 spl_autoload_register('k_autoload');
+require_once 'openid.inc.php';
 
 // This loads the site-configuration. By default, it will load the development environment.
 //

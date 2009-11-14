@@ -1,8 +1,10 @@
 <?php
-require_once dirname(__FILE__) . '/../config/global.inc.php';
+require_once(dirname(__FILE__) . '/../config/global.inc.php');
+$container = create_container();
 k()
   // Use container for wiring of components
-  ->setComponentCreator(new k_InjectorAdapter(create_container()))
+  ->setComponentCreator(new k_InjectorAdapter($container))
+  ->setIdentityLoader($container->get('k_IdentityLoader'))
   // Location of debug logging
   ->setLog($debug_log_path)
   // Enable/disable in-browser debugging
