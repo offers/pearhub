@@ -7,6 +7,7 @@ set_include_path(
   . PATH_SEPARATOR . dirname(dirname(__FILE__)).'/thirdparty/konstrukt/lib'
   . PATH_SEPARATOR . dirname(dirname(__FILE__)).'/thirdparty/pdoext/lib'
   . PATH_SEPARATOR . dirname(dirname(__FILE__)).'/thirdparty/bucket/lib'
+  . PATH_SEPARATOR . dirname(dirname(__FILE__)).'/thirdparty/zf'
   . PATH_SEPARATOR . get_include_path()
 );
 
