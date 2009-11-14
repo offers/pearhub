@@ -1,0 +1,3 @@
+[submodule "thirdparty/bucket"]
+	path = thirdparty/bucket
+	url = git@github.com:troelskn/bucket.git
