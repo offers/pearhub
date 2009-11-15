@@ -1,0 +1,128 @@
+html {
+        font-family: "DejaVu Sans", verdana;
+       }
+h2 {
+     color: #888;
+     font-weight: normal;
+     font-size: 200%;
+     margin-bottom: .25em;
+     }
+.modal-wrap {
+              border-top: 2px solid #C3D9FF;
+              }
+.collection {
+              border-collapse: collapse;
+              width: 100%;
+              border-bottom: 2px solid #C3D9FF;
+              }
+.collection a {
+                color: #1E49E6;
+                }
+.collection a:visited {
+                        color: purple;
+                        }
+.collection caption {
+                      border-top: 2px solid #C3D9FF;
+                      }
+.collection td {
+                 border-bottom: 1px solid #ccc;
+                 }
+.collection tr.odd td {}
+.collection tr.even td {}
+.collection caption,
+.collection th,
+.collection td {
+                 padding: .25em;
+                 }
+.collection th,
+.collection tfoot td,
+.collection caption {
+                      background-color: #E0ECFF;
+                      color: #1E49E6;
+}
+.collection th.sort-asc,
+.collection th.sort-desc,
+.collection th.sort-asc a,
+.collection th.sort-desc a {
+                             background-color: white;
+                             text-decoration: none;
+                             }
+.collection th.sort-asc a:after {
+                                  color: #ccc;
+                                  content: " \025BE"
+                                  }
+.collection th.sort-desc a:after {
+                                   color: #ccc;
+                                   content: " \025B4"
+                                   }
+.collection th a,
+.collection caption a {
+                        color: #1E49E6;
+                        text-decoration: underline;
+                        font-weight: bold;
+}
+.collection a:hover {
+                      text-decoration: none;
+}
+.collection tfoot td {
+                       text-align: right;
+}
+.collection caption {
+                      text-align: left;
+                      }
+.collection tfoot a,
+.collection tfoot span {
+                         padding: 0 .25em;
+                         }
+.collection tfoot a {
+                      color: #1E49E6;
+                      font-weight: bold;
+                      }
+.collection tfoot span {
+                         background-color: purple;
+                         color: #E0ECFF;
+                       }
+.collection tr.rowlink a.rowlink {
+                           display: block;
+                           }
+.collection tr.rowlink:hover a.rowlink {
+                                         text-decoration: none;
+                                 }
+.collection tr.rowlink:hover td {
+                                  background-color: #1E49E6;
+                               }
+.collection tr.rowlink:hover a.rowlink {
+                                         color: white;
+                                         }
+.collection td.actions a {
+                           visibility: hidden;
+                           text-decoration: none;
+                           background-color: white;
+                           color: #1E49E6;
+                           padding: 0 .5em;
+                           -moz-border-radius: 2px;
+                           /*color: #888;*/
+                           }
+.collection td.actions a:hover {
+                                 background-color: #E0ECFF;
+                           }
+.collection tr.rowlink:hover td.actions a {
+                                            visibility: visible;
+                                            }
+.krudt-form {
+             padding: .25em;
+             margin: .25em 0;
+             width: auto;
+             background-color: #E0ECFF;
+             }
+
+.krudt-form label {
+                   font-weight: bold;
+                   color: #888;
+                   display: block;
+                   }
+.form-footer {
+               border-bottom: 2px solid #C3D9FF;
+               padding: .25em;
+               margin: 0;
+               }
