@@ -8,6 +8,8 @@ class components_Root extends k_Component {
     switch ($name) {
     case 'account':
       return 'components_Account';
+    case 'projects':
+      return 'components_projects_List';
     case 'login':
       return 'components_Login';
     case 'logout':
@@ -18,6 +20,7 @@ class components_Root extends k_Component {
     return $this->wrap(parent::execute());
   }
   function wrapHtml($content) {
+    $this->document->addStyle($this->url('/krudt.css'));
     $t = $this->templates->create("document");
     return
       $t->render(
