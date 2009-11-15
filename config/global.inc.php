@@ -12,6 +12,11 @@ set_include_path(
 );
 
 require_once 'konstrukt/konstrukt.inc.php';
+require_once 'pdoext.inc.php';
+require_once 'pdoext/connection.inc.php';
+require_once 'pdoext/query.inc.php';
+require_once 'pdoext/tablegateway.php';
+
 set_error_handler('k_exceptions_error_handler');
 spl_autoload_register('k_autoload');
 require_once 'openid.inc.php';

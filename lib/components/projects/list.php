@@ -7,7 +7,7 @@ class components_projects_List extends k_Component {
   protected $projects;
   protected $project;
   protected $url_init = array('sort' => 'id', 'direction' => 'asc', 'page' => 1);
-  function __construct(k_TemplateFactory $templates, Projects $projects) {
+  function __construct(k_TemplateFactory $templates, ProjectGateway $projects) {
     $this->templates = $templates;
     $this->projects = $projects;
   }

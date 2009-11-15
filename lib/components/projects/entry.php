@@ -6,7 +6,7 @@ class components_projects_Entry extends k_Component {
   protected $templates;
   protected $projects;
   protected $project;
-  function __construct(k_TemplateFactory $templates, Projects $projects) {
+  function __construct(k_TemplateFactory $templates, ProjectGateway $projects) {
     $this->templates = $templates;
     $this->projects = $projects;
   }
