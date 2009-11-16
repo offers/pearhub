@@ -35,6 +35,9 @@ class components_projects_List extends k_Component {
         'content' => $content));
   }
   function renderHtmlNew() {
+    if ($this->identity()->anonymous()) {
+      throw new k_NotAuthorized();
+    }
     if (!$this->project) {
       $this->project = new Project();
     }
@@ -49,12 +52,29 @@ class components_projects_List extends k_Component {
     return $this->render();
   }
   function processNew() {
+    if ($this->identity()->anonymous()) {
+      throw new k_NotAuthorized();
+    }
     $this->project = new Project(
       array(
         'name' => $this->body('name'),
-        'owner' => $this->body('owner'),
-        'created' => $this->body('created'),
+        'owner' => $this->identity()->user(),
+        'created' => date('Y-m-d H:i:s'),
         'repository' => $this->body('repository')));
+    $filespec = json_decode($this->body('filespec'), true);
+    if (!$filespec) {
+      $this->project->errors['filespec'][] = 'Syntax error';
+      return false;
+    }
+    $this->project->setFilespec($filespec);
+
+    $ignore = json_decode($this->body('ignore'), true);
+    if (!$ignore) {
+      $this->project->errors['ignore'][] = 'Syntax error';
+      return false;
+    }
+    $this->project->setIgnore($ignore);
+
     return $this->projects->insert($this->project);
   }
 }

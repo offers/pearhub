@@ -29,7 +29,7 @@ class Contact {
   function getArrayCopy() {
     return $this->row;
   }
-  function display_name() {
+  function displayName() {
     return "Contact#" . $this->id();
   }
   function id() {

@@ -5,6 +5,10 @@ svn export http://konstrukt.googlecode.com/svn/trunk thirdparty/konstrukt
 svn export http://pdoext.googlecode.com/svn/trunk thirdparty/pdoext
 svn export http://framework.zend.com/svn/framework/standard/tags/release-1.9.5/library/ thirdparty/zf
 
+wget http://svn.php.net/viewvc/pear2/sandbox/SimpleChannelServer/trunk/pearscs.phar?view=co
+mv "pearscs.phar?view=co" script/pearscs.phar
+chmod +x script/pearscs.phar
+
 # Set file permissions
 chmod 777 log
 

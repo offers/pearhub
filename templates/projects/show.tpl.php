@@ -1,4 +1,4 @@
-<h2><?php e($project->display_name()); ?></h2>
+<h2><?php e($project->displayName()); ?></h2>
 <dl>
   <dt>Name</dt>
   <dd><?php e($project->name()); ?></dd>

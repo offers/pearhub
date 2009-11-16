@@ -6,7 +6,7 @@ require_once 'bucket.inc.php';
 date_default_timezone_set('Europe/Paris');
 
 $debug_log_path = dirname(dirname(__FILE__)).'/log/debug.log';
-$debug_enabled = true;
+$debug_enabled = false;
 
 function create_container() {
   $factory = new ApplicationFactory();

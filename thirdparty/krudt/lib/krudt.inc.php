@@ -76,6 +76,23 @@ class krudt_view_ViewHelper {
   }
 
   /**
+   * Creates a `<input type="text" />` for a record.
+   */
+  function html_text_area($view, $context, $entry, $field, $label = null) {
+    $label || $label = ucfirst(str_replace('_', ' ', $field));
+    $html = '  <p class="krudt-form">
+    <label for="field-' . $view->escape($field) . '">' . $view->escape($label) . '</label>
+    <textarea id="field-' . $view->escape($field) . '" name="' . $view->escape($field) . '">' . $view->escape($entry->{$field}()) . '</textarea>
+';
+    if (isset($entry->errors[$field])) {
+      $html .= '    <span style="display:block;color:red">' . $view->escape($entry->errors[$field]) . ' </span>
+';
+    }
+    $html .= "  </p>\n";
+    return $html;
+  }
+
+  /**
    * Creates a `<table>` containing a collection.
    */
   function collection($view, $context, $collection, $fields = null, $row_actions = null, $collection_actions = null) {

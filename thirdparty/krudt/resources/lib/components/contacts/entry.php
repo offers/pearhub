@@ -40,7 +40,7 @@ class components_contacts_Entry extends k_Component {
     return $xml->outputMemory();
   }
   function renderHtmlEdit() {
-    $this->document->setTitle("Edit " . $this->contact->display_name());
+    $this->document->setTitle("Edit " . $this->contact->displayName());
     $t = $this->templates->create("contacts/edit");
     return $t->render($this, array('contact' => $this->contact));
   }
@@ -58,7 +58,7 @@ class components_contacts_Entry extends k_Component {
     return $this->contacts->update($this->contact);
   }
   function renderHtmlDelete() {
-    $this->document->setTitle("Delete " . $this->contact->display_name());
+    $this->document->setTitle("Delete " . $this->contact->displayName());
     $t = $this->templates->create("contacts/delete");
     return $t->render($this, array('contact' => $this->contact));
   }

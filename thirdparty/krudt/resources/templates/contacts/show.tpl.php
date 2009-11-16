@@ -1,4 +1,4 @@
-<h2><?php e($contact->display_name()); ?></h2>
+<h2><?php e($contact->displayName()); ?></h2>
 <dl>
   <dt>First Name</dt>
   <dd><?php e($contact->first_name()); ?></dd>

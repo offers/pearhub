@@ -40,7 +40,10 @@ class components_projects_Entry extends k_Component {
     return $xml->outputMemory();
   }
   function renderHtmlEdit() {
-    $this->document->setTitle("Edit " . $this->project->display_name());
+    if ($this->identity()->anonymous()) {
+      throw new k_NotAuthorized();
+    }
+    $this->document->setTitle("Edit " . $this->project->displayName());
     $t = $this->templates->create("projects/edit");
     return $t->render($this, array('project' => $this->project));
   }
@@ -51,6 +54,9 @@ class components_projects_Entry extends k_Component {
     return $this->render();
   }
   function processUpdate() {
+    if ($this->identity()->anonymous()) {
+      throw new k_NotAuthorized();
+    }
     $this->project = new Project(
       array(
         'id' => $this->project->id(),
@@ -61,11 +67,17 @@ class components_projects_Entry extends k_Component {
     return $this->projects->update($this->project);
   }
   function renderHtmlDelete() {
-    $this->document->setTitle("Delete " . $this->project->display_name());
+    if ($this->identity()->anonymous()) {
+      throw new k_NotAuthorized();
+    }
+    $this->document->setTitle("Delete " . $this->project->displayName());
     $t = $this->templates->create("projects/delete");
     return $t->render($this, array('project' => $this->project));
   }
   function DELETE() {
+    if ($this->identity()->anonymous()) {
+      throw new k_NotAuthorized();
+    }
     if ($this->projects->delete($this->project)) {
       return new k_SeeOther($this->url('..'));
     }
