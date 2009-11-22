@@ -4,6 +4,39 @@ require_once 'pdoext/connection.inc.php';
 require_once 'pdoext/query.inc.php';
 require_once 'pdoext/tablegateway.php';
 
+class Accessor {
+  public $errors = array();
+  protected $row = array();
+  function __construct($row = array()) {
+    $this->row = $row;
+  }
+  function getArrayCopy() {
+    return $this->row;
+  }
+  function __call($fn, $args) {
+    if (preg_match('/^(g|s)et(.+)$/i', $fn, $reg)) {
+      $mode = $reg[1];
+      $camel_field = $reg[2];
+    } else {
+      $mode = 'g';
+      $camel_field = $fn;
+    }
+    $colum = strtolower(preg_replace('/(?<=\\w)([A-Z])/', '_\\1', $camel_field));
+    if ($mode === 'g') {
+      return isset($this->row[$colum]) ? $this->row[$colum] : null;
+    } else {
+      $this->row[$colum] = $args[0];
+    }
+  }
+}
+
+/*
+$x = new Accessor();
+$x->setFoo('fooval');
+var_dump($x);
+var_dump($x->foo());
+*/
+
 class ProjectGateway extends pdoext_TableGateway {
   protected $sql_load_aggregates;
   protected $maintainers;
@@ -11,21 +44,71 @@ class ProjectGateway extends pdoext_TableGateway {
     parent::__construct('projects', $db);
     $this->maintainers = $maintainers;
   }
-  function load($row = array()) {
-    $m = new Project($row);
-    if ($row['id']) {
-      return $this->loadAggerates($m);
-    }
-    return $m;
+  function unmarshal($hash) {
+    $p = new Project(
+      array(
+        'id' => isset($hash['id']) ? $hash['id'] : null));
+    return $this->unmarshalInto($hash, $p);
   }
-  function loadAggerates($project) {
+  function unmarshalInto($hash, Project $p) {
+    $h = array();
+    foreach ($hash as $k => $v) {
+      $h[str_replace('-', '_', $k)] = $v;
+    }
+    $hash = $h;
+    $fields = array('name', 'owner', 'created', 'repository', 'summary', 'href', 'license_title', 'license_href', 'php_version');
+    foreach ($fields as $field) {
+      if (array_key_exists($field, $hash)) {
+        $p->{"set$field"}($hash[$field]);
+      }
+    }
+    if (isset($hash['maintainers'])) {
+      if (is_string($hash['maintainers'])) {
+        $maintainers = json_decode($hash['maintainers']);
+      } else {
+        $maintainers = $hash['maintainers'];
+      }
+      foreach ($maintainers as $row) {
+        $m = $this->maintainers->unmarshal($row);
+        $this->addProjectMaintainer($m, $row['type']);
+      }
+    }
+    if (isset($hash['filespec'])) {
+      if (is_string($hash['filespec'])) {
+        $filespec = json_decode($hash['filespec']);
+      } else {
+        $filespec = $hash['filespec'];
+      }
+      foreach ($filespec as $row) {
+        $this->addFilespec($row['path'], $row['type']);
+      }
+    }
+    if (isset($hash['ignore'])) {
+      if (is_string($hash['ignore'])) {
+        $ignore = json_decode($hash['ignore']);
+      } else {
+        $ignore = $hash['ignore'];
+      }
+      foreach ($ignore as $pattern) {
+        $this->addIgnore($pattern);
+      }
+    }
+    return $p;
+  }
+  function load($row = array()) {
+    $p = new Project($row);
+    if ($row['id']) {
+      return $this->loadAggregates($p);
+    }
+    return $p;
+  }
+  function loadAggregates($project) {
     if (!$this->sql_load_aggregates) {
       $this->sql_load_aggregates = $this->db->prepare(
         '
 SELECT
   projects.id as project_id,
-  maintainers.id as maintainer_id,
-  maintainers.type,
+  project_maintainers.type,
   maintainers.user,
   maintainers.name,
   maintainers.email,
@@ -35,8 +118,11 @@ SELECT
 FROM
   projects
 LEFT JOIN
+  project_maintainers
+ON projects.id = project_maintainers.project_id
+JOIN
   maintainers
-ON projects.id = maintainers.project_id
+ON project_maintainers.user = maintainers.user
 LEFT JOIN
   filespecs
 ON projects.id = filespecs.project_id
@@ -51,9 +137,8 @@ WHERE
     }
     $this->sql_load_aggregates->execute(array('id' => $project->id()));
     foreach ($this->sql_load_aggregates as $row) {
-      if ($row['maintainer_id']) {
-        $row['id'] = $row['maintainer_id'];
-        $project->addMaintainer($this->maintainers->load($row));
+      if ($row['name']) {
+          $project->addProjectMaintainer($this->maintainers->load($row), $row['type']);
       } elseif ($row['filespec_path']) {
         $project->addFilespec($row['filespec_path'], $row['filespec_type']);
       } elseif ($row['pattern']) {
@@ -63,8 +148,17 @@ WHERE
     return $project;
   }
   function insertAggregates($project) {
-    foreach ($project->maintainers() as $maintainer) {
-      $this->maintainers->insert($maintainer);
+    $insert_project_maintainer = $this->db->prepare(
+      'insert into project_maintainers (project_id, user, type) values (:project_id, :user, :type)');
+    foreach ($project->projectMaintainers() as $pm) {
+      // This is not the job of this gateway!
+      // $this->maintainers->insert($pm->maintainer());
+      $insert_project_maintainer->execute(
+        array(
+          ':project_id' => $project->id(),
+          ':user' => $pm->maintainer()->user(),
+          ':type' => $spec['type']
+        ));
     }
     $insert_filespec = $this->db->prepare(
       'insert into filespecs (project_id, path, type) values (:project_id, :path, :type)');
@@ -88,10 +182,13 @@ WHERE
   }
   function updateAggregates($project) {
     $this->db->prepare(
-      'delete from maintainers where project_id = :project_id'
+      'delete from project_maintainers where project_id = :project_id'
     )->execute(
         array(
           ':project_id' => $project->id()));
+    $this->db->prepare(
+      'delete from maintainers where user not in (select user from project_maintainers)'
+    )->execute();
     $this->db->prepare(
       'delete from filespecs where project_id = :project_id'
     )->execute(
@@ -148,51 +245,19 @@ class MaintainersGateway extends pdoext_TableGateway {
     parent::__construct('maintainers', $db);
   }
   function load($row = array()) {
-    return new Maintainers($row);
+    return new Maintainer($row);
   }
 }
 
-class Project {
-  public $errors = array();
-  protected $row = array();
+class Project extends Accessor {
   protected $filespec = array();
   protected $file_ignore = array();
-  protected $maintainers = array();
+  protected $project_maintainers = array();
   function __construct($row = array('php_version' => '5.0.0')) {
-    $this->row = $row;
-  }
-  function getArrayCopy() {
-    return $this->row;
+    parent::__construct($row);
   }
   function displayName() {
     return $this->name();
-  }
-  function id() {
-    return isset($this->row['id']) ? $this->row['id'] : null;
-  }
-  function name() {
-    return isset($this->row['name']) ? $this->row['name'] : null;
-  }
-  function owner() {
-    return isset($this->row['owner']) ? $this->row['owner'] : null;
-  }
-  function created() {
-    return isset($this->row['created']) ? $this->row['created'] : null;
-  }
-  function repository() {
-    return isset($this->row['repository']) ? $this->row['repository'] : null;
-  }
-  function summary() {
-    return isset($this->row['summary']) ? $this->row['summary'] : null;
-  }
-  function licenseTitle() {
-    return isset($this->row['license_title']) ? $this->row['license_title'] : null;
-  }
-  function licenseHref() {
-    return isset($this->row['license_href']) ? $this->row['license_href'] : null;
-  }
-  function phpVersion() {
-    return isset($this->row['php_version']) ? $this->row['php_version'] : null;
   }
   function filespec() {
     return $this->filespec;
@@ -200,41 +265,17 @@ class Project {
   function ignore() {
     return $this->file_ignore;
   }
-  function maintainers() {
-    return $this->maintainers;
+  function projectMaintainers() {
+    return $this->project_maintainers;
   }
   function setId($id) {
     if ($this->id() !== null) {
       throw new Exception("Can't change id");
     }
-    foreach ($this->maintainers as $maintainer) {
-      $maintainer->setProjectId($id);
+    foreach ($this->project_maintainers as $project_maintainer) {
+      $project_maintainer->setProjectId($id);
     }
     return $this->row['id'] = $id;
-  }
-  function setName($name) {
-    return $this->row['name'] = $name;
-  }
-  function setOwner($owner) {
-    return $this->row['owner'] = $owner;
-  }
-  function setCreated($created) {
-    return $this->row['created'] = $created;
-  }
-  function setRepository($url) {
-    return $this->row['repository'] = $url;
-  }
-  function setSummary($summary) {
-    return $this->row['summary'] = $summary;
-  }
-  function setLicenseTitle($license_title) {
-    return $this->row['license_title'] = $license_title;
-  }
-  function setLicenseHref($license_href) {
-    return $this->row['license_href'] = $license_href;
-  }
-  function setPhpVersion($php_version) {
-    return $this->row['php_version'] = $php_version;
   }
   function addSourceFile($file) {
     $this->filespec[] = array('path' => $file, 'type' => 'src');
@@ -275,72 +316,50 @@ class Project {
   function setIgnore($ignore) {
     $this->file_ignore = $ignore;
   }
-  function addMaintainer(Maintainer $maintainer) {
-    $maintainer->setProjectId($this->id());
-    $this->maintainers[] = $maintainer;
-    return $maintainer;
+  function addProjectMaintainer(ProjectMaintainer $project_maintainer) {
+    $project_maintainer->setProjectId($this->id());
+    $this->project_maintainers[] = $project_maintainer;
+    return $project_maintainer;
   }
 }
 
-class Maintainer {
-  public $errors = array();
-  protected $row = array();
-  function __construct($row = array()) {
-    $this->row = $row;
+class ProjectMaintainer {
+  protected $project_id;
+  protected $maintainer;
+  protected $type;
+  function __construct($maintainer, $type, $project_id = null) {
+    if (!in_array($type, array('lead', 'helper'))) {
+      throw new Exception("Illegal value for 'type'");
+    }
+    $this->maintainer = $maintainer;
+    $this->type = $type;
+    $this->project_id = $project_id;
   }
-  function getArrayCopy() {
-    return $this->row;
-  }
-  function displayName() {
-    return $this->user();
-  }
-  function id() {
-    return isset($this->row['id']) ? $this->row['id'] : null;
+  function setProjectId($project_id) {
+    if ($this->projectId() !== null) {
+      throw new Exception("Can't change project_id");
+    }
+    $this->project_id = $project_id;
   }
   function projectId() {
-    return isset($this->row['project_id']) ? $this->row['project_id'] : null;
+    return $this->project_id;
+  }
+  function maintainer() {
+    return $this->maintainer;
   }
   function type() {
-    return isset($this->row['type']) ? $this->row['type'] : null;
+    return $this->type;
   }
-  function user() {
-    return isset($this->row['user']) ? $this->row['user'] : null;
-  }
-  function name() {
-    return isset($this->row['name']) ? $this->row['name'] : null;
-  }
-  function email() {
-    return isset($this->row['email']) ? $this->row['email'] : null;
+}
+
+class Maintainer extends Accessor {
+  function displayName() {
+    return $this->user();
   }
   function setId($id) {
     if ($this->id() !== null) {
       throw new Exception("Can't change id");
     }
     return $this->row['id'] = $id;
-  }
-  function setProjectId($id) {
-    return $this->row['project_id'] = $id;
-  }
-  function setType($type) {
-    if (!in_array($type, array('lead', 'helper'))) {
-      throw new Exception("Illegal value for 'type'");
-    }
-    return $this->row['type'] = $type;
-  }
-  function setUser($user) {
-    return $this->row['user'] = $user;
-  }
-  function setName($name) {
-    return $this->row['name'] = $name;
-  }
-  function setEmail($email) {
-    return $this->row['email'] = $email;
-  }
-  function toStruct() {
-    return array(
-      'type' => $this->type(),
-      'user' => $this->user(),
-      'name' => $this->name(),
-      'email' => $this->email());
   }
 }

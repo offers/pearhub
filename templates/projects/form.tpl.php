@@ -82,8 +82,13 @@
   <label for="field-maintainers">maintainers</label>
 <?php
 $maintainers = array();
-foreach ($project->maintainers() as $s) {
-  $maintainers[] = $s->toStruct();
+foreach ($project->projectMaintainers() as $m) {
+  $maintainers[] = array(
+    'type' => $m->type(),
+    'user' => $m->maintainer()->user(),
+    'name' => $m->maintainer()->name(),
+    'email' => $m->maintainer()->email(),
+  );
 }
 ?>
   <textarea id="field-maintainers" name="maintainers"><?=e(json_encode($maintainers))?></textarea>

@@ -57,13 +57,7 @@ class components_projects_Entry extends k_Component {
     if ($this->identity()->anonymous()) {
       throw new k_NotAuthorized();
     }
-    $this->project = new Project(
-      array(
-        'id' => $this->project->id(),
-        'name' => $this->body('name'),
-        'owner' => $this->body('owner'),
-        'created' => $this->body('created'),
-        'repository' => $this->body('repository')));
+    $this->projects->unmarshalInto($this->body(), $this->project);
     return $this->projects->update($this->project);
   }
   function renderHtmlDelete() {
@@ -78,7 +72,7 @@ class components_projects_Entry extends k_Component {
     if ($this->identity()->anonymous()) {
       throw new k_NotAuthorized();
     }
-    if ($this->projects->delete($this->project)) {
+    if ($this->projects->delete(array('id' => $this->project->id()))) {
       return new k_SeeOther($this->url('..'));
     }
     return $this->render();
