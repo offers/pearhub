@@ -1,5 +1,5 @@
 html {
-        font-family: "DejaVu Sans", verdana;
+       font-family: "DejaVu Sans", verdana;
        }
 h2 {
      color: #888;
@@ -10,6 +10,8 @@ h2 {
 .modal-wrap {
               border-top: 2px solid #C3D9FF;
               }
+
+/* * * * * * * * * collection * * * * * * * * */
 .collection {
               border-collapse: collapse;
               width: 100%;
@@ -39,7 +41,7 @@ h2 {
 .collection caption {
                       background-color: #E0ECFF;
                       color: #1E49E6;
-}
+                      }
 .collection th.sort-asc,
 .collection th.sort-desc,
 .collection th.sort-asc a,
@@ -60,13 +62,13 @@ h2 {
                         color: #1E49E6;
                         text-decoration: underline;
                         font-weight: bold;
-}
+                        }
 .collection a:hover {
                       text-decoration: none;
-}
+                      }
 .collection tfoot td {
                        text-align: right;
-}
+                       }
 .collection caption {
                       text-align: left;
                       }
@@ -81,16 +83,16 @@ h2 {
 .collection tfoot span {
                          background-color: purple;
                          color: #E0ECFF;
-                       }
+                         }
 .collection tr.rowlink a.rowlink {
-                           display: block;
-                           }
+                                   display: block;
+                                   }
 .collection tr.rowlink:hover a.rowlink {
                                          text-decoration: none;
-                                 }
+                                         }
 .collection tr.rowlink:hover td {
                                   background-color: #1E49E6;
-                               }
+                                  }
 .collection tr.rowlink:hover a.rowlink {
                                          color: white;
                                          }
@@ -100,29 +102,64 @@ h2 {
                            background-color: white;
                            color: #1E49E6;
                            padding: 0 .5em;
-                           -moz-border-radius: 2px;
+                           moz-border-radius: 2px;
                            /*color: #888;*/
                            }
 .collection td.actions a:hover {
                                  background-color: #E0ECFF;
-                           }
+                                 }
 .collection tr.rowlink:hover td.actions a {
                                             visibility: visible;
                                             }
-.krudt-form {
-             padding: .25em;
-             margin: .25em 0;
-             width: auto;
-             background-color: #E0ECFF;
-             }
 
-.krudt-form label {
-                   font-weight: bold;
-                   color: #888;
+/* * * * * * * * * form * * * * * * * * */
+.form {
+        padding: .25em;
+        margin: .25em 0;
+        width: auto;
+        }
+.form label {
+              color: #888;
+              display: block;
+              }
+.form label span {
                    display: block;
+                   width: 8em;
+                   line-height: 200%;
+                   float: left;
                    }
+.form input,
+.form textarea,
+.form select {
+                 font-size: 150%;
+                 }
+.form input,
+.form textarea {
+                 width: 12em;
+                 }
+.form .container {
+                   margin-top: .25em;
+                   padding-top: .25em;
+                   border-top: 2px solid #C3D9FF;
+                  }
+.form .fieldset {
+                  margin-top: .5em;
+                  }
 .form-footer {
-               border-bottom: 2px solid #C3D9FF;
+               border-top: 2px solid #C3D9FF;
+               background-color: #E0ECFF;
                padding: .25em;
                margin: 0;
                }
+.form .fieldset .remove {
+                          float: right;
+                          font-size: 200%;
+                          color: #888;
+                          cursor: pointer;
+                          }
+#maintainers-autocomplete {
+                            display: none;
+                            position: absolute;
+                            background: #eee;
+                            padding: 1em;
+                            }

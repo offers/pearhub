@@ -20,7 +20,7 @@ class components_Root extends k_Component {
     return $this->wrap(parent::execute());
   }
   function wrapHtml($content) {
-    $this->document->addStyle($this->url('/krudt.css'));
+    $this->document->addStyle($this->url('/res/style.css'));
     $t = $this->templates->create("document");
     return
       $t->render(

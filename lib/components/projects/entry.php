@@ -23,6 +23,7 @@ class components_projects_Entry extends k_Component {
   }
   function renderHtml() {
     $this->document->setTitle($this->project->name());
+    $this->document->addScript($this->url('/res/form.js'));
     $t = $this->templates->create("projects/show");
     return $t->render($this, array('project' => $this->project));
   }

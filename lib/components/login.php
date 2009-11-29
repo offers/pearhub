@@ -41,6 +41,7 @@ class components_Login extends k_Component {
   }
   protected function authenticate() {
     $open_id_adapter = new Zend_Auth_Adapter_OpenId($this->body('openid_identifier'));
+    $open_id_adapter->setReturnTo($this->url());
     $open_id_adapter->setResponse(new ZfControllerResponseAdapter());
     try {
       $result = $this->zend_auth->authenticate($open_id_adapter);

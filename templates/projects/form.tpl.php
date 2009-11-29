@@ -1,4 +1,4 @@
-<p class="krudt-form">
+<div class="form">
   <label for="field-name">name</label>
   <input type="text" id="field-name" name="name" value="<?=e($project->name())?>" />
 <?php if (isset($project->errors['name'])): ?>
@@ -6,9 +6,9 @@
       <?= e(implode(', ', $project->errors['name'])) ?>
     </span>
 <?php endif; ?>
-</p>
+</div>
 
-<p class="krudt-form">
+<div class="form">
   <label for="field-summary">summary</label>
   <textarea id="field-summary" name="summary"><?=e($project->summary())?></textarea>
 <?php if (isset($project->errors['summary'])): ?>
@@ -16,9 +16,9 @@
       <?= e(implode(', ', $project->errors['summary'])) ?>
     </span>
 <?php endif; ?>
-</p>
+</div>
 
-<p class="krudt-form">
+<div class="form">
   <label for="field-license-title">license-title</label>
   <input type="text" id="field-license-title" name="license-title" value="<?=e($project->licenseTitle())?>" />
 <?php if (isset($project->errors['license-title'])): ?>
@@ -26,9 +26,9 @@
       <?= e(implode(', ', $project->errors['license-title'])) ?>
     </span>
 <?php endif; ?>
-</p>
+</div>
 
-<p class="krudt-form">
+<div class="form">
   <label for="field-license-href">license-href</label>
   <input type="text" id="field-license-href" name="license-href" value="<?=e($project->licenseHref())?>" />
 <?php if (isset($project->errors['license-href'])): ?>
@@ -36,9 +36,9 @@
       <?= e(implode(', ', $project->errors['license-href'])) ?>
     </span>
 <?php endif; ?>
-</p>
+</div>
 
-<p class="krudt-form">
+<div class="form">
   <label for="field-php-version">php-version</label>
   <input type="text" id="field-php-version" name="php-version" value="<?=e($project->phpVersion())?>" />
 <?php if (isset($project->errors['php-version'])): ?>
@@ -46,9 +46,9 @@
       <?= e(implode(', ', $project->errors['php-version'])) ?>
     </span>
 <?php endif; ?>
-</p>
+</div>
 
-<p class="krudt-form">
+<div class="form">
   <label for="field-repository">repository</label>
   <input type="text" id="field-repository" name="repository" value="<?=e($project->repository())?>" />
 <?php if (isset($project->errors['repository'])): ?>
@@ -56,52 +56,93 @@
       <?= e(implode(', ', $project->errors['repository'])) ?>
     </span>
 <?php endif; ?>
-</p>
+</div>
 
-<p class="krudt-form">
+<div class="form">
   <label for="field-filespec">filespec</label>
-  <textarea id="field-filespec" name="filespec"><?=e(json_encode($project->filespec()))?></textarea>
+  <div id="filespec-container" class="container">
+<?php foreach ($project->filespec() as $spec): ?>
+    <div class="filespec-fieldset fieldset">
+<?php $unique = uniqid(); ?>
+      <input type="text" name="filespec[<?=$unique?>][path]" value="<?=e($spec['path'])?>" />
+      <select name="filespec[<?=$unique?>][type]">
+<?php foreach (array('src', 'doc', 'bin') as $type): ?>
+   <option<?php if ($spec['type'] == $type) echo ' selected="selected"' ?>><?=e($type)?></option>
+<?php endforeach; ?>
+      </select>
+    </div>
+<?php endforeach; ?>
+  </div>
 <?php if (isset($project->errors['filespec'])): ?>
     <span style="display:block;color:red">
       <?= e(implode(', ', $project->errors['filespec'])) ?>
     </span>
 <?php endif; ?>
-</p>
+</div>
 
-<p class="krudt-form">
-  <label for="field-ignore">ignore</label>
-  <textarea id="field-ignore" name="ignore"><?=e(json_encode($project->ignore()))?></textarea>
+<div class="form">
+  <label>ignore</label>
+  <div id="ignore-container" class="container">
+<?php foreach ($project->ignore() as $pattern): ?>
+    <div class="ignore-fieldset fieldset">
+      <input type="text" name="ignore[]" value="<?=e($pattern)?>" />
+    </div>
+<?php endforeach; ?>
+  </div>
 <?php if (isset($project->errors['ignore'])): ?>
     <span style="display:block;color:red">
       <?= e(implode(', ', $project->errors['ignore'])) ?>
     </span>
 <?php endif; ?>
-</p>
+</div>
 
-<p class="krudt-form">
+<div class="form">
   <label for="field-maintainers">maintainers</label>
+  <div id="maintainers-container" class="container">
+<?php foreach ($project->projectMaintainers() as $m): ?>
+    <div class="maintainers-fieldset fieldset">
+      <span style="float:right">remove</span>
+<?php $unique = uniqid(); ?>
+      <label><span>user:</span><input type="text" name="maintainers[<?=$unique?>][user]" value="<?=e($m->maintainer()->user())?>" /></label>
+      <label><span>name:</span><input type="text" name="maintainers[<?=$unique?>][name]" value="<?=e($m->maintainer()->name())?>" /></label>
+      <label><span>email:</span><input type="text" name="maintainers[<?=$unique?>][email]" value="<?=e($m->maintainer()->email())?>" /></label>
+      <label>
+        <span>type:</span>
+        <select name="maintainers[<?=$unique?>][type]">
 <?php
-$maintainers = array();
-foreach ($project->projectMaintainers() as $m) {
-  $maintainers[] = array(
-    'type' => $m->type(),
-    'user' => $m->maintainer()->user(),
-    'name' => $m->maintainer()->name(),
-    'email' => $m->maintainer()->email(),
-  );
-}
+foreach (array('lead', 'helper') as $t):
+   if ($t == $m->type()):
+     echo '<option selected="selected">';
+   else:
+     echo '<option>';
+   endif;
+   e($t);
+   echo '</option>';
+endforeach;
 ?>
-  <textarea id="field-maintainers" name="maintainers"><?=e(json_encode($maintainers))?></textarea>
+        </select>
+      </label>
+    </div>
+<?php endforeach; ?>
+  </div>
 <?php if (isset($project->errors['maintainers'])): ?>
     <span style="display:block;color:red">
       <?= e(implode(', ', $project->errors['maintainers'])) ?>
     </span>
 <?php endif; ?>
-</p>
+</div>
 
-<p class="form-footer">
+<div id="maintainers-autocomplete">
+</div>
+
+<script>//<![CDATA[
+   URL_AUTOCOMPLETE_MAINTAINERS = "<?= url('/projects?maintainers'); ?>";
+   init();
+//]]></script>
+
+<div class="form-footer">
   <a href="<?= e(url()) ?>">Cancel</a>
   :
   <input type="submit" value="OK" />
-</p>
+</div>
 

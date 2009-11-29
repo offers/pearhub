@@ -35,6 +35,7 @@ class components_projects_List extends k_Component {
         'content' => $content));
   }
   function renderHtmlNew() {
+    $this->document->addScript($this->url('/res/form.js'));
     if ($this->identity()->anonymous()) {
       throw new k_NotAuthorized();
     }
@@ -44,6 +45,19 @@ class components_projects_List extends k_Component {
     $this->document->setTitle("New project");
     $t = $this->templates->create('projects/new');
     return $this->wrapHtml($t->render($this, array('project' => $this->project)));
+  }
+  function renderJson() {
+    return null;
+  }
+  function renderJsonMaintainers() {
+    if ($this->identity()->anonymous()) {
+      throw new k_NotAuthorized();
+    }
+    // TODO: pull from db, from $this->query('q');
+    return array(
+      array('user' => 'troelskn', 'name' => 'Troels Knak-Nielsen', 'email' => 'troelskn@gmail.com'),
+      array('user' => 'anders.ekdahl', 'name' => 'Anders Ekdahl', 'email' => null),
+    );
   }
   function postForm() {
     if ($this->processNew()) {
