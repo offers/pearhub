@@ -7,10 +7,6 @@ h2 {
      font-size: 200%;
      margin-bottom: .25em;
      }
-.modal-wrap {
-              border-top: 2px solid #C3D9FF;
-              }
-
 /* * * * * * * * * collection * * * * * * * * */
 .collection {
               border-collapse: collapse;
@@ -113,6 +109,14 @@ h2 {
                                             }
 
 /* * * * * * * * * form * * * * * * * * */
+.modal-wrap {
+              width: 40em;
+              margin-left: auto;
+              margin-right: auto;
+              }
+.modal-wrap h2 {
+                 border-bottom: 2px solid #C3D9FF;
+                 }
 .form {
         padding: .25em;
         margin: .25em 0;
@@ -137,12 +141,13 @@ h2 {
 .form textarea {
                  width: 12em;
                  }
-.form .container {
+.container {
                    margin-top: .25em;
                    padding-top: .25em;
                    border-top: 2px solid #C3D9FF;
                   }
-.form .fieldset {
+.fieldset {
+                  clear: both;
                   margin-top: .5em;
                   }
 .form-footer {
@@ -151,12 +156,19 @@ h2 {
                padding: .25em;
                margin: 0;
                }
-.form .fieldset .remove {
+.remove {
                           float: right;
                           font-size: 200%;
                           color: #888;
                           cursor: pointer;
                           }
+.append {
+                color: #888;
+                background: #eee;
+                padding: .25em;
+                margin-top: .5em;
+                cursor: pointer;
+                }
 #maintainers-autocomplete {
                             display: none;
                             position: absolute;

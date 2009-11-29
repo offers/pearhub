@@ -35,13 +35,13 @@ class components_projects_List extends k_Component {
         'content' => $content));
   }
   function renderHtmlNew() {
-    $this->document->addScript($this->url('/res/form.js'));
     if ($this->identity()->anonymous()) {
       throw new k_NotAuthorized();
     }
     if (!$this->project) {
       $this->project = new Project();
     }
+    $this->document->addScript($this->url('/res/form.js'));
     $this->document->setTitle("New project");
     $t = $this->templates->create('projects/new');
     return $this->wrapHtml($t->render($this, array('project' => $this->project)));
@@ -75,14 +75,14 @@ class components_projects_List extends k_Component {
         'owner' => $this->identity()->user(),
         'created' => date('Y-m-d H:i:s'),
         'repository' => $this->body('repository')));
-    $filespec = json_decode($this->body('filespec'), true);
+    $filespec = $this->body('filespec');
     if (!$filespec) {
       $this->project->errors['filespec'][] = 'Syntax error';
       return false;
     }
     $this->project->setFilespec($filespec);
 
-    $ignore = json_decode($this->body('ignore'), true);
+    $ignore = $this->body('ignore');
     if (!$ignore) {
       $this->project->errors['ignore'][] = 'Syntax error';
       return false;

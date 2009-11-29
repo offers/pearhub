@@ -64,33 +64,33 @@ class ProjectGateway extends pdoext_TableGateway {
     }
     if (isset($hash['maintainers'])) {
       if (is_string($hash['maintainers'])) {
-        $maintainers = json_decode($hash['maintainers']);
+        $maintainers = $hash['maintainers'];
       } else {
         $maintainers = $hash['maintainers'];
       }
       foreach ($maintainers as $row) {
         $m = $this->maintainers->unmarshal($row);
-        $this->addProjectMaintainer($m, $row['type']);
+        $p->addProjectMaintainer($m, $row['type']);
       }
     }
     if (isset($hash['filespec'])) {
       if (is_string($hash['filespec'])) {
-        $filespec = json_decode($hash['filespec']);
+        $filespec = $hash['filespec'];
       } else {
         $filespec = $hash['filespec'];
       }
       foreach ($filespec as $row) {
-        $this->addFilespec($row['path'], $row['type']);
+        $p->addFilespec($row['path'], $row['type']);
       }
     }
     if (isset($hash['ignore'])) {
       if (is_string($hash['ignore'])) {
-        $ignore = json_decode($hash['ignore']);
+        $ignore = $hash['ignore'];
       } else {
         $ignore = $hash['ignore'];
       }
       foreach ($ignore as $pattern) {
-        $this->addIgnore($pattern);
+        $p->addIgnore($pattern);
       }
     }
     return $p;
@@ -120,7 +120,7 @@ FROM
 LEFT JOIN
   project_maintainers
 ON projects.id = project_maintainers.project_id
-JOIN
+LEFT JOIN
   maintainers
 ON project_maintainers.user = maintainers.user
 LEFT JOIN

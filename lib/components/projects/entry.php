@@ -44,6 +44,7 @@ class components_projects_Entry extends k_Component {
     if ($this->identity()->anonymous()) {
       throw new k_NotAuthorized();
     }
+    $this->document->addScript($this->url('/res/form.js'));
     $this->document->setTitle("Edit " . $this->project->displayName());
     $t = $this->templates->create("projects/edit");
     return $t->render($this, array('project' => $this->project));

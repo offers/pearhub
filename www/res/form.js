@@ -7,6 +7,15 @@ map = function(it, fn) {
     }
     return result;
 };
+select = function(it, fn) {
+    var result = [];
+    for (var key in it) {
+        if (it.hasOwnProperty(key) && fn(it[key])) {
+            result[key] = it[key];
+        }
+    }
+    return result;
+};
 getElementPosition = function(obj) {
     var curleft = 0;
     var curtop = 0;
@@ -40,26 +49,6 @@ uniqueId = (function() {
                     return __uniqueId++;
                 };
             })();
-isBlank = function(fieldset) {
-    var isEmpty = true;
-    map(
-        fieldset.getElementsByTagName("input"),
-        function(input) {
-            isEmpty = isEmpty && !! input.value.match(/^\s*$/);
-        });
-    return isEmpty;
-};
-findFieldsets = function(container) {
-    var fieldsets = [];
-    map(
-        container.childNodes,
-        function(node) {
-            if (node.className && node.className.match(/fieldset/)) {
-                fieldsets.push(node);
-            }
-        });
-    return fieldsets;
-};
 bind = function(target, event, fn) {
     var handler = "on" + event;
     var eventAccess = {
@@ -77,52 +66,51 @@ bind = function(target, event, fn) {
         };
     }
 };
-bindFieldset = function(fieldset, handler) {
-    map(
-        fieldset.getElementsByTagName("input"),
-        function(input) {
-            bind(input, 'change', handler);
+initContainer = function(append, container, create) {
+    bind(
+        append, 'click',
+        function() {
+            create(container);
         });
-};
-update = function(container, create) {
-// loop over each fieldset:
-//   if empty + not last => remove
-// if not last empty => add one
-    var fieldsets = findFieldsets(container);
-    var last = fieldsets.length - 1;
-    for (var ii=0,ll=fieldsets.length; ii < ll; ii++) {
-        var fieldset = fieldsets[ii];
-        var isLast = ii == last;
-        if (!isLast && isBlank(fieldset)) {
-            fieldset.parentElement.removeChild(fieldset);
-        }
-    }
-    if (fieldsets.length == 0 || !isBlank(fieldsets[last])) {
-        create();
-    }
-};
-initContainer = function(container, create) {
-    var handler = function() {
-        update(
-            container,
-            function() {
-                bindFieldset(create(container), handler);
-            });
-    };
     map(
-        findFieldsets(container),
+        select(
+            container.getElementsByTagName("div"),
+            function(div) {
+                return div.className.match(/\bfieldset\b/);
+            }),
         function(fieldset) {
-            bindFieldset(fieldset, handler);
+            var remove = select(
+                fieldset.getElementsByTagName("span"),
+                function(span) {
+                    return span.className.match(/\bremove\b/);
+                })[0];
+            bindRemoveButton(fieldset, remove);
         });
-    handler();
+};
+bindRemoveButton = function(fieldset, button) {
+    bind(
+        button, 'click',
+        function() {
+            fieldset.parentNode.removeChild(fieldset);
+        });
+};
+makeRemoveButton = function(fieldset, name) {
+    var span = document.createElement("span");
+    span.className = "remove";
+    span.title = "Click to remove this " + name;
+    span.appendChild(document.createTextNode("\u2297"));
+    bindRemoveButton(fieldset, span);
+    fieldset.appendChild(span);
 };
 init = function() {
     initContainer(
+        document.getElementById("filespec-append"),
         document.getElementById("filespec-container"),
         function(container) {
             var id = uniqueId();
             var fieldset = document.createElement("div");
-            fieldset.className = "filespec-fieldset";
+            fieldset.className = "filespec-fieldset fieldset";
+            makeRemoveButton(fieldset, "filespec");
             var inputPath = document.createElement("input");
             inputPath.name = "filespec[" + id + "][path]";
             fieldset.appendChild(inputPath);
@@ -136,11 +124,13 @@ init = function() {
             return fieldset;
         });
     initContainer(
+        document.getElementById("ignore-append"),
         document.getElementById("ignore-container"),
         function(container) {
             var id = uniqueId();
             var fieldset = document.createElement("div");
-            fieldset.className = "ignore-fieldset";
+            fieldset.className = "ignore-fieldset fieldset";
+            makeRemoveButton(fieldset, "ignore");
             var input = document.createElement("input");
             input.name = "ignore[" + id + "]";
             fieldset.appendChild(input);
@@ -148,6 +138,7 @@ init = function() {
             return fieldset;
         });
     initContainer(
+        document.getElementById("maintainers-append"),
         document.getElementById("maintainers-container"),
         function(container) {
             var id = uniqueId();
@@ -232,17 +223,7 @@ init = function() {
                 bind(element, 'blur', hideAutoComplete);
             };
 
-            var span = document.createElement("span");
-            span.className = "remove";
-            span.title = "Click to remove this maintainer";
-            span.appendChild(document.createTextNode("\u2297"));
-            bind(
-                span, 'click',
-                function() {
-                    container.removeChild(fieldset);
-                });
-            fieldset.appendChild(span);
-
+            makeRemoveButton(fieldset, "maintainer");
             bindAutocomplete(makeElement("user", document.createElement("input")));
             bindAutocomplete(makeElement("name", document.createElement("input")));
             bindAutocomplete(makeElement("email", document.createElement("input")));

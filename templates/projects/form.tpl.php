@@ -63,6 +63,7 @@
   <div id="filespec-container" class="container">
 <?php foreach ($project->filespec() as $spec): ?>
     <div class="filespec-fieldset fieldset">
+      <span class="remove" title="Click to remove this filespec">&#8855;</span>
 <?php $unique = uniqid(); ?>
       <input type="text" name="filespec[<?=$unique?>][path]" value="<?=e($spec['path'])?>" />
       <select name="filespec[<?=$unique?>][type]">
@@ -73,6 +74,7 @@
     </div>
 <?php endforeach; ?>
   </div>
+  <div id="filespec-append" class="append">Add filespec</div>
 <?php if (isset($project->errors['filespec'])): ?>
     <span style="display:block;color:red">
       <?= e(implode(', ', $project->errors['filespec'])) ?>
@@ -85,10 +87,12 @@
   <div id="ignore-container" class="container">
 <?php foreach ($project->ignore() as $pattern): ?>
     <div class="ignore-fieldset fieldset">
+      <span class="remove" title="Click to remove this ignore">&#8855;</span>
       <input type="text" name="ignore[]" value="<?=e($pattern)?>" />
     </div>
 <?php endforeach; ?>
   </div>
+  <div id="ignore-append" class="append">Add ignore</div>
 <?php if (isset($project->errors['ignore'])): ?>
     <span style="display:block;color:red">
       <?= e(implode(', ', $project->errors['ignore'])) ?>
@@ -101,7 +105,7 @@
   <div id="maintainers-container" class="container">
 <?php foreach ($project->projectMaintainers() as $m): ?>
     <div class="maintainers-fieldset fieldset">
-      <span style="float:right">remove</span>
+      <span class="remove" title="Click to remove this maintainer">&#8855;</span>
 <?php $unique = uniqid(); ?>
       <label><span>user:</span><input type="text" name="maintainers[<?=$unique?>][user]" value="<?=e($m->maintainer()->user())?>" /></label>
       <label><span>name:</span><input type="text" name="maintainers[<?=$unique?>][name]" value="<?=e($m->maintainer()->name())?>" /></label>
@@ -125,6 +129,7 @@ endforeach;
     </div>
 <?php endforeach; ?>
   </div>
+  <div id="maintainers-append" class="append">Add maintainer</div>
 <?php if (isset($project->errors['maintainers'])): ?>
     <span style="display:block;color:red">
       <?= e(implode(', ', $project->errors['maintainers'])) ?>
