@@ -49,8 +49,9 @@ $db->exec(
     '
 create table filespecs (
   project_id bigint not null,
-  path varchar(255) not null primary key,
+  path varchar(255) not null,
   type enum("src", "doc", "bin") not null default "src",
+  primary key (project_id, path),
   index (project_id),
   foreign key (project_id) references projects(id)
 )
