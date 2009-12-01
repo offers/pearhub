@@ -25,7 +25,8 @@ $db->exec(
 create table maintainers (
   user varchar(64) not null primary key,
   name varchar(255),
-  email varchar(255)
+  email varchar(255),
+  owner varchar(255) not null
 )
 '
 );

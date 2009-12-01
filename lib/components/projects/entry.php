@@ -5,10 +5,14 @@ require_once 'projects.inc.php';
 class components_projects_Entry extends k_Component {
   protected $templates;
   protected $projects;
+  protected $maintainers;
+  protected $db;
   protected $project;
-  function __construct(k_TemplateFactory $templates, ProjectGateway $projects) {
+  function __construct(k_TemplateFactory $templates, ProjectGateway $projects, MaintainersGateway $maintainers, PDO $db) {
     $this->templates = $templates;
     $this->projects = $projects;
+    $this->maintainers = $maintainers;
+    $this->db = $db;
   }
   function execute() {
     $this->templates->loadViewHelper(new krudt_view_ViewHelper());
@@ -65,8 +69,45 @@ class components_projects_Entry extends k_Component {
     if ($this->project->owner() != $this->identity()->user()) {
       throw new k_Forbidden();
     }
+    ////////////////////////////
     $this->projects->unmarshalInto($this->body(), $this->project);
-    return $this->projects->update($this->project);
+
+    $this->project->setProjectMaintainers(array());
+    foreach ($this->body('maintainers') as $row) {
+      $m = $this->maintainers->fetch(array('user' => $row['user']));
+      if ($m) {
+        if ($m->owner() == $this->identity()->user()) {
+          $m->setName($row['name']);
+          $m->setEmail($row['email']);
+        }
+      } else {
+        $m = new Maintainer(
+          array(
+            'user' => $row['user'],
+            'name' => $row['name'],
+            'email' => $row['email'],
+            'owner' => $this->identity()->user()));
+      }
+      $this->project->addProjectMaintainer(new ProjectMaintainer($m, $row['type']));
+    }
+
+    $this->db->beginTransaction();
+    try {
+      $this->projects->update($this->project);
+      foreach ($this->project->projectMaintainers() as $m) {
+        $this->maintainers->delete(array('user' => $m->maintainer()->user()));
+        $this->maintainers->insert($m->maintainer());
+      }
+      $this->db->commit();
+    } catch (Exception $ex) {
+      $this->db->rollback();
+      return false;
+    }
+    return true;
+
+    ////////////////////////////
+    /* $this->projects->unmarshalInto($this->body(), $this->project); */
+    /* return $this->projects->update($this->project); */
   }
   function renderHtmlDelete() {
     if ($this->identity()->anonymous()) {

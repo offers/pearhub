@@ -62,18 +62,6 @@ class ProjectGateway extends pdoext_TableGateway {
         $p->{"set$field"}($hash[$field]);
       }
     }
-    if (isset($hash['maintainers'])) {
-      if (is_string($hash['maintainers'])) {
-        $maintainers = $hash['maintainers'];
-      } else {
-        $maintainers = $hash['maintainers'];
-      }
-      throw new Exception("TODO");
-      foreach ($maintainers as $row) {
-        $m = $this->maintainers->unmarshal($row);
-        $p->addProjectMaintainer($m, $row['type']);
-      }
-    }
     if (isset($hash['filespec'])) {
       if (is_string($hash['filespec'])) {
         $filespec = $hash['filespec'];
@@ -141,7 +129,7 @@ WHERE
     $this->sql_load_aggregates->execute(array('id' => $project->id()));
     foreach ($this->sql_load_aggregates as $row) {
       if ($row['name']) {
-          $project->addProjectMaintainer($this->maintainers->load($row), $row['type']);
+        $project->addProjectMaintainer(new ProjectMaintainer($this->maintainers->load($row), $row['type'], $project->id()));
       } elseif ($row['filespec_path']) {
         $project->addFilespec($row['filespec_path'], $row['filespec_type']);
       } elseif ($row['pattern']) {
@@ -154,8 +142,6 @@ WHERE
     $insert_project_maintainer = $this->db->prepare(
       'insert into project_maintainers (project_id, user, type) values (:project_id, :user, :type)');
     foreach ($project->projectMaintainers() as $pm) {
-      // This is not the job of this gateway!
-      // $this->maintainers->insert($pm->maintainer());
       $insert_project_maintainer->execute(
         array(
           ':project_id' => $project->id(),
@@ -323,6 +309,12 @@ class Project extends Accessor {
     $project_maintainer->setProjectId($this->id());
     $this->project_maintainers[] = $project_maintainer;
     return $project_maintainer;
+  }
+  function setProjectMaintainers($project_maintainers = array()) {
+    $this->project_maintainers = array();
+    foreach ($project_maintainers as $pm) {
+      $this->addProjectMaintainer($pm);
+    }
   }
 }
 

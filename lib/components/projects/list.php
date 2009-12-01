@@ -5,12 +5,14 @@ require_once 'projects.inc.php';
 class components_projects_List extends k_Component {
   protected $templates;
   protected $projects;
+  protected $maintainers;
   protected $db;
   protected $project;
   protected $url_init = array('sort' => 'id', 'direction' => 'asc', 'page' => 1);
-  function __construct(k_TemplateFactory $templates, ProjectGateway $projects, PDO $db) {
+  function __construct(k_TemplateFactory $templates, ProjectGateway $projects, MaintainersGateway $maintainers, PDO $db) {
     $this->templates = $templates;
     $this->projects = $projects;
+    $this->maintainers = $maintainers;
     $this->db = $db;
   }
   function execute() {
@@ -67,11 +69,6 @@ class components_projects_List extends k_Component {
         $result[] = $row;
     }
     return $result;
-    /* // TODO: pull from db, from $this->query('q'); */
-    /* return array( */
-    /*   array('user' => 'troelskn', 'name' => 'Troels Knak-Nielsen', 'email' => 'troelskn@gmail.com'), */
-    /*   array('user' => 'anders.ekdahl', 'name' => 'Anders Ekdahl', 'email' => null), */
-    /* ); */
   }
   function postForm() {
     if ($this->processNew()) {
@@ -83,26 +80,40 @@ class components_projects_List extends k_Component {
     if ($this->identity()->anonymous()) {
       throw new k_NotAuthorized();
     }
-    $this->project = new Project(
-      array(
-        'name' => $this->body('name'),
-        'owner' => $this->identity()->user(),
-        'created' => date('Y-m-d H:i:s'),
-        'repository' => $this->body('repository')));
-    $filespec = $this->body('filespec');
-    if (!$filespec) {
-      $this->project->errors['filespec'][] = 'Syntax error';
+    $this->project = new Project();
+    $this->projects->unmarshalInto($this->body(), $this->project);
+    $this->project->setOwner($this->identity()->user());
+
+    foreach ($this->body('maintainers') as $row) {
+      $m = $this->maintainers->fetch(array('user' => $row['user']));
+      if ($m) {
+        if ($m->owner() == $this->identity()->user()) {
+          $m->setName($row['name']);
+          $m->setEmail($row['email']);
+        }
+      } else {
+        $m = new Maintainer(
+          array(
+            'user' => $row['user'],
+            'name' => $row['name'],
+            'email' => $row['email'],
+            'owner' => $this->identity()->user()));
+      }
+      $this->project->addProjectMaintainer(new ProjectMaintainer($m, $row['type']));
+    }
+
+    $this->db->beginTransaction();
+    try {
+      $this->projects->insert($this->project);
+      foreach ($this->project->projectMaintainers() as $m) {
+        $this->maintainers->delete(array('user' => $m->maintainer()->user()));
+        $this->maintainers->insert($m->maintainer());
+      }
+      $this->db->commit();
+    } catch (Exception $ex) {
+      $this->db->rollback();
       return false;
     }
-    $this->project->setFilespec($filespec);
-
-    $ignore = $this->body('ignore');
-    if (!$ignore) {
-      $this->project->errors['ignore'][] = 'Syntax error';
-      return false;
-    }
-    $this->project->setIgnore($ignore);
-
-    return $this->projects->insert($this->project);
+    return true;
   }
 }
