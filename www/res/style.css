@@ -141,6 +141,11 @@ h2 {
 .form textarea {
                  width: 12em;
                  }
+.full input,
+.full textarea,
+.full select {
+               width: 100%;
+               }
 .container {
                    margin-top: .25em;
                    padding-top: .25em;
@@ -157,21 +162,44 @@ h2 {
                margin: 0;
                }
 .remove {
-                          float: right;
-                          font-size: 200%;
-                          color: #888;
-                          cursor: pointer;
-                          }
+          float: right;
+          font-size: 200%;
+          color: #888;
+          text-decoration: none;
+          }
+.remove:hover {
+                color: #800;
+                }
 .append {
-                color: #888;
-                background: #eee;
-                padding: .25em;
-                margin-top: .5em;
-                cursor: pointer;
+          display: block;
+          color: #888;
+          text-decoration: none;
+          background-color: #eee;
+          padding: .25em;
+          margin-top: .5em;
+          text-align: center;
+          }
+.append:hover {
+                background-color: #E0ECFF;
                 }
 #maintainers-autocomplete {
                             display: none;
                             position: absolute;
-                            background: #eee;
-                            padding: 1em;
+                            background-color: #eee;
+                            padding: .25em;
                             }
+#maintainers-autocomplete ul {
+                               margin: 0;
+                               padding: 0;
+                               list-style: none;
+                               }
+#maintainers-autocomplete li {
+                               color: #888;
+                               margin: 0;
+                               padding: 0;
+                               cursor: pointer;
+                               }
+#maintainers-autocomplete li.selected {
+                                        color: #000;
+                                        background-color: #E0ECFF;
+                                        }

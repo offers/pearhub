@@ -68,6 +68,7 @@ class ProjectGateway extends pdoext_TableGateway {
       } else {
         $maintainers = $hash['maintainers'];
       }
+      throw new Exception("TODO");
       foreach ($maintainers as $row) {
         $m = $this->maintainers->unmarshal($row);
         $p->addProjectMaintainer($m, $row['type']);
@@ -79,6 +80,7 @@ class ProjectGateway extends pdoext_TableGateway {
       } else {
         $filespec = $hash['filespec'];
       }
+      $p->setFilespec(array());
       foreach ($filespec as $row) {
         $p->addFilespec($row['path'], $row['type']);
       }
@@ -89,6 +91,7 @@ class ProjectGateway extends pdoext_TableGateway {
       } else {
         $ignore = $hash['ignore'];
       }
+      $p->setIgnore(array());
       foreach ($ignore as $pattern) {
         $p->addIgnore($pattern);
       }

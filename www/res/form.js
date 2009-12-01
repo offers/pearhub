@@ -2,7 +2,7 @@ map = function(it, fn) {
     var result = [];
     for (var key in it) {
         if (it.hasOwnProperty(key)) {
-            result.push(fn(it[key]));
+            result.push(fn(it[key], key));
         }
     }
     return result;
@@ -29,6 +29,26 @@ getElementPosition = function(obj) {
     }
     return {x: curleft, y: curtop};
 };
+createElement = function(nodeName, attributes) {
+    var el;
+    try {
+        var html = "<" + nodeName + map(
+            attributes,
+            function(v, k) {
+                return k + '="' + v + '"';
+            }
+        ).join(" ") + "/>";
+        el = document.createElement(html);
+    } catch (err) {
+        el = document.createElement(nodeName);
+        map(
+            attributes,
+            function(v, k) {
+                el.setAttribute(k, v);
+            });
+    }
+    return el;
+};
 makeDeferrer = function(defaultMsec) {
     var timeout = null;
     return function(fn, msec) {
@@ -43,34 +63,83 @@ makeDeferrer = function(defaultMsec) {
             }, msec || defaultMsec || 200);
     };
 };
+createXhr = (function() {
+                 var xhr = null;
+                 if (window.XMLHttpRequest) {
+                     return function() {
+                         if (xhr && xhr.readyState < 4) {
+                             xhr.abort();
+                             xhr = null;
+                         }
+                         return new XMLHttpRequest();
+                     };
+                 } else {
+                     return function() {
+                         if (xhr && xhr.readyState < 4) {
+                             xhr.abort();
+                             xhr = null;
+                         }
+                         return new ActiveXObject("Microsoft.XMLHTTP");
+                     };
+                 }
+             })();
 uniqueId = (function() {
-                var __uniqueId = (new Date()).getTime();
+                var id = (new Date()).getTime();
                 return function() {
-                    return __uniqueId++;
+                    return id++;
                 };
             })();
-bind = function(target, event, fn) {
-    var handler = "on" + event;
-    var eventAccess = {
-        "target": target
-    };
-    if (typeof target[handler] == "function") {
-        var old = target[handler];
-        target[handler] = function() {
-            old(eventAccess);
-            fn(eventAccess);
+/** Registers an event handler. Returns a detach function. */
+bind = function(element, signal, fnc) {
+    if (element.addEventListener) {
+        var wrapper = function(e) {
+            var evt = {
+                stop : function() {
+                    if (e.cancelable) {
+                        e.preventDefault();
+                    }
+                    e.stopPropagation();
+                },
+                key: function() {
+                    return e.keyCode;
+                },
+                target: element
+            };
+            fnc(evt);
+        };
+        element.addEventListener(signal.replace(/^(on)/, ""), wrapper, false);
+        return function() {
+            element.removeEventListener(signal.replace(/^(on)/, ""), wrapper, false);
+        };
+    } else if (element.attachEvent) {
+        var wrapper = function() {
+            var e = window.event;
+            var evt = {
+                stop : function() {
+                    e.cancelBubble = true;
+                    e.returnValue = false;
+                },
+                key: function() {
+                    return e.which;
+                },
+                target: element
+            };
+            fnc(evt);
+        };
+        element.attachEvent(signal, wrapper);
+        return function() {
+            element.detachEvent(signal, wrapper);
         };
     } else {
-        target[handler] = function() {
-            fn(eventAccess);
-        };
+        throw new Error("Can't register event handler");
     }
 };
 initContainer = function(append, container, create) {
     bind(
         append, 'click',
-        function() {
+        function(event) {
             create(container);
+            event.stop();
         });
     map(
         select(
@@ -80,7 +149,7 @@ initContainer = function(append, container, create) {
             }),
         function(fieldset) {
             var remove = select(
-                fieldset.getElementsByTagName("span"),
+                fieldset.getElementsByTagName("a"),
                 function(span) {
                     return span.className.match(/\bremove\b/);
                 })[0];
@@ -90,12 +159,14 @@ initContainer = function(append, container, create) {
 bindRemoveButton = function(fieldset, button) {
     bind(
         button, 'click',
-        function() {
+        function(event) {
             fieldset.parentNode.removeChild(fieldset);
+            event.stop();
         });
 };
 makeRemoveButton = function(fieldset, name) {
-    var span = document.createElement("span");
+    var span = document.createElement("a");
+    span.href = "#";
     span.className = "remove";
     span.title = "Click to remove this " + name;
     span.appendChild(document.createTextNode("\u2297"));
@@ -111,11 +182,9 @@ init = function() {
             var fieldset = document.createElement("div");
             fieldset.className = "filespec-fieldset fieldset";
             makeRemoveButton(fieldset, "filespec");
-            var inputPath = document.createElement("input");
-            inputPath.name = "filespec[" + id + "][path]";
+            var inputPath = createElement("input", {type: "text", name: "filespec[" + id + "][path]"});
             fieldset.appendChild(inputPath);
-            var inputType = document.createElement("select");
-            inputType.name = "filespec[" + id + "][type]";
+            var inputType = createElement("select", {name: "filespec[" + id + "][type]"});
             inputType.appendChild(new Option("src"));
             inputType.appendChild(new Option("doc"));
             inputType.appendChild(new Option("bin"));
@@ -131,8 +200,7 @@ init = function() {
             var fieldset = document.createElement("div");
             fieldset.className = "ignore-fieldset fieldset";
             makeRemoveButton(fieldset, "ignore");
-            var input = document.createElement("input");
-            input.name = "ignore[" + id + "]";
+            var input = document.createElement("input", {type: "text", name: "ignore[" + id + "]"});
             fieldset.appendChild(input);
             container.appendChild(fieldset);
             return fieldset;
@@ -144,54 +212,100 @@ init = function() {
             var id = uniqueId();
             var fieldset = document.createElement("div");
             fieldset.className = "maintainers-fieldset fieldset";
-            var createXhr;
-            if (window.XMLHttpRequest) {
-                createXhr = function() {
-                    return new XMLHttpRequest();
-                };
-            } else {
-                createXhr = function() {
-                    return new ActiveXObject("Microsoft.XMLHTTP");
-                };
-            }
-            var xhr = null;
             var defer = makeDeferrer();
             var autoComplete = function(event) {
-                defer(
-                    function() {
-                        if (xhr) {
-                            xhr.abort();
-                            xhr = null;
+                var div = document.getElementById("maintainers-autocomplete");
+                var list = div.getElementsByTagName("li");
+                var current = null;
+                var currentIndex = -1;
+                map(
+                    list,
+                    function(li) {
+                        if (!current) {
+                            currentIndex++;
                         }
-                        xhr = createXhr();
-                        xhr.open("GET", URL_AUTOCOMPLETE_MAINTAINERS + "&q=" + escape(event.target.value), true);
-                        xhr.setRequestHeader("Accept", "application/json");
-                        xhr.onreadystatechange = function() {
-                            if (xhr.readyState == 4) {
-                                if (xhr.status == 200) {
-                                    var json;
-                                    eval("json = " + xhr.responseText + ";");
-                                    updateAutocomplete(event.target, json);
-                                } else {
-                                    if (console) {
-                                        console.log("There was a problem retrieving the data:\n" + xhr.statusText);
+                        if (li.className == "selected") {
+                            current = li;
+                        }
+                    });
+
+                if (event.key() == 38) { // up
+                    if (current && currentIndex > 0) {
+                        current.className = "";
+                        list[currentIndex - 1].className = "selected";
+                    }
+                } else if (event.key() == 40) { // down
+                    if (current) {
+                        if (currentIndex < (list.length - 1)) {
+                            current.className = "";
+                            list[currentIndex + 1].className = "selected";
+                        }
+                    } else if (list.length > 0 && list[0]) {
+                        list[0].className = "selected";
+                    }
+                } else if (event.key() == 13) { // enter
+                    event.stop();
+                    if (current && (div.style.display != "none")) {
+                        current.selectItem();
+                        event.target.blur();
+                    }
+                } else if (event.key() == 27) { // escape
+                    event.stop();
+                    div.style.display = "none";
+                } else {
+                    var div = document.getElementById("maintainers-autocomplete");
+                    div.style.display = "none";
+                    defer(
+                        function() {
+                            var xhr = createXhr();
+                            xhr.open("GET", URL_AUTOCOMPLETE_MAINTAINERS + "&q=" + escape(event.target.value), true);
+                            xhr.setRequestHeader("Accept", "application/json");
+                            xhr.onreadystatechange = function() {
+                                if (xhr.readyState == 4) {
+                                    if (xhr.status == 200) {
+                                        var json;
+                                        eval("json = " + xhr.responseText + ";");
+                                        updateAutocomplete(event.target, json);
+                                    } else {
+                                        if (console) {
+                                            console.log("There was a problem retrieving the data:\n" + xhr.statusText);
+                                        }
                                     }
+                                    xhr = null;
                                 }
-                                xhr = null;
-                            }
-                        };
-                        xhr.send(null);
-                    }, 200);
+                            };
+                            xhr.send(null);
+                        }, 200);
+                }
             };
             var updateAutocomplete = function(input, json) {
                 var div = document.getElementById("maintainers-autocomplete");
                 div.innerHTML = "";
+                if (json.length == 0) {
+                    div.style.display = "none";
+                    return;
+                }
                 var ul = div.appendChild(document.createElement("ul"));
                 map(
                     json,
                     function(data) {
                         var li = document.createElement("li");
-                        li.appendChild(document.createTextNode(data.user + " / " + data.name + " / " + data.email));
+                        var bold = document.createElement("b");
+                        bold.appendChild(document.createTextNode(data.user));
+                        li.appendChild(bold);
+                        if (data.name) {
+                            li.appendChild(document.createTextNode(" " + data.name));
+                        }
+                        if (data.email) {
+                            li.appendChild(document.createTextNode(" <" + data.email + ">"));
+                        }
+                        var handler = function() {
+                            inputFields["user"].value = data.user;
+                            inputFields["name"].value = data.name;
+                            inputFields["email"].value = data.email;
+                        };
+                        bind(li, "click", handler);
+                        li.selectItem = handler;
                         ul.appendChild(li);
                     });
                 var pos = getElementPosition(input);
@@ -218,18 +332,21 @@ init = function() {
                 return input;
             };
 
-            var bindAutocomplete = function(element) {
-                bind(element, 'keydown', autoComplete);
-                bind(element, 'blur', hideAutoComplete);
-            };
-
+            var inputFields = {};
             makeRemoveButton(fieldset, "maintainer");
-            bindAutocomplete(makeElement("user", document.createElement("input")));
-            bindAutocomplete(makeElement("name", document.createElement("input")));
-            bindAutocomplete(makeElement("email", document.createElement("input")));
+            map(
+                ["user", "name", "email"],
+                function(name) {
+                    var input = createElement("input", {type: "text", name: "maintainers[" + id + "][" + name + "]"});
+                    inputFields[name] = input;
+                    var element = makeElement(name, input);
+                    if (name == "user") {
+                        bind(element, 'keydown', autoComplete);
+                        bind(element, 'blur', hideAutoComplete);
+                    }
+                });
 
-            var inputType = document.createElement("select");
-            inputType.name = "maintainers[" + id + "][type]";
+            var inputType = createElement("select", {name: "maintainers[" + id + "][type]"});
             inputType.appendChild(new Option("lead"));
             inputType.appendChild(new Option("helper"));
             makeElement("type", inputType);

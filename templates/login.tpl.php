@@ -10,6 +10,8 @@
       <input type="text" name="openid_identifier" value="" />
       <input type="submit" value="Login" />
     </label>
+    <br/>
+    <label><input type="checkbox" name="remember" /> Remember login for 30 days</label>
   </p>
   <h2>Don't have an OpenID login?</h2>
   <p>

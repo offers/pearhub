@@ -1,4 +1,4 @@
-<div class="form">
+<div class="form full">
   <label for="field-name">name</label>
   <input type="text" id="field-name" name="name" value="<?=e($project->name())?>" />
 <?php if (isset($project->errors['name'])): ?>
@@ -8,7 +8,7 @@
 <?php endif; ?>
 </div>
 
-<div class="form">
+<div class="form full">
   <label for="field-summary">summary</label>
   <textarea id="field-summary" name="summary"><?=e($project->summary())?></textarea>
 <?php if (isset($project->errors['summary'])): ?>
@@ -18,7 +18,7 @@
 <?php endif; ?>
 </div>
 
-<div class="form">
+<div class="form full">
   <label for="field-license-title">license-title</label>
   <input type="text" id="field-license-title" name="license-title" value="<?=e($project->licenseTitle())?>" />
 <?php if (isset($project->errors['license-title'])): ?>
@@ -28,7 +28,7 @@
 <?php endif; ?>
 </div>
 
-<div class="form">
+<div class="form full">
   <label for="field-license-href">license-href</label>
   <input type="text" id="field-license-href" name="license-href" value="<?=e($project->licenseHref())?>" />
 <?php if (isset($project->errors['license-href'])): ?>
@@ -48,7 +48,7 @@
 <?php endif; ?>
 </div>
 
-<div class="form">
+<div class="form full">
   <label for="field-repository">repository</label>
   <input type="text" id="field-repository" name="repository" value="<?=e($project->repository())?>" />
 <?php if (isset($project->errors['repository'])): ?>
@@ -63,10 +63,10 @@
   <div id="filespec-container" class="container">
 <?php foreach ($project->filespec() as $spec): ?>
     <div class="filespec-fieldset fieldset">
-      <span class="remove" title="Click to remove this filespec">&#8855;</span>
+      <a href="#" class="remove" title="Click to remove this filespec">&#8855;</a>
 <?php $unique = uniqid(); ?>
-      <input type="text" name="filespec[<?=$unique?>][path]" value="<?=e($spec['path'])?>" />
-      <select name="filespec[<?=$unique?>][type]">
+      <input type="text" name="filespec[<?=$unique?>][path]" value="<?=e($spec['path'])?>"
+      /><select name="filespec[<?=$unique?>][type]">
 <?php foreach (array('src', 'doc', 'bin') as $type): ?>
    <option<?php if ($spec['type'] == $type) echo ' selected="selected"' ?>><?=e($type)?></option>
 <?php endforeach; ?>
@@ -74,7 +74,7 @@
     </div>
 <?php endforeach; ?>
   </div>
-  <div id="filespec-append" class="append">Add filespec</div>
+  <a href="#" id="filespec-append" class="append" title="Click to add a filespec">Add filespec</a>
 <?php if (isset($project->errors['filespec'])): ?>
     <span style="display:block;color:red">
       <?= e(implode(', ', $project->errors['filespec'])) ?>
@@ -87,12 +87,12 @@
   <div id="ignore-container" class="container">
 <?php foreach ($project->ignore() as $pattern): ?>
     <div class="ignore-fieldset fieldset">
-      <span class="remove" title="Click to remove this ignore">&#8855;</span>
+      <a href="#" class="remove" title="Click to remove this ignore">&#8855;</a>
       <input type="text" name="ignore[]" value="<?=e($pattern)?>" />
     </div>
 <?php endforeach; ?>
   </div>
-  <div id="ignore-append" class="append">Add ignore</div>
+  <a href="#" id="ignore-append" class="append" title="Click to add an ignore rule">Add ignore</a>
 <?php if (isset($project->errors['ignore'])): ?>
     <span style="display:block;color:red">
       <?= e(implode(', ', $project->errors['ignore'])) ?>
@@ -105,7 +105,7 @@
   <div id="maintainers-container" class="container">
 <?php foreach ($project->projectMaintainers() as $m): ?>
     <div class="maintainers-fieldset fieldset">
-      <span class="remove" title="Click to remove this maintainer">&#8855;</span>
+      <a href="#" class="remove" title="Click to remove this maintainer">&#8855;</a>
 <?php $unique = uniqid(); ?>
       <label><span>user:</span><input type="text" name="maintainers[<?=$unique?>][user]" value="<?=e($m->maintainer()->user())?>" /></label>
       <label><span>name:</span><input type="text" name="maintainers[<?=$unique?>][name]" value="<?=e($m->maintainer()->name())?>" /></label>
@@ -129,7 +129,7 @@ endforeach;
     </div>
 <?php endforeach; ?>
   </div>
-  <div id="maintainers-append" class="append">Add maintainer</div>
+  <a href="#" id="maintainers-append" class="append" title="Click to add a maintainer">Add maintainer</a>
 <?php if (isset($project->errors['maintainers'])): ?>
     <span style="display:block;color:red">
       <?= e(implode(', ', $project->errors['maintainers'])) ?>

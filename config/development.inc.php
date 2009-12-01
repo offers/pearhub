@@ -16,6 +16,6 @@ function create_container() {
   $factory->pdo_username = 'root';
   $container->registerImplementation('PDO', 'pdoext_Connection');
   $container->registerImplementation('k_DefaultNotAuthorizedComponent', 'NotAuthorizedComponent');
-  $container->registerImplementation('k_IdentityLoader', 'SessionIdentityLoader');
+  $container->registerImplementation('k_IdentityLoader', 'CookieIdentityLoader');
   return $container;
 }

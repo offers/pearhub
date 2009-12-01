@@ -44,6 +44,9 @@ class components_projects_Entry extends k_Component {
     if ($this->identity()->anonymous()) {
       throw new k_NotAuthorized();
     }
+    if ($this->project->owner() != $this->identity()->user()) {
+      throw new k_Forbidden();
+    }
     $this->document->addScript($this->url('/res/form.js'));
     $this->document->setTitle("Edit " . $this->project->displayName());
     $t = $this->templates->create("projects/edit");
@@ -59,12 +62,18 @@ class components_projects_Entry extends k_Component {
     if ($this->identity()->anonymous()) {
       throw new k_NotAuthorized();
     }
+    if ($this->project->owner() != $this->identity()->user()) {
+      throw new k_Forbidden();
+    }
     $this->projects->unmarshalInto($this->body(), $this->project);
     return $this->projects->update($this->project);
   }
   function renderHtmlDelete() {
     if ($this->identity()->anonymous()) {
       throw new k_NotAuthorized();
+    }
+    if ($this->project->owner() != $this->identity()->user()) {
+      throw new k_Forbidden();
     }
     $this->document->setTitle("Delete " . $this->project->displayName());
     $t = $this->templates->create("projects/delete");
@@ -73,6 +82,9 @@ class components_projects_Entry extends k_Component {
   function DELETE() {
     if ($this->identity()->anonymous()) {
       throw new k_NotAuthorized();
+    }
+    if ($this->project->owner() != $this->identity()->user()) {
+      throw new k_Forbidden();
     }
     if ($this->projects->delete(array('id' => $this->project->id()))) {
       return new k_SeeOther($this->url('..'));

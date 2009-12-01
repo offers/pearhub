@@ -5,11 +5,13 @@ require_once 'projects.inc.php';
 class components_projects_List extends k_Component {
   protected $templates;
   protected $projects;
+  protected $db;
   protected $project;
   protected $url_init = array('sort' => 'id', 'direction' => 'asc', 'page' => 1);
-  function __construct(k_TemplateFactory $templates, ProjectGateway $projects) {
+  function __construct(k_TemplateFactory $templates, ProjectGateway $projects, PDO $db) {
     $this->templates = $templates;
     $this->projects = $projects;
+    $this->db = $db;
   }
   function execute() {
     $this->templates->loadViewHelper(new krudt_view_ViewHelper());
@@ -53,11 +55,23 @@ class components_projects_List extends k_Component {
     if ($this->identity()->anonymous()) {
       throw new k_NotAuthorized();
     }
-    // TODO: pull from db, from $this->query('q');
-    return array(
-      array('user' => 'troelskn', 'name' => 'Troels Knak-Nielsen', 'email' => 'troelskn@gmail.com'),
-      array('user' => 'anders.ekdahl', 'name' => 'Anders Ekdahl', 'email' => null),
-    );
+    $q = pdoext_query('maintainers');
+    $q->addColumn('user');
+    $q->addColumn('name');
+    $q->addColumn('email');
+    $q->addCriterion('user', $this->query('q') . '%', 'like');
+    $q->setLimit(10);
+    $this->debug($q->toSql(new pdoext_DummyConnection()));
+    $result = array();
+    foreach ($this->db->query($q) as $row) {
+        $result[] = $row;
+    }
+    return $result;
+    /* // TODO: pull from db, from $this->query('q'); */
+    /* return array( */
+    /*   array('user' => 'troelskn', 'name' => 'Troels Knak-Nielsen', 'email' => 'troelskn@gmail.com'), */
+    /*   array('user' => 'anders.ekdahl', 'name' => 'Anders Ekdahl', 'email' => null), */
+    /* ); */
   }
   function postForm() {
     if ($this->processNew()) {

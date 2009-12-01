@@ -2,10 +2,12 @@
 class components_Login extends k_Component {
   protected $templates;
   protected $zend_auth;
+  protected $auth_cookies;
   protected $errors;
-  function __construct(k_TemplateFactory $templates, Zend_Auth $zend_auth) {
+  function __construct(k_TemplateFactory $templates, Zend_Auth $zend_auth, AuthenticationCookiesGateway $auth_cookies) {
     $this->templates = $templates;
     $this->zend_auth = $zend_auth;
+    $this->auth_cookies = $auth_cookies;
     $this->errors = array();
   }
   function execute() {
@@ -41,7 +43,7 @@ class components_Login extends k_Component {
   }
   protected function authenticate() {
     $open_id_adapter = new Zend_Auth_Adapter_OpenId($this->body('openid_identifier'));
-    $open_id_adapter->setReturnTo($this->url());
+    $open_id_adapter->setReturnTo($this->url('', array('remember' => $this->body('remember'))));
     $open_id_adapter->setResponse(new ZfControllerResponseAdapter());
     try {
       $result = $this->zend_auth->authenticate($open_id_adapter);
@@ -53,11 +55,25 @@ class components_Login extends k_Component {
       $user = $this->selectUser($this->zend_auth->getIdentity());
       if ($user) {
         $this->session()->set('identity', $user);
+        if ($this->query('remember')) {
+            $auth = new AuthenticationCookie(
+                array(
+                    'openid_identifier' => $user->user(),
+                    'user_agent' => $this->header('User-Agent'),
+                    'created' => date('Y-m-d H:i:s')));
+            $this->auth_cookies->delete(array('openid_identifier' => $user->user()));
+            $this->auth_cookies->insert($auth);
+            $this->cookie()->set('user', $auth->hash(), $auth->expire());
+        }
         return new k_SeeOther($this->query('continue'));
       }
       $this->errors[] = "Auth OK, but no such user on this system.";
     }
     $this->session()->set('identity', null);
+    if ($this->cookie('user')) {
+        $this->auth_cookies->delete(array('hash' => $this->cookie('user')));
+        $this->cookie()->set('user', null);
+    }
     $this->zend_auth->clearIdentity();
     foreach ($result->getMessages() as $message) {
       $this->errors[] = $message;
