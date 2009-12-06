@@ -112,6 +112,7 @@ class components_projects_List extends k_Component {
       $this->db->commit();
     } catch (Exception $ex) {
       $this->db->rollback();
+      $this->project->errors[] = $ex->getMessage();
       return false;
     }
     return true;
