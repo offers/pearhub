@@ -70,7 +70,9 @@ class components_projects_Entry extends k_Component {
       throw new k_Forbidden();
     }
     $this->project->unmarshal($this->body());
-    $this->project->unmarshalMaintainers($this->body(), $this->identity()->user(), $this->maintainers);
+    if (!$this->project->unmarshalMaintainers($this->body(), $this->identity()->user(), $this->maintainers)) {
+      return false;
+    }
 
     $this->db->beginTransaction();
     try {

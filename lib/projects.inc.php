@@ -62,35 +62,59 @@ class ProjectGateway extends pdoext_TableGateway {
       $this->sql_load_aggregates = $this->db->prepare(
         '
 SELECT
-  projects.id as project_id,
   project_maintainers.type,
   maintainers.user,
   maintainers.name,
   maintainers.email,
-  filespecs.type as filespec_type,
-  filespecs.path as filespec_path,
-  file_ignores.pattern
+  null as filespec_type,
+  null as filespec_path,
+  null as pattern
 FROM
-  projects
-LEFT JOIN
   project_maintainers
-ON projects.id = project_maintainers.project_id
 LEFT JOIN
   maintainers
 ON project_maintainers.user = maintainers.user
-LEFT JOIN
-  filespecs
-ON projects.id = filespecs.project_id
-LEFT JOIN
-  file_ignores
-ON projects.id = file_ignores.project_id
 WHERE
-  projects.id = :id
+  project_maintainers.project_id = :id1
+
+UNION
+
+SELECT
+  null,
+  null,
+  null,
+  null,
+  type as filespec_type,
+  path as filespec_path,
+  null
+FROM
+  filespecs
+WHERE
+  filespecs.project_id = :id2
+
+UNION
+
+SELECT
+  null,
+  null,
+  null,
+  null,
+  null,
+  null,
+  pattern
+FROM
+  file_ignores
+WHERE
+  file_ignores.project_id = :id3
 '
       );
       $this->sql_load_aggregates->setFetchMode(PDO::FETCH_ASSOC);
     }
-    $this->sql_load_aggregates->execute(array('id' => $project->id()));
+    $this->sql_load_aggregates->execute(
+      array(
+        'id1' => $project->id(),
+        'id2' => $project->id(),
+        'id3' => $project->id()));
     foreach ($this->sql_load_aggregates as $row) {
       if ($row['name']) {
         $project->addProjectMaintainer(new ProjectMaintainer($this->maintainers->load($row), $row['type'], $project->id()));
@@ -140,9 +164,6 @@ WHERE
         array(
           ':project_id' => $project->id()));
     $this->db->prepare(
-      'delete from maintainers where user not in (select user from project_maintainers)'
-    )->execute();
-    $this->db->prepare(
       'delete from filespecs where project_id = :project_id'
     )->execute(
         array(
@@ -153,6 +174,8 @@ WHERE
         array(
           ':project_id' => $project->id()));
     $this->insertAggregates($project);
+    $this->db->exec(
+      'delete from maintainers where user not in (select user from project_maintainers)');
   }
   function validate_update($project) {
     if (!$project->id()) {
@@ -296,24 +319,14 @@ class Project extends Accessor {
       }
     }
     if (isset($hash['filespec'])) {
-      if (is_string($hash['filespec'])) {
-        $filespec = $hash['filespec'];
-      } else {
-        $filespec = $hash['filespec'];
-      }
       $this->setFilespec(array());
-      foreach ($filespec as $row) {
+      foreach ($hash['filespec'] as $row) {
         $this->addFilespec($row['path'], $row['type']);
       }
     }
     if (isset($hash['ignore'])) {
-      if (is_string($hash['ignore'])) {
-        $ignore = $hash['ignore'];
-      } else {
-        $ignore = $hash['ignore'];
-      }
       $this->setIgnore(array());
-      foreach ($ignore as $pattern) {
+      foreach ($hash['ignore'] as $pattern) {
         $this->addIgnore($pattern);
       }
     }
@@ -330,7 +343,7 @@ class Project extends Accessor {
           $m->setName($row['name']);
           $m->setEmail($row['email']);
         } elseif ($row['name'] !== $m->name() || $row['email'] !== $m->email()) {
-          $this->errors['maintainers'][] = "You're not allowed to change details of this maintainer.";
+          $this->errors['maintainers'][] = "You're not allowed to change details of $user.";
         }
       } else {
         $m = new Maintainer(
@@ -342,6 +355,7 @@ class Project extends Accessor {
       }
       $this->addProjectMaintainer(new ProjectMaintainer($m, $row['type']));
     }
+    return empty($this->errors['maintainers']);
   }
 }
 
