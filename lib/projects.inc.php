@@ -50,42 +50,6 @@ class ProjectGateway extends pdoext_TableGateway {
         'id' => isset($hash['id']) ? $hash['id'] : null));
     return $this->unmarshalInto($hash, $p);
   }
-  function unmarshalInto($hash, Project $p) {
-    $h = array();
-    foreach ($hash as $k => $v) {
-      $h[str_replace('-', '_', $k)] = $v;
-    }
-    $hash = $h;
-    $fields = array('name', 'owner', 'created', 'repository', 'summary', 'href', 'license_title', 'license_href', 'php_version');
-    foreach ($fields as $field) {
-      if (array_key_exists($field, $hash)) {
-        $p->{"set$field"}($hash[$field]);
-      }
-    }
-    if (isset($hash['filespec'])) {
-      if (is_string($hash['filespec'])) {
-        $filespec = $hash['filespec'];
-      } else {
-        $filespec = $hash['filespec'];
-      }
-      $p->setFilespec(array());
-      foreach ($filespec as $row) {
-        $p->addFilespec($row['path'], $row['type']);
-      }
-    }
-    if (isset($hash['ignore'])) {
-      if (is_string($hash['ignore'])) {
-        $ignore = $hash['ignore'];
-      } else {
-        $ignore = $hash['ignore'];
-      }
-      $p->setIgnore(array());
-      foreach ($ignore as $pattern) {
-        $p->addIgnore($pattern);
-      }
-    }
-    return $p;
-  }
   function load($row = array()) {
     $p = new Project($row);
     if ($row['id']) {
@@ -146,7 +110,7 @@ WHERE
         array(
           ':project_id' => $project->id(),
           ':user' => $pm->maintainer()->user(),
-          ':type' => $spec['type']
+          ':type' => $pm->type()
         ));
     }
     $insert_filespec = $this->db->prepare(
@@ -316,6 +280,69 @@ class Project extends Accessor {
       $this->addProjectMaintainer($pm);
     }
   }
+  function unmarshal($hash) {
+    $h = array();
+    foreach ($hash as $k => $v) {
+      $h[str_replace('-', '_', $k)] = $v;
+    }
+    $hash = $h;
+    $fields = array(
+      'name', 'owner', 'created', 'repository',
+      'summary', 'href', 'license_title', 'license_href',
+      'php_version');
+    foreach ($fields as $field) {
+      if (array_key_exists($field, $hash)) {
+        $this->{"set$field"}($hash[$field]);
+      }
+    }
+    if (isset($hash['filespec'])) {
+      if (is_string($hash['filespec'])) {
+        $filespec = $hash['filespec'];
+      } else {
+        $filespec = $hash['filespec'];
+      }
+      $this->setFilespec(array());
+      foreach ($filespec as $row) {
+        $this->addFilespec($row['path'], $row['type']);
+      }
+    }
+    if (isset($hash['ignore'])) {
+      if (is_string($hash['ignore'])) {
+        $ignore = $hash['ignore'];
+      } else {
+        $ignore = $hash['ignore'];
+      }
+      $this->setIgnore(array());
+      foreach ($ignore as $pattern) {
+        $this->addIgnore($pattern);
+      }
+    }
+  }
+  function unmarshalMaintainers($body, $user, $maintainers) {
+    if (!isset($body['maintainers'])) {
+      throw new Exception("Missing field maintainers");
+    }
+    $this->setProjectMaintainers(array());
+    foreach ($body['maintainers'] as $row) {
+      $m = $maintainers->fetch(array('user' => $row['user']));
+      if ($m) {
+        if ($m->owner() == $user) {
+          $m->setName($row['name']);
+          $m->setEmail($row['email']);
+        } elseif ($row['name'] !== $m->name() || $row['email'] !== $m->email()) {
+          $this->errors['maintainers'][] = "You're not allowed to change details of this maintainer.";
+        }
+      } else {
+        $m = new Maintainer(
+          array(
+            'user' => $row['user'],
+            'name' => $row['name'],
+            'email' => $row['email'],
+            'owner' => $user));
+      }
+      $this->addProjectMaintainer(new ProjectMaintainer($m, $row['type']));
+    }
+  }
 }
 
 class ProjectMaintainer {
@@ -331,7 +358,7 @@ class ProjectMaintainer {
     $this->project_id = $project_id;
   }
   function setProjectId($project_id) {
-    if ($this->projectId() !== null) {
+    if ($this->projectId() !== null && $project_id !== $this->projectId()) {
       throw new Exception("Can't change project_id");
     }
     $this->project_id = $project_id;

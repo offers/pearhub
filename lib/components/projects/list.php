@@ -81,26 +81,9 @@ class components_projects_List extends k_Component {
       throw new k_NotAuthorized();
     }
     $this->project = new Project();
-    $this->projects->unmarshalInto($this->body(), $this->project);
+    $this->project->unmarshal($this->body());
+    $this->project->unmarshalMaintainers($this->body(), $this->identity()->user(), $this->maintainers);
     $this->project->setOwner($this->identity()->user());
-
-    foreach ($this->body('maintainers') as $row) {
-      $m = $this->maintainers->fetch(array('user' => $row['user']));
-      if ($m) {
-        if ($m->owner() == $this->identity()->user()) {
-          $m->setName($row['name']);
-          $m->setEmail($row['email']);
-        }
-      } else {
-        $m = new Maintainer(
-          array(
-            'user' => $row['user'],
-            'name' => $row['name'],
-            'email' => $row['email'],
-            'owner' => $this->identity()->user()));
-      }
-      $this->project->addProjectMaintainer(new ProjectMaintainer($m, $row['type']));
-    }
 
     $this->db->beginTransaction();
     try {
