@@ -1,4 +1,4 @@
-map = function(it, fn) {
+var map = function(it, fn) {
     var result = [];
     for (var key in it) {
         if (it.hasOwnProperty(key)) {
@@ -7,7 +7,8 @@ map = function(it, fn) {
     }
     return result;
 };
-select = function(it, fn) {
+
+var select = function(it, fn) {
     var result = [];
     for (var key in it) {
         if (it.hasOwnProperty(key) && fn(it[key])) {
@@ -16,7 +17,8 @@ select = function(it, fn) {
     }
     return result;
 };
-getElementPosition = function(obj) {
+
+var getElementPosition = function(obj) {
     var curleft = 0;
     var curtop = 0;
     if (obj.offsetParent) {
@@ -29,7 +31,8 @@ getElementPosition = function(obj) {
     }
     return {x: curleft, y: curtop};
 };
-createElement = function(nodeName, attributes) {
+
+var createElement = function(nodeName, attributes) {
     var el;
     try {
         var html = "<" + nodeName + map(
@@ -49,7 +52,8 @@ createElement = function(nodeName, attributes) {
     }
     return el;
 };
-makeDeferrer = function(defaultMsec) {
+
+var makeDeferrer = function(defaultMsec) {
     var timeout = null;
     return function(fn, msec) {
         if (timeout) {
@@ -63,7 +67,8 @@ makeDeferrer = function(defaultMsec) {
             }, msec || defaultMsec || 200);
     };
 };
-createXhr = (function() {
+
+var createXhr = (function() {
                  var xhr = null;
                  if (window.XMLHttpRequest) {
                      return function() {
@@ -83,14 +88,16 @@ createXhr = (function() {
                      };
                  }
              })();
-uniqueId = (function() {
+
+var uniqueId = (function() {
                 var id = (new Date()).getTime();
                 return function() {
                     return id++;
                 };
             })();
+
 /** Registers an event handler. Returns a detach function. */
-bind = function(element, signal, fnc) {
+var bind = function(element, signal, fnc) {
     if (element.addEventListener) {
         var wrapper = function(e) {
             var evt = {
@@ -134,7 +141,8 @@ bind = function(element, signal, fnc) {
         throw new Error("Can't register event handler");
     }
 };
-initContainer = function(append, container, create) {
+
+var initContainer = function(append, container, create) {
     bind(
         append, 'click',
         function(event) {
@@ -156,7 +164,8 @@ initContainer = function(append, container, create) {
             bindRemoveButton(fieldset, remove);
         });
 };
-bindRemoveButton = function(fieldset, button) {
+
+var bindRemoveButton = function(fieldset, button) {
     bind(
         button, 'click',
         function(event) {
@@ -164,7 +173,8 @@ bindRemoveButton = function(fieldset, button) {
             event.stop();
         });
 };
-makeRemoveButton = function(fieldset, name) {
+
+var makeRemoveButton = function(fieldset, name) {
     var span = document.createElement("a");
     span.href = "#";
     span.className = "remove";
@@ -173,7 +183,124 @@ makeRemoveButton = function(fieldset, name) {
     bindRemoveButton(fieldset, span);
     fieldset.appendChild(span);
 };
-init = function() {
+
+var defer = makeDeferrer();
+
+var autoComplete = function(event) {
+    var div = document.getElementById("maintainers-autocomplete");
+    var list = div.getElementsByTagName("li");
+    var current = null;
+    var currentIndex = -1;
+    map(
+        list,
+        function(li) {
+            if (!current) {
+                currentIndex++;
+            }
+            if (li.className == "selected") {
+                current = li;
+            }
+        });
+    if (event.key() == 38) { // up
+        if (current && currentIndex > 0) {
+            current.className = "";
+            list[currentIndex - 1].className = "selected";
+        }
+    } else if (event.key() == 40) { // down
+        if (current) {
+            if (currentIndex < (list.length - 1)) {
+                current.className = "";
+                list[currentIndex + 1].className = "selected";
+            }
+        } else if (list.length > 0 && list[0]) {
+            list[0].className = "selected";
+        }
+    } else if (event.key() == 13) { // enter
+        event.stop();
+        if (current && (div.style.display != "none")) {
+            current.selectItem();
+            event.target.blur();
+        }
+    } else if (event.key() == 27) { // escape
+        event.stop();
+        div.style.display = "none";
+    } else {
+        div.style.display = "none";
+        defer(
+            function() {
+                var xhr = createXhr();
+                xhr.open("GET", URL_AUTOCOMPLETE_MAINTAINERS + "&q=" + escape(event.target.value), true);
+                xhr.setRequestHeader("Accept", "application/json");
+                xhr.onreadystatechange = function() {
+                    if (xhr.readyState == 4) {
+                        if (xhr.status == 200) {
+                            var json;
+                            eval("json = " + xhr.responseText + ";");
+                            var inputFields = {};
+                            map(
+                                event.target.parentNode.parentNode.getElementsByTagName("input"),
+                                function(input) {
+                                    inputFields[input.name.match(/\[([^\]]+)\]$/)[1]] = input;
+                                });
+                            updateAutocomplete(event.target, inputFields, json);
+                        } else {
+                            if (console) {
+                                console.log("There was a problem retrieving the data:\n" + xhr.statusText);
+                            }
+                        }
+                        xhr = null;
+                    }
+                };
+                xhr.send(null);
+            }, 200);
+    }
+};
+
+var updateAutocomplete = function(input, inputFields, json) {
+    var div = document.getElementById("maintainers-autocomplete");
+    div.innerHTML = "";
+    if (json.length == 0) {
+        div.style.display = "none";
+        return;
+    }
+    var ul = div.appendChild(document.createElement("ul"));
+    map(
+        json,
+        function(data) {
+            var li = document.createElement("li");
+            var bold = document.createElement("b");
+            bold.appendChild(document.createTextNode(data.user));
+            li.appendChild(bold);
+            if (data.name) {
+                li.appendChild(document.createTextNode(" " + data.name));
+            }
+            if (data.email) {
+                li.appendChild(document.createTextNode(" <" + data.email + ">"));
+            }
+            var handler = function() {
+                inputFields["user"].value = data.user;
+                inputFields["name"].value = data.name;
+                inputFields["email"].value = data.email;
+            };
+            bind(li, "click", handler);
+            li.selectItem = handler;
+            ul.appendChild(li);
+        });
+    var pos = getElementPosition(input);
+    div.style.display = "block";
+    div.style.top = (pos.y + (input.offsetHeight || 0)) + "px";
+    div.style.left = pos.x + "px";
+};
+
+var hideAutoComplete = function() {
+    defer(
+        function() {
+            var div = document.getElementById("maintainers-autocomplete");
+            div.style.display = "none";
+        }, 100);
+};
+
+var init = function() {
     initContainer(
         document.getElementById("filespec-append"),
         document.getElementById("filespec-container"),
@@ -212,112 +339,6 @@ init = function() {
             var id = uniqueId();
             var fieldset = document.createElement("div");
             fieldset.className = "maintainers-fieldset fieldset";
-            var defer = makeDeferrer();
-            var autoComplete = function(event) {
-                var div = document.getElementById("maintainers-autocomplete");
-                var list = div.getElementsByTagName("li");
-                var current = null;
-                var currentIndex = -1;
-                map(
-                    list,
-                    function(li) {
-                        if (!current) {
-                            currentIndex++;
-                        }
-                        if (li.className == "selected") {
-                            current = li;
-                        }
-                    });
-                if (event.key() == 38) { // up
-                    if (current && currentIndex > 0) {
-                        current.className = "";
-                        list[currentIndex - 1].className = "selected";
-                    }
-                } else if (event.key() == 40) { // down
-                    if (current) {
-                        if (currentIndex < (list.length - 1)) {
-                            current.className = "";
-                            list[currentIndex + 1].className = "selected";
-                        }
-                    } else if (list.length > 0 && list[0]) {
-                        list[0].className = "selected";
-                    }
-                } else if (event.key() == 13) { // enter
-                    event.stop();
-                    if (current && (div.style.display != "none")) {
-                        current.selectItem();
-                        event.target.blur();
-                    }
-                } else if (event.key() == 27) { // escape
-                    event.stop();
-                    div.style.display = "none";
-                } else {
-                    div.style.display = "none";
-                    defer(
-                        function() {
-                            var xhr = createXhr();
-                            xhr.open("GET", URL_AUTOCOMPLETE_MAINTAINERS + "&q=" + escape(event.target.value), true);
-                            xhr.setRequestHeader("Accept", "application/json");
-                            xhr.onreadystatechange = function() {
-                                if (xhr.readyState == 4) {
-                                    if (xhr.status == 200) {
-                                        var json;
-                                        eval("json = " + xhr.responseText + ";");
-                                        updateAutocomplete(event.target, json);
-                                    } else {
-                                        if (console) {
-                                            console.log("There was a problem retrieving the data:\n" + xhr.statusText);
-                                        }
-                                    }
-                                    xhr = null;
-                                }
-                            };
-                            xhr.send(null);
-                        }, 200);
-                }
-            };
-            var updateAutocomplete = function(input, json) {
-                var div = document.getElementById("maintainers-autocomplete");
-                div.innerHTML = "";
-                if (json.length == 0) {
-                    div.style.display = "none";
-                    return;
-                }
-                var ul = div.appendChild(document.createElement("ul"));
-                map(
-                    json,
-                    function(data) {
-                        var li = document.createElement("li");
-                        var bold = document.createElement("b");
-                        bold.appendChild(document.createTextNode(data.user));
-                        li.appendChild(bold);
-                        if (data.name) {
-                            li.appendChild(document.createTextNode(" " + data.name));
-                        }
-                        if (data.email) {
-                            li.appendChild(document.createTextNode(" <" + data.email + ">"));
-                        }
-                        var handler = function() {
-                            inputFields["user"].value = data.user;
-                            inputFields["name"].value = data.name;
-                            inputFields["email"].value = data.email;
-                        };
-                        bind(li, "click", handler);
-                        li.selectItem = handler;
-                        ul.appendChild(li);
-                    });
-                var pos = getElementPosition(input);
-                div.style.display = "block";
-                div.style.top = (pos.y + (input.offsetHeight || 0)) + "px";
-                div.style.left = pos.x + "px";
-            };
-            var hideAutoComplete = function() {
-                defer(
-                    function() {
-                        var div = document.getElementById("maintainers-autocomplete");
-                        div.style.display = "none";
-                    }, 100);
-            };
 
             var makeElement = function(name, input) {
                 var label = document.createElement("label");
@@ -330,17 +351,15 @@ init = function() {
                 return input;
             };
 
-            var inputFields = {};
             makeRemoveButton(fieldset, "maintainer");
             map(
                 ["user", "name", "email"],
                 function(name) {
                     var input = createElement("input", {type: "text", name: "maintainers[" + id + "][" + name + "]"});
-                    inputFields[name] = input;
-                    var element = makeElement(name, input);
+                    makeElement(name, input);
                     if (name == "user") {
-                        bind(element, 'keydown', autoComplete);
-                        bind(element, 'blur', hideAutoComplete);
+                        bind(input, 'keydown', autoComplete);
+                        bind(input, 'blur', hideAutoComplete);
                     }
                 });
 
@@ -351,6 +370,24 @@ init = function() {
 
             container.appendChild(fieldset);
             return fieldset;
+        });
+    // install auto-complete for static maintainers-fieldsets
+    map(
+        select(
+            document.getElementById("maintainers-container").getElementsByTagName("div"),
+            function(div) {
+                return div.className.match(/\bfieldset\b/);
+            }),
+        function(fieldset) {
+            map(
+                fieldset.getElementsByTagName("input"),
+                function(input) {
+                    if (input.name.match(/\[user\]$/)) {
+                        bind(input, 'keydown', autoComplete);
+                        bind(input, 'blur', hideAutoComplete);
+                    }
+                });
+
         });
 
 };
