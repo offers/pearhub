@@ -200,7 +200,7 @@ init = function() {
             var fieldset = document.createElement("div");
             fieldset.className = "ignore-fieldset fieldset";
             makeRemoveButton(fieldset, "ignore");
-            var input = document.createElement("input", {type: "text", name: "ignore[" + id + "]"});
+            var input = createElement("input", {type: "text", name: "ignore[" + id + "]"});
             fieldset.appendChild(input);
             container.appendChild(fieldset);
             return fieldset;
@@ -228,7 +228,6 @@ init = function() {
                             current = li;
                         }
                     });
-
                 if (event.key() == 38) { // up
                     if (current && currentIndex > 0) {
                         current.className = "";
@@ -253,7 +252,6 @@ init = function() {
                     event.stop();
                     div.style.display = "none";
                 } else {
-                    var div = document.getElementById("maintainers-autocomplete");
                     div.style.display = "none";
                     defer(
                         function() {
