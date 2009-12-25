@@ -44,12 +44,6 @@ class ProjectGateway extends pdoext_TableGateway {
     parent::__construct('projects', $db);
     $this->maintainers = $maintainers;
   }
-  function unmarshal($hash) {
-    $p = new Project(
-      array(
-        'id' => isset($hash['id']) ? $hash['id'] : null));
-    return $this->unmarshalInto($hash, $p);
-  }
   function load($row = array()) {
     $p = new Project($row);
     if ($row['id']) {
@@ -321,14 +315,14 @@ class Project extends Accessor {
         $this->{"set$field"}($hash[$field]);
       }
     }
+    $this->setFilespec(array());
     if (isset($hash['filespec'])) {
-      $this->setFilespec(array());
       foreach ($hash['filespec'] as $row) {
         $this->addFilespec($row['path'], $row['type']);
       }
     }
+    $this->setIgnore(array());
     if (isset($hash['ignore'])) {
-      $this->setIgnore(array());
       foreach ($hash['ignore'] as $pattern) {
         $this->addIgnore($pattern);
       }
