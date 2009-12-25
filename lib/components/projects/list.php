@@ -61,12 +61,13 @@ class components_projects_List extends k_Component {
     $q->addColumn('user');
     $q->addColumn('name');
     $q->addColumn('email');
+    $q->addColumn('owner');
     $q->addCriterion('user', $this->query('q') . '%', 'like');
     $q->setLimit(10);
-    $this->debug($q->toSql(new pdoext_DummyConnection()));
     $result = array();
     foreach ($this->db->query($q) as $row) {
-        $result[] = $row;
+      $row['is_locked'] = $row['owner'] !== $this->identity()->user();
+      $result[] = $row;
     }
     return $result;
   }

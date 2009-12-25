@@ -281,6 +281,11 @@ var updateAutocomplete = function(input, inputFields, json) {
                 inputFields["user"].value = data.user;
                 inputFields["name"].value = data.name;
                 inputFields["email"].value = data.email;
+                if (data.is_locked) {
+                    inputFields["user"].disabled = true;
+                    inputFields["name"].disabled = true;
+                    inputFields["email"].disabled = true;
+                }
             };
             bind(li, "click", handler);
             li.selectItem = handler;

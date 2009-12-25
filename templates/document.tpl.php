@@ -11,9 +11,9 @@
   <body>
 
 <?php if (!$context->identity()->anonymous()): ?>
-<form method="post" action="<?= e(url('/logout')) ?>">
+<form method="post" action="<?php e(url('/logout')) ?>">
   <p>
-    Hello <strong><?= e($context->identity()->user()) ?></strong>
+    Hello <strong><?php e($context->identity()->user()) ?></strong>
     <input type="submit" value="Log out" />
   </p>
 </form>

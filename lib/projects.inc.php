@@ -63,6 +63,7 @@ class ProjectGateway extends pdoext_TableGateway {
         '
 SELECT
   project_maintainers.type,
+  maintainers.owner,
   maintainers.user,
   maintainers.name,
   maintainers.email,
@@ -84,6 +85,7 @@ SELECT
   null,
   null,
   null,
+  null,
   type as filespec_type,
   path as filespec_path,
   null
@@ -95,6 +97,7 @@ WHERE
 UNION
 
 SELECT
+  null,
   null,
   null,
   null,
@@ -343,7 +346,7 @@ class Project extends Accessor {
           $m->setName($row['name']);
           $m->setEmail($row['email']);
         } elseif ($row['name'] !== $m->name() || $row['email'] !== $m->email()) {
-          $this->errors['maintainers'][] = "You're not allowed to change details of $user.";
+          $this->errors['maintainers'][] = "You're not allowed to change details of " . $row['user'] . ".";
         }
       } else {
         $m = new Maintainer(

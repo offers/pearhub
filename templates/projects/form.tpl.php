@@ -104,12 +104,14 @@
   <label for="field-maintainers">maintainers</label>
   <div id="maintainers-container" class="container">
 <?php foreach ($project->projectMaintainers() as $m): ?>
+<?php $is_locked = $m->maintainer()->owner() !== $context->identity()->user(); ?>
+<?php $more = $is_locked ? ' disabled="true"' : '' ; ?>
     <div class="maintainers-fieldset fieldset">
       <a href="#" class="remove" title="Click to remove this maintainer">&#8855;</a>
 <?php $unique = uniqid(); ?>
-      <label><span>user:</span><input type="text" name="maintainers[<?=$unique?>][user]" value="<?=e($m->maintainer()->user())?>" /></label>
-      <label><span>name:</span><input type="text" name="maintainers[<?=$unique?>][name]" value="<?=e($m->maintainer()->name())?>" /></label>
-      <label><span>email:</span><input type="text" name="maintainers[<?=$unique?>][email]" value="<?=e($m->maintainer()->email())?>" /></label>
+      <label><span>user:</span><input type="text" name="maintainers[<?=$unique?>][user]" value="<?=e($m->maintainer()->user())?>"<?=$more?> /></label>
+      <label><span>name:</span><input type="text" name="maintainers[<?=$unique?>][name]" value="<?=e($m->maintainer()->name())?>"<?=$more?> /></label>
+      <label><span>email:</span><input type="text" name="maintainers[<?=$unique?>][email]" value="<?=e($m->maintainer()->email())?>"<?=$more?> /></label>
       <label>
         <span>type:</span>
         <select name="maintainers[<?=$unique?>][type]">
