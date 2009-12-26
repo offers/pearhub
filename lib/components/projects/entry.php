@@ -1,5 +1,4 @@
 <?php
-require_once 'thirdparty/krudt/lib/krudt.inc.php';
 require_once 'projects.inc.php';
 
 class components_projects_Entry extends k_Component {

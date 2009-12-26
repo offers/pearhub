@@ -1,5 +1,4 @@
 <?php
-require_once 'thirdparty/krudt/lib/krudt.inc.php';
 require_once 'projects.inc.php';
 
 class components_projects_List extends k_Component {
@@ -8,7 +7,6 @@ class components_projects_List extends k_Component {
   protected $maintainers;
   protected $db;
   protected $project;
-  protected $url_init = array('sort' => 'id', 'direction' => 'asc', 'page' => 1);
   function __construct(k_TemplateFactory $templates, ProjectGateway $projects, MaintainersGateway $maintainers, PDO $db) {
     $this->templates = $templates;
     $this->projects = $projects;
@@ -21,17 +19,20 @@ class components_projects_List extends k_Component {
   function renderHtml() {
     $this->document->setTitle("Projects");
     $t = $this->templates->create('projects/list');
+    $selection = $this->projects->selectPaginated($this->query('page'));
+    if ($this->query('q')) {
+      $selection->addCriterion('name', '%' . $this->query('q') . '%', 'like');
+    }
     return $t->render(
       $this,
       array(
-        'projects' => $this->projects));
+        'projects' => $selection));
   }
   function wrapHtml($content) {
     $t = $this->templates->create('projects/wrapper');
     return $t->render(
       $this,
       array(
-        'projects' => $this->projects,
         'content' => $content));
   }
   function renderHtmlNew() {

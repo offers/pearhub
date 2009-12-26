@@ -20,6 +20,13 @@ function add_javascript($js) {
 }
 
 /**
+ * Returns querystring value.
+ */
+function query($key, $default = null) {
+  return $GLOBALS['k_current_context']->query($key, $default);
+}
+
+/**
  * Generates an opening html `<form>` tag.
  */
 function html_form_tag($method = 'post', $action = null, $options = array()) {
@@ -195,7 +202,6 @@ function krudt_errors_for($entity, $field) {
   }
 }
 
-
 /**
  * Creates a `<input type="text" />` for a record.
  */
@@ -234,7 +240,7 @@ function krudt_text_area($entry, $field, $label = null) {
  * Just a very simple pagination widget.
  * You might want to have a look at PEAR::Pager for some more elaborate alternatives.
  */
-function krudt_paginate($collection, $page_size = 10) {
+function krudt_paginate($collection, $sticky_parameters = array(), $page_size = 10) {
   $page_size = (integer) $page_size;
   if ($page_size < 1) {
     throw new Exception("Can't paginate with size < 1");
@@ -244,7 +250,7 @@ function krudt_paginate($collection, $page_size = 10) {
   if ($last_page === 1) {
     return "";
   }
-  $page = $GLOBALS['k_current_context']->query('page', 1);
+  $page = query('page', 1);
   if ($page > $last_page) {
     $page = $last_page;
   }
@@ -252,11 +258,17 @@ function krudt_paginate($collection, $page_size = 10) {
     $page = 1;
   }
   $html = "\n" . '<div class="pagination">';
+  $params = array();
+  foreach ($sticky_parameters as $key) {
+    $params[$key] = query($key);
+  }
+  array_filter($params);
   for ($ii = 1; $ii <= $last_page; ++$ii) {
     if ($ii == $page) {
       $html .= "\n" . '  <span class="current">' . $ii . '</span>';
     } else {
-      $html .= "\n" . '  <a href="' . escape(url('', array('page' => $ii))) . '">' . $ii . '</a>';
+      $params['page'] = $ii;
+      $html .= "\n" . '  <a href="' . escape(url($params)) . '">' . $ii . '</a>';
     }
   }
   $html .= "\n" . '</div>';
