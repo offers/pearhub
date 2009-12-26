@@ -14,10 +14,6 @@ class components_projects_Entry extends k_Component {
     $this->maintainers = $maintainers;
     $this->db = $db;
   }
-  function execute() {
-    $this->templates->loadViewHelper(new krudt_view_ViewHelper());
-    return parent::execute();
-  }
   function dispatch() {
     $this->project = $this->projects->fetch(array('name' => $this->name()));
     if (!$this->project) {

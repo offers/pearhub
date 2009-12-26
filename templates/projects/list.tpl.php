@@ -9,5 +9,5 @@
   <a href="<?php e(url('', array('new'))); ?>">New entry</a>
 </p>
 
-<?php print $this->paginate($projects); ?>
+<?php echo krudt_paginate($projects); ?>
 

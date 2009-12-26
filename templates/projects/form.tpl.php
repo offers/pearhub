@@ -1,61 +1,37 @@
 <div class="form full">
   <label for="field-name">name</label>
   <input type="text" id="field-name" name="name" value="<?=e($project->name())?>" />
-<?php if (isset($project->errors['name'])): ?>
-    <span style="display:block;color:red">
-      <?= e(implode(', ', $project->errors['name'])) ?>
-    </span>
-<?php endif; ?>
+  <?php echo krudt_errors_for($project, 'name'); ?>
 </div>
 
 <div class="form full">
   <label for="field-summary">summary</label>
   <textarea id="field-summary" name="summary"><?=e($project->summary())?></textarea>
-<?php if (isset($project->errors['summary'])): ?>
-    <span style="display:block;color:red">
-      <?= e(implode(', ', $project->errors['summary'])) ?>
-    </span>
-<?php endif; ?>
+  <?php echo krudt_errors_for($project, 'summary'); ?>
 </div>
 
 <div class="form full">
   <label for="field-license-title">license-title</label>
   <input type="text" id="field-license-title" name="license-title" value="<?=e($project->licenseTitle())?>" />
-<?php if (isset($project->errors['license-title'])): ?>
-    <span style="display:block;color:red">
-      <?= e(implode(', ', $project->errors['license-title'])) ?>
-    </span>
-<?php endif; ?>
+  <?php echo krudt_errors_for($project, 'license-title'); ?>
 </div>
 
 <div class="form full">
   <label for="field-license-href">license-href</label>
   <input type="text" id="field-license-href" name="license-href" value="<?=e($project->licenseHref())?>" />
-<?php if (isset($project->errors['license-href'])): ?>
-    <span style="display:block;color:red">
-      <?= e(implode(', ', $project->errors['license-href'])) ?>
-    </span>
-<?php endif; ?>
+  <?php echo krudt_errors_for($project, 'license-href'); ?>
 </div>
 
 <div class="form">
   <label for="field-php-version">php-version</label>
   <input type="text" id="field-php-version" name="php-version" value="<?=e($project->phpVersion())?>" />
-<?php if (isset($project->errors['php-version'])): ?>
-    <span style="display:block;color:red">
-      <?= e(implode(', ', $project->errors['php-version'])) ?>
-    </span>
-<?php endif; ?>
+  <?php echo krudt_errors_for($project, 'php-version'); ?>
 </div>
 
 <div class="form full">
   <label for="field-repository">repository</label>
   <input type="text" id="field-repository" name="repository" value="<?=e($project->repository())?>" />
-<?php if (isset($project->errors['repository'])): ?>
-    <span style="display:block;color:red">
-      <?= e(implode(', ', $project->errors['repository'])) ?>
-    </span>
-<?php endif; ?>
+  <?php echo krudt_errors_for($project, 'repository'); ?>
 </div>
 
 <div class="form">
@@ -66,20 +42,12 @@
       <a href="#" class="remove" title="Click to remove this filespec">&#8855;</a>
 <?php $unique = uniqid(); ?>
       <input type="text" name="filespec[<?=$unique?>][path]" value="<?=e($spec['path'])?>"
-      /><select name="filespec[<?=$unique?>][type]">
-<?php foreach (array('src', 'doc', 'bin') as $type): ?>
-   <option<?php if ($spec['type'] == $type) echo ' selected="selected"' ?>><?=e($type)?></option>
-<?php endforeach; ?>
-      </select>
+      /><?php echo html_select("filespec[$unique][type]", array('src', 'doc', 'bin'), $spec['type']); ?>
     </div>
 <?php endforeach; ?>
   </div>
   <a href="#" id="filespec-append" class="append" title="Click to add a filespec">Add filespec</a>
-<?php if (isset($project->errors['filespec'])): ?>
-    <span style="display:block;color:red">
-      <?= e(implode(', ', $project->errors['filespec'])) ?>
-    </span>
-<?php endif; ?>
+  <?php echo krudt_errors_for($project, 'filespec'); ?>
 </div>
 
 <div class="form">
@@ -93,11 +61,7 @@
 <?php endforeach; ?>
   </div>
   <a href="#" id="ignore-append" class="append" title="Click to add an ignore rule">Add ignore</a>
-<?php if (isset($project->errors['ignore'])): ?>
-    <span style="display:block;color:red">
-      <?= e(implode(', ', $project->errors['ignore'])) ?>
-    </span>
-<?php endif; ?>
+  <?php echo krudt_errors_for($project, 'ignore'); ?>
 </div>
 
 <div class="form">
@@ -114,41 +78,23 @@
       <label><span>email:</span><input type="text" name="maintainers[<?=$unique?>][email]" value="<?=e($m->maintainer()->email())?>"<?=$more?> /></label>
       <label>
         <span>type:</span>
-        <select name="maintainers[<?=$unique?>][type]">
-<?php
-foreach (array('lead', 'helper') as $t):
-   if ($t == $m->type()):
-     echo '<option selected="selected">';
-   else:
-     echo '<option>';
-   endif;
-   e($t);
-   echo '</option>';
-endforeach;
-?>
-        </select>
+        <?php echo html_select("maintainers[$unique][type]", array('lead', 'helper'), $m->type()); ?>
       </label>
     </div>
 <?php endforeach; ?>
   </div>
   <a href="#" id="maintainers-append" class="append" title="Click to add a maintainer">Add maintainer</a>
-<?php if (isset($project->errors['maintainers'])): ?>
-    <span style="display:block;color:red">
-      <?= e(implode(', ', $project->errors['maintainers'])) ?>
-    </span>
-<?php endif; ?>
+  <?php echo krudt_errors_for($project, 'maintainers'); ?>
 </div>
 
 <div id="maintainers-autocomplete">
 </div>
 
-<script>//<![CDATA[
-   URL_AUTOCOMPLETE_MAINTAINERS = "<?= url('/projects?maintainers'); ?>";
-   init();
-//]]></script>
+<?php add_onload('URL_AUTOCOMPLETE_MAINTAINERS = "'. url('/projects?maintainers') .'";'); ?>
+<?php add_onload('init();'); ?>
 
 <div class="form-footer">
-  <a href="<?= e(url()) ?>">Cancel</a>
+  <a href="<?php e(url()) ?>">Cancel</a>
   :
   <input type="submit" value="OK" />
 </div>
