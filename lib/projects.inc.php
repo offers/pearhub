@@ -63,7 +63,9 @@ SELECT
   maintainers.email,
   null as filespec_type,
   null as filespec_path,
-  null as pattern
+  null as pattern,
+  null as channel,
+  null as version
 FROM
   project_maintainers
 LEFT JOIN
@@ -82,6 +84,8 @@ SELECT
   null,
   type as filespec_type,
   path as filespec_path,
+  null,
+  null,
   null
 FROM
   filespecs
@@ -98,11 +102,31 @@ SELECT
   null,
   null,
   null,
-  pattern
+  pattern,
+  null,
+  null
 FROM
   file_ignores
 WHERE
   file_ignores.project_id = :id3
+
+UNION
+
+SELECT
+  null,
+  null,
+  null,
+  null,
+  null,
+  null,
+  null,
+  null,
+  channel,
+  version
+FROM
+  dependencies
+WHERE
+  dependencies.project_id = :id4
 '
       );
       $this->sql_load_aggregates->setFetchMode(PDO::FETCH_ASSOC);
@@ -111,7 +135,8 @@ WHERE
       array(
         'id1' => $project->id(),
         'id2' => $project->id(),
-        'id3' => $project->id()));
+        'id3' => $project->id(),
+        'id4' => $project->id()));
     foreach ($this->sql_load_aggregates as $row) {
       if ($row['name']) {
         $project->addProjectMaintainer(new ProjectMaintainer($this->maintainers->load($row), $row['type'], $project->id()));
@@ -119,6 +144,8 @@ WHERE
         $project->addFilespec($row['filespec_path'], $row['filespec_type']);
       } elseif ($row['pattern']) {
         $project->addIgnore($row['pattern']);
+      } elseif ($row['channel']) {
+          $project->addDependency($row['channel'], $row['version']);
       }
     }
     return $project;
@@ -153,6 +180,16 @@ WHERE
           ':pattern' => $pattern
         ));
     }
+    $insert_dependency = $this->db->prepare(
+      'insert into dependencies (project_id, channel, version) values (:project_id, :channel, :version)');
+    foreach ($project->dependencies() as $dep) {
+      $insert_dependency->execute(
+        array(
+          ':project_id' => $project->id(),
+          ':channel' => $dep['channel'],
+          ':version' => $dep['version']
+        ));
+    }
   }
   function updateAggregates($project) {
     $this->db->prepare(
@@ -167,6 +204,11 @@ WHERE
           ':project_id' => $project->id()));
     $this->db->prepare(
       'delete from file_ignores where project_id = :project_id'
+    )->execute(
+        array(
+          ':project_id' => $project->id()));
+    $this->db->prepare(
+      'delete from dependencies where project_id = :project_id'
     )->execute(
         array(
           ':project_id' => $project->id()));
@@ -225,6 +267,7 @@ class MaintainersGateway extends pdoext_TableGateway {
 class Project extends Accessor {
   protected $filespec = array();
   protected $file_ignore = array();
+  protected $dependencies = array();
   protected $project_maintainers = array();
   function __construct($row = array('php_version' => '5.0.0')) {
     parent::__construct($row);
@@ -237,6 +280,9 @@ class Project extends Accessor {
   }
   function ignore() {
     return $this->file_ignore;
+  }
+  function dependencies() {
+    return $this->dependencies;
   }
   function projectMaintainers() {
     return $this->project_maintainers;
@@ -282,6 +328,12 @@ class Project extends Accessor {
     }
     $this->filespec[] = array('path' => $path, 'type' => $type);
   }
+  function setDependencies($dependencies) {
+    $this->dependencies = $dependencies;
+  }
+  function addDependency($channel, $version = null) {
+    $this->dependencies[] = array('channel' => $channel, 'version' => $version);
+  }
   function addIgnore($pattern) {
     $this->file_ignore[] = $pattern;
     return $pattern;
@@ -325,6 +377,14 @@ class Project extends Accessor {
     if (isset($hash['ignore'])) {
       foreach ($hash['ignore'] as $pattern) {
         $this->addIgnore($pattern);
+      }
+    }
+    $this->setDependencies(array());
+    if (isset($hash['dependencies'])) {
+      foreach ($hash['dependencies'] as $row) {
+          $this->addDependency(
+              $row['channel'],
+              isset($row['version']) ? $row['version'] : null);
       }
     }
   }
