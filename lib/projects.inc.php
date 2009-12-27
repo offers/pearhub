@@ -61,9 +61,9 @@ SELECT
   maintainers.user,
   maintainers.name,
   maintainers.email,
-  null as filespec_type,
-  null as filespec_path,
-  null as pattern,
+  null as path,
+  null as destination,
+  null as `ignore`,
   null as channel,
   null as version
 FROM
@@ -82,33 +82,15 @@ SELECT
   null,
   null,
   null,
-  type as filespec_type,
-  path as filespec_path,
-  null,
-  null,
-  null
-FROM
-  filespecs
-WHERE
-  filespecs.project_id = :id2
-
-UNION
-
-SELECT
-  null,
-  null,
-  null,
-  null,
-  null,
-  null,
-  null,
-  pattern,
+  path,
+  destination,
+  `ignore`,
   null,
   null
 FROM
-  file_ignores
+  files
 WHERE
-  file_ignores.project_id = :id3
+  files.project_id = :id2
 
 UNION
 
@@ -126,7 +108,7 @@ SELECT
 FROM
   dependencies
 WHERE
-  dependencies.project_id = :id4
+  dependencies.project_id = :id3
 '
       );
       $this->sql_load_aggregates->setFetchMode(PDO::FETCH_ASSOC);
@@ -135,15 +117,12 @@ WHERE
       array(
         'id1' => $project->id(),
         'id2' => $project->id(),
-        'id3' => $project->id(),
-        'id4' => $project->id()));
+        'id3' => $project->id()));
     foreach ($this->sql_load_aggregates as $row) {
       if ($row['name']) {
         $project->addProjectMaintainer(new ProjectMaintainer($this->maintainers->load($row), $row['type'], $project->id()));
-      } elseif ($row['filespec_path']) {
-        $project->addFilespec($row['filespec_path'], $row['filespec_type']);
-      } elseif ($row['pattern']) {
-        $project->addIgnore($row['pattern']);
+      } elseif ($row['path']) {
+        $project->addFile($row['path'], $row['destination'], $row['ignore']);
       } elseif ($row['channel']) {
           $project->addDependency($row['channel'], $row['version']);
       }
@@ -161,23 +140,15 @@ WHERE
           ':type' => $pm->type()
         ));
     }
-    $insert_filespec = $this->db->prepare(
-      'insert into filespecs (project_id, path, type) values (:project_id, :path, :type)');
-    foreach ($project->filespec() as $spec) {
-      $insert_filespec->execute(
+    $insert_files = $this->db->prepare(
+      'insert into files (project_id, path, destination, `ignore`) values (:project_id, :path, :destination, :ignore)');
+    foreach ($project->files() as $file) {
+      $insert_files->execute(
         array(
           ':project_id' => $project->id(),
-          ':path' => $spec['path'],
-          ':type' => $spec['type']
-        ));
-    }
-    $insert_ignores = $this->db->prepare(
-      'insert into file_ignores (project_id, pattern) values (:project_id, :pattern)');
-    foreach ($project->ignore() as $pattern) {
-      $insert_ignores->execute(
-        array(
-          ':project_id' => $project->id(),
-          ':pattern' => $pattern
+          ':path' => $file['path'],
+          ':destination' => $file['destination'],
+          ':ignore' => $file['ignore']
         ));
     }
     $insert_dependency = $this->db->prepare(
@@ -198,12 +169,7 @@ WHERE
         array(
           ':project_id' => $project->id()));
     $this->db->prepare(
-      'delete from filespecs where project_id = :project_id'
-    )->execute(
-        array(
-          ':project_id' => $project->id()));
-    $this->db->prepare(
-      'delete from file_ignores where project_id = :project_id'
+      'delete from files where project_id = :project_id'
     )->execute(
         array(
           ':project_id' => $project->id()));
@@ -251,18 +217,20 @@ WHERE
     if (count(array_unique($names)) < count($names)) {
       $project->errors['maintainers'][] = "Each maintainer can only be entered once";
     }
-    if (count($project->filespec()) === 0) {
-      $project->errors['filespec'][] = "You must enter at least one filespec";
+    if (count($project->files()) === 0) {
+      $project->errors['files'][] = "You must enter at least one file";
     }
-    foreach ($project->filespec() as $spec) {
-      if (!trim($spec['path'])) {
-        $project->errors['filespec'][] = "Filespec path is missing";
+    $paths = array();
+    foreach ($project->files() as $file) {
+      if (!trim($file['path'])) {
+        $project->errors['files'][] = "File path is missing";
+      } elseif (!trim($file['destination'])) {
+        $project->errors['files'][] = "File destination is missing";
       }
+      $paths[] = $file['path'];
     }
-    foreach ($project->ignore() as $pattern) {
-      if (!trim($pattern)) {
-        $project->errors['ignore'][] = "Ignore pattern is missing";
-      }
+    if (count(array_unique($paths)) < count($paths)) {
+      $project->errors['files'][] = "Each path can only be entered once";
     }
     foreach ($project->dependencies() as $dep) {
       if (!trim($dep['channel'])) {
@@ -309,8 +277,7 @@ class MaintainersGateway extends pdoext_TableGateway {
 }
 
 class Project extends Accessor {
-  protected $filespec = array();
-  protected $file_ignore = array();
+  protected $files = array();
   protected $dependencies = array();
   protected $project_maintainers = array();
   function __construct($row = array('php_version' => '5.0.0')) {
@@ -319,11 +286,8 @@ class Project extends Accessor {
   function displayName() {
     return $this->name();
   }
-  function filespec() {
-    return $this->filespec;
-  }
-  function ignore() {
-    return $this->file_ignore;
+  function files() {
+    return $this->files;
   }
   function dependencies() {
     return $this->dependencies;
@@ -340,50 +304,26 @@ class Project extends Accessor {
     }
     return $this->row['id'] = $id;
   }
-  function addSourceFile($file) {
-    $this->filespec[] = array('path' => $file, 'type' => 'src');
-    return $file;
+  function addFile($path, $destination, $ignore = null) {
+    $this->files[] = array('path' => $path, 'destination' => $destination, 'ignore' => $ignore);
+    return $path;
   }
-  function addDocumentationFile($file) {
-    $this->filespec[] = array('path' => $file, 'type' => 'doc');
-    return $file;
-  }
-  function addBinFile($file) {
-    $this->filespec[] = array('path' => $file, 'type' => 'bin');
-    return $file;
-  }
-  function setFilespec($specs) {
-    foreach ($specs as $spec) {
-      if (!isset($spec['path'])) {
+  function setFiles($files) {
+    foreach ($files as $file) {
+      if (!isset($file['path'])) {
         throw new Exception("Missing property 'path'");
       }
-      if (!isset($spec['type'])) {
-        throw new Exception("Missing property 'type'");
-      }
-      if (!in_array($spec['type'], array('src', 'doc', 'bin'))) {
-        throw new Exception("Unknown file type ". $spec['type']);
+      if (!isset($file['destination'])) {
+        throw new Exception("Missing property 'destination'");
       }
     }
-    return $this->filespec = $specs;
-  }
-  function addFilespec($path, $type) {
-    if (!in_array($type, array('src', 'doc', 'bin'))) {
-      throw new Exception("Unknown file type ". $type);
-    }
-    $this->filespec[] = array('path' => $path, 'type' => $type);
+    return $this->files = $files;
   }
   function setDependencies($dependencies) {
     $this->dependencies = $dependencies;
   }
   function addDependency($channel, $version = null) {
     $this->dependencies[] = array('channel' => $channel, 'version' => $version);
-  }
-  function addIgnore($pattern) {
-    $this->file_ignore[] = $pattern;
-    return $pattern;
-  }
-  function setIgnore($ignore) {
-    $this->file_ignore = $ignore;
   }
   function addProjectMaintainer(ProjectMaintainer $project_maintainer) {
     $project_maintainer->setProjectId($this->id());
@@ -411,16 +351,13 @@ class Project extends Accessor {
         $this->{"set$field"}($hash[$field]);
       }
     }
-    $this->setFilespec(array());
-    if (isset($hash['filespec'])) {
-      foreach ($hash['filespec'] as $row) {
-        $this->addFilespec($row['path'], $row['type']);
-      }
-    }
-    $this->setIgnore(array());
-    if (isset($hash['ignore'])) {
-      foreach ($hash['ignore'] as $pattern) {
-        $this->addIgnore($pattern);
+    $this->setFiles(array());
+    if (isset($hash['files'])) {
+      foreach ($hash['files'] as $row) {
+        $this->addFile(
+          $row['path'],
+          isset($row['destination']) ? $row['destination'] : '/',
+          isset($row['ignore']) ? $row['ignore'] : null);
       }
     }
     $this->setDependencies(array());

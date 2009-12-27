@@ -74,7 +74,10 @@ class components_projects_Entry extends k_Component {
 
     $this->db->beginTransaction();
     try {
-      $this->projects->update($this->project);
+      if (!$this->projects->update($this->project)) {
+        $this->db->rollback();
+        return false;
+      }
       foreach ($this->project->projectMaintainers() as $m) {
         $this->maintainers->delete(array('user' => $m->maintainer()->user()));
         $this->maintainers->insert($m->maintainer());
@@ -82,6 +85,7 @@ class components_projects_Entry extends k_Component {
       $this->db->commit();
     } catch (Exception $ex) {
       $this->db->rollback();
+      $this->debug($ex);
       $this->project->errors[] = $ex->getMessage();
       return false;
     }

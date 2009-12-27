@@ -316,40 +316,25 @@ var wrapInLabel = function(name, input) {
 
 var init = function() {
     initContainer(
-        document.getElementById("filespec-append"),
-        document.getElementById("filespec-container"),
+        document.getElementById("files-append"),
+        document.getElementById("files-container"),
         function(container) {
             var id = uniqueId();
             var fieldset = document.createElement("div");
-            fieldset.className = "filespec-fieldset fieldset";
-            makeRemoveButton(fieldset, "filespec");
+            fieldset.className = "files-fieldset fieldset";
+            makeRemoveButton(fieldset, "path");
             fieldset.appendChild(
                 wrapInLabel(
                     "path",
-                    createElement("input", {type: "text", name: "filespec[" + id + "][path]"})));
-            var inputType = createElement("select", {name: "filespec[" + id + "][type]"});
-            inputType.appendChild(new Option("src"));
-            inputType.appendChild(new Option("doc"));
-            inputType.appendChild(new Option("bin"));
+                    createElement("input", {type: "text", name: "files[" + id + "][path]"})));
             fieldset.appendChild(
                 wrapInLabel(
-                    "type",
-                    inputType));
-            container.appendChild(fieldset);
-            return fieldset;
-        });
-    initContainer(
-        document.getElementById("ignore-append"),
-        document.getElementById("ignore-container"),
-        function(container) {
-            var id = uniqueId();
-            var fieldset = document.createElement("div");
-            fieldset.className = "ignore-fieldset fieldset";
-            makeRemoveButton(fieldset, "ignore");
+                    "destination",
+                    createElement("input", {type: "text", name: "files[" + id + "][destination]", value: "/"})));
             fieldset.appendChild(
                 wrapInLabel(
-                    "pattern",
-                    createElement("input", {type: "text", name: "ignore[" + id + "]"})));
+                    "ignore",
+                    createElement("input", {type: "text", name: "files[" + id + "][ignore]"})));
             container.appendChild(fieldset);
             return fieldset;
         });
