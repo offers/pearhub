@@ -75,7 +75,7 @@
       <label><span>email:</span><input type="text" name="maintainers[<?=$unique?>][email]" value="<?=e($m->maintainer()->email())?>"<?=$more?> /></label>
       <label>
         <span>type:</span>
-        <?php echo html_select("maintainers[$unique][type]", array('lead', 'helper'), $m->type()); ?>
+        <?php echo html_select("maintainers[$unique][type]", array('lead', 'developer', 'contributor', 'helper'), $m->type()); ?>
       </label>
     </div>
 <?php endforeach; ?>

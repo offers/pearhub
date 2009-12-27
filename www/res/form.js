@@ -401,6 +401,8 @@ var init = function() {
 
             var inputType = createElement("select", {name: "maintainers[" + id + "][type]"});
             inputType.appendChild(new Option("lead"));
+            inputType.appendChild(new Option("developer"));
+            inputType.appendChild(new Option("contributor"));
             inputType.appendChild(new Option("helper"));
             makeElement("type", inputType);
 

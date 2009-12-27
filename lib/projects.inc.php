@@ -464,7 +464,7 @@ class ProjectMaintainer {
   protected $maintainer;
   protected $type;
   function __construct($maintainer, $type, $project_id = null) {
-    if (!in_array($type, array('lead', 'helper'))) {
+    if (!in_array($type, array('lead', 'developer', 'contributor', 'helper'))) {
       throw new Exception("Illegal value for 'type'");
     }
     $this->maintainer = $maintainer;
