@@ -1,5 +1,6 @@
 <p>
 Lorem ipsum dolor sit amet.
 </p>
-<p><a href="<?=e(url('projects'))?>">projects</a></p>
-
+<p><?php echo html_link(url('projects'), "View projects"); ?></p>
+<p><?php echo html_link(url('projects', array('new')), "Create new project"); ?></p>
+<p><?php echo html_link(url('login'), "Log in"); ?></p>

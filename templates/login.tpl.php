@@ -1,18 +1,17 @@
-<form method="post" action="<?= e(url())?>" id="openid">
-  <h1>Authentication required</h1>
+<?php echo html_form_tag('post', url(), array('id' => 'openid')); ?>
   <h2>OpenID Login</h2>
   <p>
-<?= implode("<br/>", array_map('htmlspecialchars', $errors)) ?>
+<?php echo implode("<br/>", array_map('escape', $errors)) ?>
   </p>
-  <p>
+  <div>
     <label>
       open-id url:
       <input type="text" name="openid_identifier" value="" />
-      <input type="submit" value="Login" />
+      <input type="submit" value="Login" class="submit" />
     </label>
     <br/>
     <label><input type="checkbox" name="remember" /> Remember login for 30 days</label>
-  </p>
+  </div>
   <h2>Don't have an OpenID login?</h2>
   <p>
     You can create a login for free at: <a href="https://www.myopenid.com/signup">myopenid.com</a>

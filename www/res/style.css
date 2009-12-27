@@ -251,7 +251,7 @@ a:hover {
 
 /* * * * zurb awesome-button * * * */
 
-.form-footer input, #search .submit {
+.form-footer input, #search .submit, #openid .submit {
   background: url(overlay-button.png) repeat-x;
   display: inline-block;
   color: #fff;
@@ -268,7 +268,7 @@ a:hover {
   text-shadow: 0 -1px 1px rgba(0,0,0,0.25);
   border-bottom: 1px solid rgba(0,0,0,0.25);
 }
-.form-footer input:hover, #search .submit:hover {
+.form-footer input:hover, #search .submit:hover, #openid .submit:hover {
   background-color: #c28;
   color: #fff;
 }
@@ -278,4 +278,13 @@ a:hover {
 }
 .form-footer input.warning:hover {
   background-color: #c00;
+}
+
+#openid input {
+  color: #444;
+  font-size: 150%;
+  font-family: Monaco, Deja Vu Sans Mono, Inconsolata, Consolas, monospace;
+}
+#openid label {
+  color: #888;
 }
