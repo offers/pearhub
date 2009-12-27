@@ -84,7 +84,7 @@ a:hover {
 
 #content h1 {
   font-weight: normal;
-  font-size: 200%;
+  font-size: 300%;
   color: #444;
   margin-bottom: .25em;
 }
@@ -120,7 +120,7 @@ a:hover {
 }
 .list li a {
   display: block;
-  font-size: 2em;
+  font-size: 175%;
   font-weight: bold;
   line-height: 1.2;
   padding: 0.25em;

@@ -3,11 +3,23 @@
   <a href="<?php e(url('', array('delete'))); ?>">delete</a>
 </p>
 
+<h2>Summary</h2>
+
+<p>
+  <?php e($project->summary()); ?>
+</p>
+
+<h2>Dependencies</h2>
+
+<ul>
+<?php foreach ($project->dependencies() as $dep): ?>
+  <li><?php e($dep['channel']) ?> <?php e($dep['version']) ?></li>
+<?php endforeach; ?>
+</ul>
+
 <h2>Details</h2>
 
 <dl>
-  <dt>Name</dt>
-  <dd><?php e($project->name()); ?></dd>
   <dt>Created</dt>
   <dd><?php e($project->created()); ?></dd>
   <dt>Owner</dt>
@@ -39,10 +51,3 @@
 </dl>
 <?php endforeach; ?>
 
-<h2>Dependencies</h2>
-
-<ul>
-<?php foreach ($project->dependencies() as $dep): ?>
-  <li><?php e($dep['channel']) ?> <?php e($dep['version']) ?></li>
-<?php endforeach; ?>
-</ul>
