@@ -17,7 +17,8 @@ class components_projects_List extends k_Component {
     return 'components_projects_Entry';
   }
   function renderHtml() {
-    $this->document->setTitle("Projects");
+    $this->document->setTitle("projects");
+    $this->document->addCrumb('projects', $this->url());
     $t = $this->templates->create('projects/list');
     $selection = $this->projects->selectPaginated($this->query('page'));
     if ($this->query('q')) {
@@ -28,12 +29,9 @@ class components_projects_List extends k_Component {
       array(
         'projects' => $selection));
   }
-  function wrapHtml($content) {
-    $t = $this->templates->create('projects/wrapper');
-    return $t->render(
-      $this,
-      array(
-        'content' => $content));
+  function forward($class_name, $namespace = "") {
+    $this->document->addCrumb('projects', $this->url());
+    return parent::forward($class_name, $namespace);
   }
   function renderHtmlNew() {
     if ($this->identity()->anonymous()) {
@@ -43,9 +41,11 @@ class components_projects_List extends k_Component {
       $this->project = new Project();
     }
     $this->document->addScript($this->url('/res/form.js'));
-    $this->document->setTitle("New project");
+    $this->document->setTitle("new project");
+    $this->document->addCrumb('projects', $this->url());
+    $this->document->addCrumb('new', $this->url('', array('new')));
     $t = $this->templates->create('projects/new');
-    return $this->wrapHtml($t->render($this, array('project' => $this->project)));
+    return $t->render($this, array('project' => $this->project));
   }
   function renderJson() {
     return null;

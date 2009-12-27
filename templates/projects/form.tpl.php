@@ -1,71 +1,68 @@
 <div class="form full">
-  <label for="field-name">name</label>
-  <input type="text" id="field-name" name="name" value="<?=e($project->name())?>" />
-  <?php echo krudt_errors_for($project, 'name'); ?>
-</div>
-
-<div class="form full">
   <label for="field-summary">summary</label>
-  <textarea id="field-summary" name="summary"><?=e($project->summary())?></textarea>
+  <?php echo html_text_area("summary", $project->summary(), array('id' => "field-summary")); ?>
   <?php echo krudt_errors_for($project, 'summary'); ?>
 </div>
 
 <div class="form full">
-  <label for="field-license-title">license-title</label>
-  <input type="text" id="field-license-title" name="license-title" value="<?=e($project->licenseTitle())?>" />
-  <?php echo krudt_errors_for($project, 'license-title'); ?>
-</div>
-
-<div class="form full">
-  <label for="field-license-href">license-href</label>
-  <input type="text" id="field-license-href" name="license-href" value="<?=e($project->licenseHref())?>" />
-  <?php echo krudt_errors_for($project, 'license-href'); ?>
-</div>
-
-<div class="form">
-  <label for="field-php-version">php-version</label>
-  <input type="text" id="field-php-version" name="php-version" value="<?=e($project->phpVersion())?>" />
-  <?php echo krudt_errors_for($project, 'php-version'); ?>
-</div>
-
-<div class="form full">
   <label for="field-repository">repository</label>
-  <input type="text" id="field-repository" name="repository" value="<?=e($project->repository())?>" />
+  <?php echo html_text_field("repository", $project->repository(), array('id' => "field-repository")); ?>
   <?php echo krudt_errors_for($project, 'repository'); ?>
 </div>
 
 <div class="form">
-  <label for="field-filespec">filespec</label>
+  <label for="field-php-version">php-version</label>
+  <?php echo html_text_field("php-version", $project->phpVersion(), array('id' => "field-php-version")); ?>
+  <?php echo krudt_errors_for($project, 'php-version'); ?>
+</div>
+
+<div class="form">
+  <h2>license</h2>
+  <div class="container">
+    <label><span>title:</span><?php echo html_text_field("license-title", $project->licenseTitle(), array('id' => "field-license-title")); ?></label>
+    <?php echo krudt_errors_for($project, 'license-title'); ?>
+
+    <label><span>href:</span><?php echo html_text_field("license-href", $project->licenseHref(), array('id' => "field-license-href")); ?></label>
+    <?php echo krudt_errors_for($project, 'license-href'); ?>
+  </div>
+</div>
+
+<div class="form">
+  <h2>filespec</h2>
   <div id="filespec-container" class="container">
 <?php foreach ($project->filespec() as $spec): ?>
     <div class="filespec-fieldset fieldset">
       <a href="#" class="remove" title="Click to remove this filespec">&#8855;</a>
 <?php $unique = uniqid(); ?>
-      <input type="text" name="filespec[<?=$unique?>][path]" value="<?=e($spec['path'])?>"
-      /><?php echo html_select("filespec[$unique][type]", array('src', 'doc', 'bin'), $spec['type']); ?>
+      <label><span>path:</span><input type="text" name="filespec[<?=$unique?>][path]" value="<?=e($spec['path'])?>" /></label>
+      <label><span>type:</span><?php echo html_select("filespec[$unique][type]", array('src', 'doc', 'bin'), $spec['type']); ?></label>
     </div>
 <?php endforeach; ?>
   </div>
-  <a href="#" id="filespec-append" class="append" title="Click to add a filespec">Add filespec</a>
+  <div class="append-wrapper">
+    <a href="#" id="filespec-append" class="append" title="Click to add a filespec">Add filespec</a>
+  </div>
   <?php echo krudt_errors_for($project, 'filespec'); ?>
 </div>
 
 <div class="form">
-  <label>ignore</label>
+  <h2>ignore</h2>
   <div id="ignore-container" class="container">
 <?php foreach ($project->ignore() as $pattern): ?>
     <div class="ignore-fieldset fieldset">
       <a href="#" class="remove" title="Click to remove this ignore">&#8855;</a>
-      <input type="text" name="ignore[]" value="<?=e($pattern)?>" />
+      <label><span>pattern:</span><input type="text" name="ignore[]" value="<?=e($pattern)?>" /></label>
     </div>
 <?php endforeach; ?>
   </div>
-  <a href="#" id="ignore-append" class="append" title="Click to add an ignore rule">Add ignore</a>
+  <div class="append-wrapper">
+    <a href="#" id="ignore-append" class="append" title="Click to add an ignore rule">Add ignore</a>
+  </div>
   <?php echo krudt_errors_for($project, 'ignore'); ?>
 </div>
 
 <div class="form">
-  <label for="field-maintainers">maintainers</label>
+  <h2>maintainers</h2>
   <div id="maintainers-container" class="container">
 <?php foreach ($project->projectMaintainers() as $m): ?>
 <?php $is_locked = $m->maintainer()->owner() !== $context->identity()->user(); ?>
@@ -83,8 +80,28 @@
     </div>
 <?php endforeach; ?>
   </div>
-  <a href="#" id="maintainers-append" class="append" title="Click to add a maintainer">Add maintainer</a>
+  <div class="append-wrapper">
+    <a href="#" id="maintainers-append" class="append" title="Click to add a maintainer">Add maintainer</a>
+  </div>
   <?php echo krudt_errors_for($project, 'maintainers'); ?>
+</div>
+
+<div class="form">
+  <h2>dependencies</h2>
+  <div id="dependencies-container" class="container">
+<?php foreach ($project->dependencies() as $dep): ?>
+    <div class="dependencies-fieldset fieldset">
+      <a href="#" class="remove" title="Click to remove this dependency">&#8855;</a>
+      <?php $unique = uniqid(); ?>
+      <label><span>channel:</span><?php echo html_text_field("dependencies[".$unique."][channel]", $dep['channel']); ?></label>
+      <label><span>version:</span><?php echo html_text_field("dependencies[".$unique."][version]", $dep['version']); ?></label>
+    </div>
+<?php endforeach; ?>
+  </div>
+  <div class="append-wrapper">
+    <a href="#" id="dependencies-append" class="append" title="Click to add a dependency">Add Dependency</a>
+  </div>
+  <?php echo krudt_errors_for($project, 'dependencies'); ?>
 </div>
 
 <div id="maintainers-autocomplete">
@@ -92,10 +109,4 @@
 
 <?php add_onload('URL_AUTOCOMPLETE_MAINTAINERS = "'. url('/projects?maintainers') .'";'); ?>
 <?php add_onload('init();'); ?>
-
-<div class="form-footer">
-  <a href="<?php e(url()) ?>">Cancel</a>
-  :
-  <input type="submit" value="OK" />
-</div>
 

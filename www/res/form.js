@@ -305,6 +305,15 @@ var hideAutoComplete = function() {
         }, 100);
 };
 
+var wrapInLabel = function(name, input) {
+    var label = document.createElement("label");
+    var span = document.createElement("span");
+    span.appendChild(document.createTextNode(name + ": "));
+    label.appendChild(span);
+    label.appendChild(input);
+    return label;
+};
+
 var init = function() {
     initContainer(
         document.getElementById("filespec-append"),
@@ -314,13 +323,18 @@ var init = function() {
             var fieldset = document.createElement("div");
             fieldset.className = "filespec-fieldset fieldset";
             makeRemoveButton(fieldset, "filespec");
-            var inputPath = createElement("input", {type: "text", name: "filespec[" + id + "][path]"});
-            fieldset.appendChild(inputPath);
+            fieldset.appendChild(
+                wrapInLabel(
+                    "path",
+                    createElement("input", {type: "text", name: "filespec[" + id + "][path]"})));
             var inputType = createElement("select", {name: "filespec[" + id + "][type]"});
             inputType.appendChild(new Option("src"));
             inputType.appendChild(new Option("doc"));
             inputType.appendChild(new Option("bin"));
-            fieldset.appendChild(inputType);
+            fieldset.appendChild(
+                wrapInLabel(
+                    "type",
+                    inputType));
             container.appendChild(fieldset);
             return fieldset;
         });
@@ -332,8 +346,25 @@ var init = function() {
             var fieldset = document.createElement("div");
             fieldset.className = "ignore-fieldset fieldset";
             makeRemoveButton(fieldset, "ignore");
-            var input = createElement("input", {type: "text", name: "ignore[" + id + "]"});
-            fieldset.appendChild(input);
+            fieldset.appendChild(
+                wrapInLabel(
+                    "pattern",
+                    createElement("input", {type: "text", name: "ignore[" + id + "]"})));
+            container.appendChild(fieldset);
+            return fieldset;
+        });
+    initContainer(
+        document.getElementById("dependencies-append"),
+        document.getElementById("dependencies-container"),
+        function(container) {
+            var id = uniqueId();
+            var fieldset = document.createElement("div");
+            fieldset.className = "dependencies-fieldset fieldset";
+            makeRemoveButton(fieldset, "dependency");
+            fieldset.appendChild(
+                wrapInLabel("channel", createElement("input", {type: "text", name: "dependencies[" + id + "][channel]"})));
+            fieldset.appendChild(
+                wrapInLabel("version", createElement("input", {type: "text", name: "dependencies[" + id + "][version]"})));
             container.appendChild(fieldset);
             return fieldset;
         });

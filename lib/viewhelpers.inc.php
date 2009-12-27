@@ -26,6 +26,21 @@ function query($key, $default = null) {
   return $GLOBALS['k_current_context']->query($key, $default);
 }
 
+function html_link($url, $title = null, $options = array()) {
+  if ($title === null) {
+    $title = $url;
+  }
+  $options['href'] = $url;
+  $html = "<a";
+  foreach ($options as $k => $v) {
+    if ($v !== null) {
+      $html .= ' ' . escape($k) . '="' . escape($v) . '"';
+    }
+  }
+  $html .= ">".escape($title)."</a>";
+  return $html;
+}
+
 /**
  * Generates an opening html `<form>` tag.
  */

@@ -6,8 +6,6 @@ class components_Root extends k_Component {
   }
   protected function map($name) {
     switch ($name) {
-    case 'account':
-      return 'components_Account';
     case 'projects':
       return 'components_projects_List';
     case 'login':
@@ -16,10 +14,15 @@ class components_Root extends k_Component {
       return 'components_Logout';
     }
   }
+  function dispatch() {
+    $this->document->addCrumb('pearhub.org', $this->url());
+    return parent::dispatch();
+  }
   function execute() {
     return $this->wrap(parent::execute());
   }
   function wrapHtml($content) {
+    $this->document->addStyle($this->url('/res/reset.css'));
     $this->document->addStyle($this->url('/res/style.css'));
     $t = $this->templates->create("document");
     return
@@ -28,11 +31,13 @@ class components_Root extends k_Component {
         array(
           'content' => $content,
           'title' => $this->document->title(),
+          'crumbtrail' => $this->document->crumbtrail(),
           'scripts' => $this->document->scripts(),
           'styles' => $this->document->styles(),
           'onload' => $this->document->onload()));
   }
   function renderHtml() {
+    $this->document->setTitle('welcome');
     $t = $this->templates->create("root");
     return $t->render($this);
   }

@@ -1,4 +1,3 @@
-<h2><?php e($project->displayName()); ?></h2>
 <dl>
   <dt>Name</dt>
   <dd><?php e($project->name()); ?></dd>
@@ -11,6 +10,7 @@
 </dl>
 <p>
   <a href="<?php e(url('', array('edit'))); ?>">Edit project</a>
-  :
+</p>
+<p>
   <a href="<?php e(url('', array('delete'))); ?>">Delete project</a>
 </p>

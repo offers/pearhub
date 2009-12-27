@@ -22,6 +22,7 @@ class components_projects_Entry extends k_Component {
   }
   function renderHtml() {
     $this->document->setTitle($this->project->name());
+    $this->document->addCrumb($this->project->name(), $this->url());
     $this->document->addScript($this->url('/res/form.js'));
     $t = $this->templates->create("projects/show");
     return $t->render($this, array('project' => $this->project));
@@ -47,7 +48,9 @@ class components_projects_Entry extends k_Component {
       throw new k_Forbidden();
     }
     $this->document->addScript($this->url('/res/form.js'));
-    $this->document->setTitle("Edit " . $this->project->displayName());
+    $this->document->setTitle("edit " . $this->project->displayName());
+    $this->document->addCrumb($this->project->displayName(), $this->url());
+    $this->document->addCrumb("edit", $this->url('', array('edit')));
     $t = $this->templates->create("projects/edit");
     return $t->render($this, array('project' => $this->project));
   }
@@ -91,7 +94,9 @@ class components_projects_Entry extends k_Component {
     if ($this->project->owner() != $this->identity()->user()) {
       throw new k_Forbidden();
     }
-    $this->document->setTitle("Delete " . $this->project->displayName());
+    $this->document->setTitle("delete " . $this->project->displayName());
+    $this->document->addCrumb($this->project->displayName(), $this->url());
+    $this->document->addCrumb("delete", $this->url('', array('delete')));
     $t = $this->templates->create("projects/delete");
     return $t->render($this, array('project' => $this->project));
   }

@@ -1,20 +1,21 @@
-<h2>Projects</h2>
+<div id="search">
+  <?php echo html_form_tag('get'); ?>
+    <a href="<?php e(url()) ?>">All projects</a>
+    <?php echo html_text_field('q', query('q'), array('id' => 'q')); ?>
+    <input type="submit" value="Search" class="submit" />
+  </form>
+</div>
 
-<?php echo html_form_tag('get'); ?>
-<?php echo html_text_field('q', query('q')); ?>
-<input type="submit" value="Search" />
-<a href="<?php e(url()) ?>">All projects</a>
-</form>
-
-Found <?php e($projects->count()) ?> projects.
-
-<ul>
+<ul class="list">
 <?php foreach ($projects as $entry): ?>
-<li><a href="<?php e(url($entry->name())); ?>"><?php e($entry->displayName()); ?></a></li>
+  <li>
+    <?php echo html_link(url($entry->name()), $entry->displayName()); ?>
+    <div class="meta"><?php e($entry->repository()); ?></div>
+  </li>
 <?php endforeach; ?>
 </ul>
 <p>
-  <a href="<?php e(url(array('new'))); ?>">New entry</a>
+  <a href="<?php e(url('', array('new'))); ?>">Add new project</a>
 </p>
 
 <?php echo krudt_paginate($projects, array('q')); ?>
