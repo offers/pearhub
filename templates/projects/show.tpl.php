@@ -2,6 +2,9 @@
   <a href="<?php e(url('', array('edit'))); ?>">edit</a>
   <a href="<?php e(url('', array('delete'))); ?>">delete</a>
 </p>
+
+<h2>Details</h2>
+
 <dl>
   <dt>Name</dt>
   <dd><?php e($project->name()); ?></dd>

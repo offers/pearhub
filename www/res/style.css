@@ -90,9 +90,9 @@ a:hover {
 }
 
 #content h2 {
-  font-weight: normal;
-  font-size: 150%;
   color: #444;
+  font-size: 150%;
+  border-bottom: 1px solid #888;
   margin: .25em 0;
 }
 
@@ -173,11 +173,13 @@ a:hover {
   margin: 0;
 }
 /* * * * fieldsets * * * */
+/*
 .form h2 {
   color: #888;
   font-size: 150%;
   border-bottom: 1px solid #888;
 }
+*/
 .container {
   margin-top: .25em;
   padding-top: .25em;
