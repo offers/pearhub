@@ -46,13 +46,14 @@ a:hover {
   bottom: 3em;
   float: right;
 }
+
 #q {
   font-family: Monaco, Deja Vu Sans Mono, Inconsolata, Consolas, monospace;
 }
 
 #profile {
-  text-align: right;
 }
+
 #profile #logout {
   padding: 0;
   margin: 0;
@@ -64,6 +65,7 @@ a:hover {
   font-weight: bold;
   cursor: pointer;
 }
+
 #profile #logout:hover {
   color: #c28;
   background-color: #808;
