@@ -1,5 +1,10 @@
 <?php
 
+/**
+ * Code for parsing and representing a manifest file.
+ * This is probably obsolete, since we have projects instead.
+ */
+
 class Manifest {
   protected $name = "";
   protected $summary = "";
