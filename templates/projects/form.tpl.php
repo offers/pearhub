@@ -20,9 +20,9 @@
   <h2>license</h2>
   <div class="container">
     <label><span>title:</span><?php echo html_text_field("license-title", $project->licenseTitle(), array('id' => "field-license-title")); ?></label>
-    <?php echo krudt_errors_for($project, 'license-title'); ?>
 
     <label><span>href:</span><?php echo html_text_field("license-href", $project->licenseHref(), array('id' => "field-license-href")); ?></label>
+    <?php echo krudt_errors_for($project, 'license-title'); ?>
     <?php echo krudt_errors_for($project, 'license-href'); ?>
   </div>
 </div>

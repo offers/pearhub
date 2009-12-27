@@ -216,17 +216,61 @@ WHERE
     $this->db->exec(
       'delete from maintainers where user not in (select user from project_maintainers)');
   }
-  function validate_update($project) {
+  function validateUpdate($project) {
     if (!$project->id()) {
-      $project->errors['id'] = "Missing id";
+      $project->errors['id'][] = "Missing id";
     }
   }
   function validate($project) {
     if (!$project->name()) {
-      $project->errors['name'] = "Missing name";
+      $project->errors['name'][] = "Missing name";
     }
     if (!$project->repository()) {
-      $project->errors['repository'] = "Missing repository";
+      $project->errors['repository'][] = "Missing repository";
+    }
+    if (!preg_match('/^\d+\.\d+\.\d+$/', $project->phpVersion())) {
+      $project->errors['php-version'][] = "Format of version must be X.X.X";
+    }
+    if (!$project->licenseTitle()) {
+      $project->errors['license-title'][] = "Missing license";
+    }
+    $found = false;
+    $names = array();
+    foreach ($project->projectMaintainers() as $pm) {
+      if ($pm->type() === 'lead') {
+        $found = true;
+      }
+      if (!trim($pm->maintainer()->user())) {
+        $project->errors['maintainers'][] = "Maintainer name is missing";
+      }
+      $names[] = $pm->maintainer()->user();
+    }
+    if (!$found) {
+      $project->errors['maintainers'][] = "There must be at least one lead";
+    }
+    if (count(array_unique($names)) < count($names)) {
+      $project->errors['maintainers'][] = "Each maintainer can only be entered once";
+    }
+    if (count($project->filespec()) === 0) {
+      $project->errors['filespec'][] = "You must enter at least one filespec";
+    }
+    foreach ($project->filespec() as $spec) {
+      if (!trim($spec['path'])) {
+        $project->errors['filespec'][] = "Filespec path is missing";
+      }
+    }
+    foreach ($project->ignore() as $pattern) {
+      if (!trim($pattern)) {
+        $project->errors['ignore'][] = "Ignore pattern is missing";
+      }
+    }
+    foreach ($project->dependencies() as $dep) {
+      if (!trim($dep['channel'])) {
+        $project->errors['dependencies'][] = "Dependency channel is missing";
+      }
+      if ($dep['version'] && !preg_match('/^\d+\.\d+\.\d+$/', $dep['version'])) {
+        $project->errors['dependencies'][] = "Format of version must be X.X.X";
+      }
     }
   }
   function insert($project) {
@@ -389,28 +433,27 @@ class Project extends Accessor {
     }
   }
   function unmarshalMaintainers($body, $user, $maintainers) {
-    if (!isset($body['maintainers'])) {
-      throw new Exception("Missing field maintainers");
-    }
     $this->setProjectMaintainers(array());
-    foreach ($body['maintainers'] as $row) {
-      $m = $maintainers->fetch(array('user' => $row['user']));
-      if ($m) {
-        if ($m->owner() == $user) {
-          $m->setName($row['name']);
-          $m->setEmail($row['email']);
-        } elseif ($row['name'] !== $m->name() || $row['email'] !== $m->email()) {
-          $this->errors['maintainers'][] = "You're not allowed to change details of " . $row['user'] . ".";
+    if (isset($body['maintainers'])) {
+      foreach ($body['maintainers'] as $row) {
+        $m = $maintainers->fetch(array('user' => $row['user']));
+        if ($m) {
+          if ($m->owner() == $user) {
+            $m->setName($row['name']);
+            $m->setEmail($row['email']);
+          } elseif ($row['name'] !== $m->name() || $row['email'] !== $m->email()) {
+            $this->errors['maintainers'][] = "You're not allowed to change details of " . $row['user'] . ".";
+          }
+        } else {
+          $m = new Maintainer(
+            array(
+              'user' => $row['user'],
+              'name' => $row['name'],
+              'email' => $row['email'],
+              'owner' => $user));
         }
-      } else {
-        $m = new Maintainer(
-          array(
-            'user' => $row['user'],
-            'name' => $row['name'],
-            'email' => $row['email'],
-            'owner' => $user));
+        $this->addProjectMaintainer(new ProjectMaintainer($m, $row['type']));
       }
-      $this->addProjectMaintainer(new ProjectMaintainer($m, $row['type']));
     }
     return empty($this->errors['maintainers']);
   }

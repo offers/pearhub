@@ -79,13 +79,15 @@ class components_projects_List extends k_Component {
       throw new k_NotAuthorized();
     }
     $this->project = new Project();
-    $this->project->unmarshal($this->body());
-    $this->project->unmarshalMaintainers($this->body(), $this->identity()->user(), $this->maintainers);
-    $this->project->setOwner($this->identity()->user());
-
     $this->db->beginTransaction();
     try {
-      $this->projects->insert($this->project);
+      $this->project->unmarshal($this->body());
+      $this->project->unmarshalMaintainers($this->body(), $this->identity()->user(), $this->maintainers);
+      $this->project->setOwner($this->identity()->user());
+      if (!$this->projects->insert($this->project)) {
+        $this->db->rollback();
+        return false;
+      }
       foreach ($this->project->projectMaintainers() as $m) {
         $this->maintainers->delete(array('user' => $m->maintainer()->user()));
         $this->maintainers->insert($m->maintainer());

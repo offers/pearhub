@@ -89,9 +89,24 @@ a:hover {
   margin-bottom: .25em;
 }
 
-#content p {
+#content h2 {
+  font-weight: normal;
+  font-size: 150%;
+  color: #444;
+  margin: .25em 0;
+}
+
+#content p, #content dl, #content ul {
   font-size: 125%;
   color: #888;
+}
+
+#content dt {
+  font-weight: bold;
+}
+
+#content dd {
+  margin-left: 1em;
 }
 
 /* * * * list * * * */

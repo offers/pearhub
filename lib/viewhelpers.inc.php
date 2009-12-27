@@ -212,7 +212,7 @@ function krudt_errors_for($entity, $field) {
   if (isset($entity->errors[$field])) {
     return
       '<span style="display:block;color:red">' . "\n"
-      . e(implode(', ', $entity->errors[$field])) . "\n"
+      . escape(implode(', ', is_array($entity->errors[$field]) ? $entity->errors[$field] : array($entity->errors[$field]))) . "\n"
       . '</span>' . "\n";
   }
 }
