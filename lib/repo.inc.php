@@ -1,91 +1,28 @@
 <?php
+require_once 'shell.inc.php';
 
 /**
- * This contains code for accessing repositories.
+ * Provides a uniform access to remote repositries.
  */
-
-class Shell {
-  function run($command /*[, ...]*/) {
-    $args = func_get_args();
-    $args[0] .= ' 2>&1';
-    $process = call_user_func_array(array($this, 'open'), $args);
-    $result = $process->exec();
-    if ($result['result'] !== 0) {
-      throw new Exception("Child process exited with error (".$result['result'].")");
-    }
-    return $result['stdout'];
-  }
-  function open($command /*[, ...]*/) {
-    $args = func_get_args();
-    array_shift($args);
-    $tokens = array();
-    foreach (preg_split('/(%s)/', $command, -1 , PREG_SPLIT_DELIM_CAPTURE) as $token) {
-      if ($token === '%s') {
-        if (count($args) === 0) {
-          throw new Exception("Argument number mismatch");
-        }
-        $tokens[] = escapeshellarg(array_shift($args));
-      } else {
-        $tokens[] = $token;
-      }
-    }
-    if (count($args) !== 0) {
-      throw new Exception("Argument number mismatch");
-    }
-    return new ShellProcess(implode($tokens));
-  }
-  function getTempname() {
-    $temp = tempnam(sys_get_temp_dir(), 'php');
-    if (file_exists($temp)) {
-      unlink($temp);
-      return $temp;
-    }
-    throw new Exception("Unable to reserve a temporary name");
-  }
+interface RepoInfo {
+  function listTags();
+  function exportTag($tagname);
+  function validateRevision($revision);
+  function exportRevision($revision);
 }
 
-class ShellProcess {
-  protected $command;
-  function __construct($command) {
-    $this->command = $command;
-  }
-  function exec($in = null, $cwd = null, $env = null) {
-    $descriptorspec = array(
-      0 => array("pipe", "r"),
-      1 => array("pipe", "w"),
-      2 => array("pipe", "w")
-    );
-    $cwd = $cwd ? $cwd : getcwd();
-    $env = $env ? $env : $_ENV;
-    $process = proc_open($this->command, $descriptorspec, $pipes, $cwd, $env);
-    if (is_resource($process)) {
-      if ($in) {
-        fwrite($pipes[0], $in);
-      }
-      fclose($pipes[0]);
-      $out = stream_get_contents($pipes[1]);
-      fclose($pipes[1]);
-      $err = stream_get_contents($pipes[2]);
-      fclose($pipes[2]);
-      $return_value = proc_close($process);
-      return array(
-        'stdout' => $out,
-        'stderr' => $err,
-        'result' => $return_value,
-      );
-    } else {
-      throw new Exception("Can't open sub-process");
-    }
-  }
-}
-
-class SvnRepoInfo {
-  protected $root;
+/**
+ * Baseclass for svn repository access.
+ * You probably want to use the subclass `SvnStandardRepoInfo` instead,
+ * if your repo has a standard layout (`/trunk` and `/tags`)
+ */
+class SvnRepoInfo implements RepoInfo {
+  protected $url;
   protected $shell;
   protected $trunk;
-  function __construct($root, $shell) {
-    $this->root = rtrim($root, '/');
-    $this->trunk = $this->root;
+  function __construct($url, $shell) {
+    $this->url = rtrim($url, '/');
+    $this->trunk = $this->url;
     $this->shell = $shell;
   }
   function listTags() {
@@ -109,14 +46,17 @@ class SvnRepoInfo {
   }
 }
 
+/**
+ * Standard svn repository access.
+ */
 class SvnStandardRepoInfo extends SvnRepoInfo {
-  function __construct($root, $shell) {
-    parent::__construct($root, $shell);
-    $this->trunk = $this->root . '/trunk';
+  function __construct($url, $shell) {
+    parent::__construct($url, $shell);
+    $this->trunk = $this->url . '/trunk';
   }
   function listTags() {
     $tags = array();
-    $result = explode("\n", trim($this->shell->run('svn ls %s', $this->root . '/tags')));
+    $result = explode("\n", trim($this->shell->run('svn ls %s', $this->url . '/tags')));
     foreach ($result as $line) {
       if (preg_match('~^[0-9]+(\.[0-9]+)?(\.[0-9]+)?\/$~', $line)) {
         $tags[] = rtrim($line, '/');
@@ -126,12 +66,15 @@ class SvnStandardRepoInfo extends SvnRepoInfo {
   }
   function exportTag($tagname) {
     $name = $this->shell->getTempname();
-    $this->shell->run('svn export %s %s', $this->root . '/tags/' . $tagname, $name);
+    $this->shell->run('svn export %s %s', $this->url . '/tags/' . $tagname, $name);
     return new LocalCopy($name);
   }
 }
 
-class GitRepoInfo {
+/**
+ * git repository access.
+ */
+class GitRepoInfo implements RepoInfo {
   protected $url;
   protected $shell;
   function __construct($url, $shell) {
@@ -180,16 +123,23 @@ class GitRepoInfo {
   }
 }
 
+/**
+ * Transient object around a local copy (export) of a repository.
+ * Be sure to destroy it after use.
+ */
 class LocalCopy {
   protected $root;
   function __construct($root) {
     $this->root = $root;
   }
   function destroy($shell) {
-    $this->shell->run('rm -rf %s', $this->root);
+    $shell->run('rm -rf %s', $this->root);
   }
   function getPath() {
     return $this->root;
+  }
+  function __tostring() {
+    return "[LocalCopy at " . $this->getPath() . "]";
   }
 }
 

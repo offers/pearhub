@@ -2,8 +2,8 @@
 
 /**
  * Filespec handler. Finds files that match a filespec pattern, in a directory.
+ * Implemented as a visitor, taking a handler as subject.
  */
-
 class Filespec {
   protected $root;
   protected $content = array();
@@ -63,6 +63,9 @@ class Filespec {
   }
 }
 
+/**
+ * Filter that buffers and skips empty directories.
+ */
 class FileHandlerDirBuffer {
   protected $handler;
   protected $buffer = array();
@@ -89,6 +92,9 @@ class FileHandlerDirBuffer {
   }
 }
 
+/**
+ * Useful for debugging.
+ */
 class PrintFileHandler {
   protected $level = 0;
   function beginDir($path, $baseinstalldir = null) {
