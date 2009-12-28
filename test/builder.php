@@ -15,5 +15,10 @@ $local_copy = $repo->exportTag($version);
 // echo $local_copy, "\n";
 
 $compiler = new ManifestCompiler($project);
-echo $compiler->build($local_copy, $project, $version);
+$files = new FileFinder($local_copy->getPath());
+foreach ($project->files() as $file) {
+  $files->traverse($file['path'], $file['ignore'], $file['destination']);
+}
+
+echo $compiler->build($files, $project, $version);
 $local_copy->destroy($sh);

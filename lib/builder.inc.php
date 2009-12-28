@@ -1,9 +1,7 @@
 <?php
 class ManifestCompiler {
   protected $manifest;
-  protected $files;
-  function build($local_copy, $project, $version) {
-    $this->files = array();
+  function build($files, $project, $version) {
     $this->manifest = new XmlWriter();
     $this->manifest->openMemory();
     $this->manifest->setIndent(true);
@@ -11,9 +9,9 @@ class ManifestCompiler {
     $this->manifest->startDocument('1.0', 'UTF-8');
     $this->writeHeader();
     $this->writeDetails($project, $version);
-    $this->writeContents($local_copy, $project);
+    $this->writeContents($files, $project);
     $this->writeDependencies($project);
-    $this->writeFilelist($local_copy, $project);
+    $this->writeFilelist($files, $project);
     $this->writeMaintainers($project);
     $this->manifest->endElement();
     $this->manifest->endDocument();
@@ -98,50 +96,40 @@ class ManifestCompiler {
       }
     }
   }
-  function writeFilelist($local_copy, $project) {
+  function writeFilelist($files, $project) {
     $this->manifest->startElement("phprelease");
     $this->manifest->startElement("filelist");
-    $finder = new FileFinder(
-      $local_copy->getPath(),
-      array($this, 'filelistFile'));
-    foreach ($project->files() as $file) {
-      $finder->traverse($file['path'], $file['ignore'], $file['destination']);
+    foreach ($files->files() as $file) {
+      $this->manifest->startElement("install");
+      $this->manifest->writeAttribute("name", $file['path']);
+      if ($file['destination']) {
+        $this->manifest->writeAttribute("as", $file['destination']);
+      }
+      $this->manifest->endElement();
     }
     $this->manifest->endElement();
     $this->manifest->endElement();
   }
-  function filelistFile($path, $destination) {
-    $this->manifest->startElement("install");
-    $this->manifest->writeAttribute("name", $path);
-    if ($destination) {
-      $this->manifest->writeAttribute("as", $destination);
-    }
-    $this->manifest->endElement();
-  }
-  function writeContents($local_copy, $project) {
+  function writeContents($files, $project) {
     $this->manifest->startElement("contents");
-    $finder = new FileFinder(
-      $local_copy->getPath(),
-      array($this, 'contentFile'),
-      array($this, 'beginDir'),
-      array($this, 'endDir'));
-    foreach ($project->files() as $file) {
-      $finder->traverse($file['path'], $file['ignore'], $file['destination']);
+    foreach ($files->events() as $event) {
+      switch ($event['type']) {
+      case 'beginDir':
+        $this->manifest->startElement('dir');
+        $this->manifest->writeAttribute("name", $event['path']);
+        $this->manifest->writeAttribute("baseinstalldir", '/');
+        break;
+      case 'endDir':
+        $this->manifest->endElement();
+        break;
+      case 'file':
+        $this->manifest->startElement('file');
+        $this->manifest->writeAttribute("name", $event['path']);
+        $this->manifest->writeAttribute("role", 'php');
+        $this->manifest->endElement();
+        break;
+      }
     }
-    $this->manifest->endElement();
-  }
-  function beginDir($path) {
-    $this->manifest->startElement('dir');
-    $this->manifest->writeAttribute("name", $path);
-    $this->manifest->writeAttribute("baseinstalldir", '/');
-  }
-  function endDir() {
-    $this->manifest->endElement();
-  }
-  function contentFile($path, $destination) {
-    $this->manifest->startElement('file');
-    $this->manifest->writeAttribute("name", $path);
-    $this->manifest->writeAttribute("role", 'php');
     $this->manifest->endElement();
   }
 }
@@ -156,24 +144,15 @@ output:
  */
 
 class FileFinder {
-  public $debug = false;
   protected $root;
-  protected $callback_file;
-  protected $callback_begin_dir;
-  protected $callback_end_dir;
+  protected $events = array();
   protected $buffer = array();
-  function __construct($root, $callback_file = null, $callback_begin_dir = null, $callback_end_dir = null) {
+  function __construct($root) {
     $this->root = rtrim($root, '/');
-    $this->callback_file = $callback_file;
-    $this->callback_begin_dir = $callback_begin_dir;
-    $this->callback_end_dir = $callback_end_dir;
   }
   function traverse($path, $ignore_pattern = null, $destination = null) {
     if (!$destination) {
       $destination = $path;
-    }
-    if ($this->debug) {
-      echo "traverse($path, $ignore_pattern, $destination)\n";
     }
     $this->buffer[] = array(false, $path);
     foreach (scandir($this->root . $path) as $child) {
@@ -190,41 +169,61 @@ class FileFinder {
             for ($ii=0, $ll=count($this->buffer); $ii < $ll; $ii++) {
               if (!$this->buffer[$ii][0]) {
                 $this->buffer[$ii][0] = true;
-                $this->beginDir($this->buffer[$ii][1]);
+                $this->events[] = array(
+                  'type' => 'beginDir',
+                  'path' => $this->buffer[$ii][1],
+                  'fullpath' => $this->root . $this->buffer[$ii][1]);
               }
             }
-            $this->file($path . '/' . $child, $child_destination);
+            $this->events[] = array(
+              'type' => 'file',
+              'path' => $path . '/' . $child,
+              'fullpath' => $this->root . $path . '/' . $child,
+              'destination' => $child_destination);
           }
         }
       }
     }
     $tuple = array_pop($this->buffer);
     if ($tuple[0]) {
-      $this->endDir();
+      $this->events[] = array('type' => 'endDir');
     }
   }
-  function beginDir($path) {
-    if ($this->debug) {
-      echo "beginDir($path)\n";
-    }
-    if ($this->callback_begin_dir) {
-      call_user_func($this->callback_begin_dir, $path);
-    }
+  function events() {
+    return $this->events;
   }
-  function endDir() {
-    if ($this->debug) {
-      echo "endDir()\n";
+  function files() {
+    $files = array();
+    foreach ($this->events as $event) {
+      if ($event['type'] === 'file') {
+        $files[] = $event;
+      }
     }
-    if ($this->callback_end_dir) {
-      call_user_func($this->callback_end_dir);
-    }
+    return $files;
   }
-  function file($path, $destination = null) {
-    if ($this->debug) {
-      echo "file($path, $destination)\n";
+}
+
+/**
+class PackageBuilder
+  input -> localcopy, package.xml
+  ouput -> package.tar.gz
+
+ */
+class PackageBuilder {
+  protected $shell;
+  function __construct($shell) {
+    $this->shell = $shell;
+  }
+  function build($local_copy, $files, $project) {
+    throw new Exception("\$destination");
+    $root = $this->shell->getTempname();
+    mkdir($root);
+    $package_dir = $root . '/Packagename'; // how to find the packagename?
+    mkdir($package_dir);
+    foreach ($files->files() as $file) {
+      $this->shell->run('mkdir -p %s', dirname($package_dir . $file['destination']));
+      $this->shell->run('move %s %s', $file['fullpath'], $package_dir . $file['destination']);
     }
-    if ($this->callback_file) {
-      call_user_func($this->callback_file, $path, $destination);
-    }
+    $this->shell->run('tar -zcvf %s %s', $destination . 'Packagename.tar.gz', $root);
   }
 }
