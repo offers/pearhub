@@ -21,7 +21,6 @@ class ManifestCompiler {
   }
   function writeHeader() {
     $this->manifest->startElement('package');
-    // $this->manifest->writeAttribute("packagerversion", "1.7.1");
     $this->manifest->writeAttribute("version", "2.0");
     $this->manifest->writeAttribute("xmlns", "http://pear.php.net/dtd/package-2.0");
     $this->manifest->writeAttributeNS(
@@ -42,9 +41,7 @@ class ManifestCompiler {
   }
   function writeDetails($project, $version) {
     $this->manifest->writeElement("name", $project->name());
-    $this->manifest->writeElement("uri", "http://www.example.org/"); // TODO
     $this->manifest->writeElement("summary", $project->summary());
-    $this->manifest->writeElement("description", "TODO"); // TODO
     $this->manifest->startElement("license");
     if ($project->licenseHref()) {
       $this->manifest->writeAttribute("uri", $project->licenseHref());
@@ -157,7 +154,9 @@ input:
 output:
   [(path, destination)]
  */
+
 class FileFinder {
+  public $debug = false;
   protected $root;
   protected $callback_file;
   protected $callback_begin_dir;
@@ -173,16 +172,20 @@ class FileFinder {
     if (!$destination) {
       $destination = $path;
     }
+    if ($this->debug) {
+      echo "traverse($path, $ignore_pattern, $destination)\n";
+    }
     $this->buffer[] = array(false, $path);
     foreach (scandir($this->root . $path) as $child) {
       if ($child !== '.' && $child !== '..') {
-        $full_path = $path . '/' . $child;
+        $full_path = $this->root . $path . '/' . $child;
+        $child_destination = $destination ? ($destination . '/' . $child) : null;
         if (!$ignore_pattern || !preg_match('/'.$ignore_pattern.'/', $path)) {
           if (is_dir($full_path)) {
             $this->traverse(
               $path . '/' . $child,
               $ignore_pattern,
-              $destination ? ($destination . '/' . $child) : null);
+              $child_destination);
           } elseif (is_file($full_path)) {
             for ($ii=0, $ll=count($this->buffer); $ii < $ll; $ii++) {
               if (!$this->buffer[$ii][0]) {
@@ -190,7 +193,7 @@ class FileFinder {
                 $this->beginDir($this->buffer[$ii][1]);
               }
             }
-            $this->file($path, $destination ? $destination : null);
+            $this->file($path . '/' . $child, $child_destination);
           }
         }
       }
@@ -201,37 +204,27 @@ class FileFinder {
     }
   }
   function beginDir($path) {
+    if ($this->debug) {
+      echo "beginDir($path)\n";
+    }
     if ($this->callback_begin_dir) {
       call_user_func($this->callback_begin_dir, $path);
     }
   }
   function endDir() {
+    if ($this->debug) {
+      echo "endDir()\n";
+    }
     if ($this->callback_end_dir) {
-      call_user_func($this->callback_end_dir, $path);
+      call_user_func($this->callback_end_dir);
     }
   }
   function file($path, $destination = null) {
+    if ($this->debug) {
+      echo "file($path, $destination)\n";
+    }
     if ($this->callback_file) {
       call_user_func($this->callback_file, $path, $destination);
     }
   }
 }
-
-
-require_once '../config/global.inc.php';
-require_once 'repo.inc.php';
-require_once 'projects.inc.php';
-
-$db = new pdoext_Connection('mysql:host=localhost;dbname=pearhub', 'root');
-$gateway = new ProjectGateway($db, new MaintainersGateway($db));
-$project = $gateway->fetch(array('name' => 'konstrukt'));
-$sh = new Shell();
-$repo = new SvnStandardRepoInfo($project->repository(), $sh);
-$tags = $repo->listTags();
-$version = $tags[count($tags)-1];
-$local_copy = $repo->exportTag($version);
-// echo $local_copy, "\n";
-
-$compiler = new ManifestCompiler($project);
-echo $compiler->build($local_copy, $project, $version);
-$local_copy->destroy($sh);
