@@ -78,6 +78,11 @@
 <h2>details</h2>
 
 <div class="form">
+  <label><span>web-site:</span><?php echo html_text_field("href", $project->href(), array('id' => "field-href")); ?></label>
+  <?php echo krudt_errors_for($project, 'href'); ?>
+</div>
+
+<div class="form">
   <label><span>php-version:</span><?php echo html_text_field("php-version", $project->phpVersion(), array('id' => "field-php-version")); ?></label>
   <?php echo krudt_errors_for($project, 'php-version'); ?>
 </div>
