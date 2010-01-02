@@ -200,6 +200,9 @@ WHERE
     if (!$project->licenseTitle()) {
       $project->errors['license-title'][] = "Missing license";
     }
+    if (!in_array($project->releasePolicy(), array('manual', 'auto'))) {
+      $project->errors[] = "You must select a valid release policy";
+    }
     $found = false;
     $names = array();
     foreach ($project->projectMaintainers() as $pm) {
