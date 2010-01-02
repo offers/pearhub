@@ -99,6 +99,23 @@
   </div>
 </div>
 
+<h2>release policy</h2>
+
+<div class="form">
+  <div class="container">
+    <?php echo html_radio("release-policy", "auto", $project->releasePolicy() == "auto", array('id' => "field-release-policy-auto", 'label' => "Automatic")); ?>
+    <p>
+      Releases are automatically created whenever a new tag is created in the repository. This is the default and recommended way to manage releases.
+    </p>
+
+    <?php echo html_radio("release-policy", "manual", $project->releasePolicy() == "manual", array('id' => "field-release-policy-manual", 'label' => "Manual")); ?>
+    <p>
+      Releases are made by explicitly requesting a new release from this site. You can use this if you don't want to follow the standard repository layout or if you don't have control over the repository (<a href="#">See the FAQ on managing someone else's project</a>)
+    </p>
+
+  </div>
+</div>
+
 <div id="maintainers-autocomplete">
 </div>
 

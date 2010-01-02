@@ -98,9 +98,13 @@ a:hover {
   margin: .25em 0;
 }
 
-#content p, #content dl, #content ul {
+#content p, #content dl, #content ul, #content label.radio-button {
   font-size: 125%;
   color: #888;
+}
+
+#content label.radio-button {
+  font-weight: bold;
 }
 
 #content dt {
@@ -109,6 +113,10 @@ a:hover {
 
 #content dd {
   margin-left: 1em;
+}
+
+#content p {
+  margin-bottom: 1em;
 }
 
 /* * * * list * * * */

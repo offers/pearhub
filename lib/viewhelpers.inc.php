@@ -109,12 +109,12 @@ function html_text_area($name, $value = null, $options = array()) {
   return $html . ">" . escape($value) . "</textarea>\n";
 }
 
-function html_radio($name, $checked = false, $options = array()) {
+function html_radio($name, $value = null, $checked = false, $options = array()) {
   $html = "";
   if (isset($options['label'])) {
     $label = $options['label'];
     $options['label'] = null;
-    $html .= '<label>';
+    $html .= '<label class="radio-button">';
   }
   $html .= '<input type="radio"';
   $options['name'] = $name;
