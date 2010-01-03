@@ -15,7 +15,7 @@ function add_stylesheet($url) {
 
 /**
  */
-function add_javascript($js) {
+function add_javascript($url) {
   $GLOBALS['k_current_context']->document()->addScript($url);
 }
 
