@@ -1,18 +1,17 @@
 <?php
 class ManifestCompiler {
   protected $manifest;
-  function build($files, $project, $version) {
+  function build($files, $project, $version, $channel = "pearhub.org") {
     $this->manifest = new XmlWriter();
     $this->manifest->openMemory();
     $this->manifest->setIndent(true);
     $this->manifest->setIndentString('  ');
     $this->manifest->startDocument('1.0', 'UTF-8');
     $this->writeHeader();
-    $this->writeDetails($project, $version);
+    $this->writeDetails($project, $version, $channel);
     $this->writeContents($files, $project);
     $this->writeDependencies($project);
     $this->writeFilelist($files, $project);
-    $this->writeMaintainers($project);
     $this->manifest->endElement();
     $this->manifest->endDocument();
     return $this->manifest->outputMemory();
@@ -21,31 +20,16 @@ class ManifestCompiler {
     $this->manifest->startElement('package');
     $this->manifest->writeAttribute("version", "2.0");
     $this->manifest->writeAttribute("xmlns", "http://pear.php.net/dtd/package-2.0");
-    $this->manifest->writeAttributeNS(
-      'xmlns',
-      'tasks',
-      'http://pear.php.net/dtd/package-2.0',
-      'http://pear.php.net/dtd/tasks-1.0');
-    $this->manifest->writeAttributeNS(
-      'xmlns',
-      'xsi',
-      'http://pear.php.net/dtd/package-2.0',
-      'http://www.w3.org/2001/XMLSchema-instance');
-    $this->manifest->writeAttributeNS(
-      'xsi',
-      'schemaLocation',
-      'http://www.w3.org/2001/XMLSchema-instance',
-      'http://pear.php.net/dtd/tasks-1.0 http://pear.php.net/dtd/tasks-1.0.xsd http://pear.php.net/dtd/package-2.0 http://pear.php.net/dtd/package-2.0.xsd');
+    $this->manifest->writeAttribute("xmlns:tasks", "http://pear.php.net/dtd/tasks-1.0");
+    $this->manifest->writeAttribute("xmlns:xsi", "http://www.w3.org/2001/XMLSchema-instance");
+    $this->manifest->writeAttribute("xsi:schemaLocation", "http://pear.php.net/dtd/tasks-1.0 http://pear.php.net/dtd/tasks-1.0.xsd http://pear.php.net/dtd/package-2.0 http://pear.php.net/dtd/package-2.0.xsd");
   }
-  function writeDetails($project, $version) {
+  function writeDetails($project, $version, $channel) {
     $this->manifest->writeElement("name", $project->name());
+    $this->manifest->writeElement("channel", $channel);
     $this->manifest->writeElement("summary", $project->summary());
-    $this->manifest->startElement("license");
-    if ($project->licenseHref()) {
-      $this->manifest->writeAttribute("uri", $project->licenseHref());
-    }
-    $this->manifest->text($project->licenseTitle());
-    $this->manifest->endElement();
+    $this->manifest->writeElement("description", $project->summary());
+    $this->writeMaintainers($project);
     $this->manifest->writeElement("date", date("Y-m-d"));
     $this->manifest->writeElement("time", date("H:i:s"));
     $this->manifest->startElement("version");
@@ -56,12 +40,22 @@ class ManifestCompiler {
     $this->manifest->writeElement("release", "stable");
     $this->manifest->writeElement("api", "stable");
     $this->manifest->endElement();
+    $this->manifest->startElement("license");
+    if ($project->licenseHref()) {
+      $this->manifest->writeAttribute("uri", $project->licenseHref());
+    }
+    $this->manifest->text($project->licenseTitle());
+    $this->manifest->endElement();
+    $this->manifest->writeElement("notes", "version " . $version);
   }
   function writeDependencies($project) {
     $this->manifest->startElement("dependencies");
     $this->manifest->startElement("required");
     $this->manifest->startElement("php");
     $this->manifest->writeElement("min", $project->phpVersion());
+    $this->manifest->endElement();
+    $this->manifest->startElement("pearinstaller");
+    $this->manifest->writeElement("min", "1.4.0");
     $this->manifest->endElement();
     foreach ($project->dependencies() as $dp) {
       $this->manifest->startElement("package");
@@ -85,16 +79,33 @@ class ManifestCompiler {
       if ($pm->type() === $type) {
         $m = $pm->maintainer();
         $this->manifest->startElement($type);
-        $this->manifest->writeElement("user", $m->user());
         if ($m->name()) {
           $this->manifest->writeElement("name", $m->name());
         }
+        $this->manifest->writeElement("user", $m->user());
         if ($m->email()) {
           $this->manifest->writeElement("email", $m->email());
         }
+        $this->manifest->writeElement("active", "yes");
         $this->manifest->endElement();
       }
     }
+  }
+  function writeContents($files, $project) {
+    $this->manifest->startElement("contents");
+    $this->manifest->startElement("dir");
+    $this->manifest->writeAttribute("name", "/");
+    $this->manifest->writeAttribute("baseinstalldir", "/");
+    foreach ($files->files() as $file) {
+      $this->manifest->startElement("file");
+      $this->manifest->writeAttribute("baseinstalldir", "/");
+      $this->manifest->writeAttribute("md5sum", md5_file($file['fullpath']));
+      $this->manifest->writeAttribute("name", $file['path']);
+      $this->manifest->writeAttribute("role", "php");
+      $this->manifest->endElement();
+    }
+    $this->manifest->endElement();
+    $this->manifest->endElement();
   }
   function writeFilelist($files, $project) {
     $this->manifest->startElement("phprelease");
@@ -108,28 +119,6 @@ class ManifestCompiler {
       $this->manifest->endElement();
     }
     $this->manifest->endElement();
-    $this->manifest->endElement();
-  }
-  function writeContents($files, $project) {
-    $this->manifest->startElement("contents");
-    foreach ($files->events() as $event) {
-      switch ($event['type']) {
-      case 'beginDir':
-        $this->manifest->startElement('dir');
-        $this->manifest->writeAttribute("name", $event['path']);
-        $this->manifest->writeAttribute("baseinstalldir", '/');
-        break;
-      case 'endDir':
-        $this->manifest->endElement();
-        break;
-      case 'file':
-        $this->manifest->startElement('file');
-        $this->manifest->writeAttribute("name", $event['path']);
-        $this->manifest->writeAttribute("role", 'php');
-        $this->manifest->endElement();
-        break;
-      }
-    }
     $this->manifest->endElement();
   }
 }
@@ -151,14 +140,12 @@ class FileFinder {
     $this->root = rtrim($root, '/');
   }
   function traverse($path, $ignore_pattern = null, $destination = null) {
-    if (!$destination) {
-      $destination = $path;
-    }
+    $path = ltrim($path, '/');
     $this->buffer[] = array(false, $path);
-    foreach (scandir($this->root . $path) as $child) {
+    foreach (scandir($this->root . '/' . $path) as $child) {
       if ($child !== '.' && $child !== '..') {
-        $full_path = $this->root . $path . '/' . $child;
-        $child_destination = $destination ? ($destination . '/' . $child) : null;
+        $full_path = $this->root . '/' . $path . '/' . $child;
+        $child_destination = $destination ? (ltrim($destination, '/') . '/' . $child) : null;
         if (!$ignore_pattern || !preg_match('/'.$ignore_pattern.'/', $path)) {
           if (is_dir($full_path)) {
             $this->traverse(
@@ -178,7 +165,7 @@ class FileFinder {
             $this->events[] = array(
               'type' => 'file',
               'path' => $path . '/' . $child,
-              'fullpath' => $this->root . $path . '/' . $child,
+              'fullpath' => $this->root . '/' . $path . '/' . $child,
               'destination' => $child_destination);
           }
         }
