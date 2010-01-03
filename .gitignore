@@ -3,6 +3,5 @@ var/
 thirdparty/konstrukt/
 thirdparty/pdoext/
 thirdparty/zf/
-www/channel.xml
 www/get
 www/rest

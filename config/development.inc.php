@@ -19,7 +19,7 @@ function create_container() {
     $factory->pdo_log_target = $GLOBALS['sql_log_path'];
   }
   $factory->temp_dir = realpath(dirname(__FILE__) . '/../var/tmp');
-  $factory->package_dir = realpath(dirname(__FILE__) . '/../var/packages');
+  $factory->package_dir = realpath(dirname(__FILE__) . '/../var/channel/get');
   $container->registerImplementation('PDO', 'pdoext_Connection');
   $container->registerImplementation('k_DefaultNotAuthorizedComponent', 'NotAuthorizedComponent');
   $container->registerImplementation('k_IdentityLoader', 'CookieIdentityLoader');

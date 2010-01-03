@@ -14,10 +14,9 @@ chmod 777 log
 
 # create var/channel
 pushd www || exit -1
-ln -s ../var/channel/channel.xml channel.xml
 ln -s ../var/channel/get get
 ln -s ../var/channel/rest rest
 popd
-mkdir var/channel && chmod 777 var/channel
-
-
+mkdir var/channel
+mkdir var/channel/get && chmod 777 var/channel/get
+mkdir var/channel/rest && chmod 777 var/channel/rest
