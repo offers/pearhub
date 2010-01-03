@@ -5,7 +5,7 @@ require_once 'builder.inc.php';
 require_once 'projects.inc.php';
 
 $db = new pdoext_Connection('mysql:host=localhost;dbname=pearhub', 'root');
-$gateway = new ProjectGateway($db, new MaintainersGateway($db));
+$gateway = new ProjectGateway($db, new MaintainerGateway($db));
 $project = $gateway->fetch(array('name' => 'konstrukt'));
 $sh = new Shell();
 $sh->temp_dir = $tmp_path;

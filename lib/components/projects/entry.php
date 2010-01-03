@@ -7,7 +7,7 @@ class components_projects_Entry extends k_Component {
   protected $maintainers;
   protected $db;
   protected $project;
-  function __construct(k_TemplateFactory $templates, ProjectGateway $projects, MaintainersGateway $maintainers, PDO $db) {
+  function __construct(k_TemplateFactory $templates, ProjectGateway $projects, MaintainerGateway $maintainers, PDO $db) {
     $this->templates = $templates;
     $this->projects = $projects;
     $this->maintainers = $maintainers;

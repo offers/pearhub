@@ -40,7 +40,7 @@ var_dump($x->foo());
 class ProjectGateway extends pdoext_TableGateway {
   protected $sql_load_aggregates;
   protected $maintainers;
-  function __construct(pdoext_Connection $db, MaintainersGateway $maintainers) {
+  function __construct(pdoext_Connection $db, MaintainerGateway $maintainers) {
     parent::__construct('projects', $db);
     $this->maintainers = $maintainers;
   }
@@ -270,7 +270,7 @@ WHERE
   }
 }
 
-class MaintainersGateway extends pdoext_TableGateway {
+class MaintainerGateway extends pdoext_TableGateway {
   function __construct(pdoext_Connection $db) {
     parent::__construct('maintainers', $db);
   }
