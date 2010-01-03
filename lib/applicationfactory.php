@@ -8,6 +8,8 @@ class ApplicationFactory {
   public $pdo_username;
   public $pdo_password;
   public $pdo_log_target;
+  public $temp_dir;
+  public $package_dir;
   function new_pdoext_Connection($c) {
     $conn = new pdoext_Connection($this->pdo_dsn, $this->pdo_username, $this->pdo_password);
     if ($this->pdo_log_target) {
@@ -20,5 +22,15 @@ class ApplicationFactory {
   }
   function new_Zend_Auth($c) {
     return Zend_Auth::getInstance();
+  }
+  function new_Shell($c) {
+    $shell = new Shell();
+    if ($this->temp_dir) {
+      $shell->temp_dir = $this->temp_dir;
+    }
+    return $shell;
+  }
+  function new_PackageBuilder($c) {
+    return new PackageBuilder($c->get('Shell'), $this->package_dir);
   }
 }

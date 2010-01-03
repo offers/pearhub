@@ -7,26 +7,48 @@ require_once 'builder.inc.php';
 require_once 'projects.inc.php';
 
 $container = create_container();
-$shell = $container->get('Shell');
-$shell->temp_dir = $tmp_path;
+$container->get('Shell')->debug = true;
 
 function create_release($version, $project) {
   global $container;
+  $gateway_releases = $container->get('ReleaseGateway');
+  $release = new Release(
+    array(
+      'project_id' => $project->id(),
+      'version' => $version,
+      'status' => 'building',
+      'mode' => 'auto'));
+  $gateway_releases->insert($release);
 }
 
-function build_release($version, $project) {
+function build_release($release, $project) {
   global $container;
+  $repo_probe = $container->get('RepoProbe');
+  $gateway_releases = $container->get('ReleaseGateway');
+  $shell = $container->get('Shell');
+  $repo = $repo_probe->getRepositoryAccess($project);
+  $local_copy = $repo->exportTag($release->version());
+  $files = new FileFinder($local_copy->getPath());
+  foreach ($project->files() as $file) {
+    $files->traverse($file['path'], $file['ignore'], $file['destination']);
+  }
+  $builder = $container->get('PackageBuilder');
+  $builder->build($local_copy, $files, $project, $release->version());
+  $local_copy->destroy($shell);
+  $release->setCompleted();
+  $gateway_releases->update($release);
 }
 
 function task_sweep_projects() {
   global $container;
-  $gateway = $container->get('ProjectGateway');
-  $shell = $container->get('Shell');
-  foreach ($gateway->select(array('release_policy' => 'auto')) as $project) {
-    $repo = $project->repositoryAccess($shell);
+  $gateway_project = $container->get('ProjectGateway');
+  $gateway_releases = $container->get('ReleaseGateway');
+  $repo_probe = $container->get('RepoProbe');
+  foreach ($gateway_project->select(array('release_policy' => 'auto')) as $project) {
+    $repo = $repo_probe->getRepositoryAccess($project);
     $latestTag = $repo->latestTag();
     if ($latestTag) {
-      $lastRelease = $project->lastRelease();
+      $lastRelease = $gateway_releases->lastReleaseFor($project);
       if (!$lastRelease || ($latestTag > $lastRelease->version())) {
         create_release($latestTag, $project);
       }
@@ -34,9 +56,47 @@ function task_sweep_projects() {
   }
 }
 
+function get_pending_releases() {
+  global $container;
+  $gateway_project = $container->get('ProjectGateway');
+  $gateway_release = $container->get('ReleaseGateway');
+  $result = array();
+  foreach ($gateway_release->select(array('status' => "building")) as $release) {
+    $project = $gateway_project->fetch(array('id' => $release->projectId()));
+    $result[] = array('project' => $project, 'release' => $release);
+  }
+  return $result;
+}
+
 function task_build_releases() {
-  $gateway = $container->get('ReleaseGateway');
-  foreach ($gateway->select('status' => "building") as $release) {
-    build_release($release->version(), $release->project());
+  foreach (get_pending_releases() as $release) {
+    build_release($release['release'], $release['project']);
+  }
+}
+
+function task_list_pending_releases() {
+  foreach (get_pending_releases() as $release) {
+    echo $release['project']->name(), " (", $release['release']->version(), ")\n";
+  }
+}
+
+function task_list_tasks() {
+  $defined_functions = get_defined_functions();
+  echo "Available tasks:\n";
+  foreach ($defined_functions['user'] as $fn) {
+    if (preg_match('/^task_(.+)$/', $fn, $reg)) {
+      echo "  ", $reg[1], "\n";
+    }
+  }
+}
+
+if (realpath($_SERVER['PHP_SELF']) == __FILE__) {
+  if (isset($_SERVER['argv'][1]) && function_exists('task_'.$_SERVER['argv'][1])) {
+    $args = $_SERVER['argv'];
+    array_shift($args);
+    array_shift($args);
+    call_user_func_array('task_'.$_SERVER['argv'][1], $args);
+  } else {
+    task_list_tasks();
   }
 }

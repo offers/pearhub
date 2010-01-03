@@ -193,24 +193,30 @@ class FileFinder {
 /**
 class PackageBuilder
   input -> localcopy, package.xml
-  ouput -> package.tar.gz
+  ouput -> package.tgz
 
  */
 class PackageBuilder {
   protected $shell;
-  function __construct($shell) {
+  protected $destination;
+  function __construct(Shell $shell, $destination) {
     $this->shell = $shell;
+    $this->destination = rtrim($destination, '/');
   }
-  function build($local_copy, $files, $project) {
-    throw new Exception("\$destination");
+  function build($local_copy, $files, $project, $version) {
     $root = $this->shell->getTempname();
-    mkdir($root);
-    $package_dir = $root . '/Packagename'; // how to find the packagename?
-    mkdir($package_dir);
+    $this->shell->run('mkdir -p %s', $root);
+    $compiler = new ManifestCompiler($project);
+    file_put_contents(
+      $root . '/package.xml',
+      $compiler->build($files, $project, $version));
+    $package_name = $project->name() . '-' . $version;
+    $package_dir = $root . '/' . $package_name;
+    $this->shell->run('mkdir -p %s', $package_dir);
     foreach ($files->files() as $file) {
-      $this->shell->run('mkdir -p %s', dirname($package_dir . $file['destination']));
-      $this->shell->run('move %s %s', $file['fullpath'], $package_dir . $file['destination']);
+      $this->shell->run('mkdir -p %s', dirname($package_dir . '/' . $file['destination']));
+      $this->shell->run('mv %s %s', $file['fullpath'], $package_dir . '/' . $file['destination']);
     }
-    $this->shell->run('tar -zcvf %s %s', $destination . 'Packagename.tar.gz', $root);
+    $this->shell->run('cd %s ; tar -zcvf %s %s package.xml', $root, $this->destination . '/' . $package_name . '.tgz', $package_name);
   }
 }

@@ -245,6 +245,9 @@ WHERE
     }
   }
   function insert($project) {
+    if (!$project->created()) {
+      $project->setCreated(date("Y-m-d H:i:s"));
+    }
     try {
       $id = parent::insert($project);
     } catch (PDOException $ex) {
@@ -437,5 +440,57 @@ class Maintainer extends Accessor {
       throw new Exception("Can't change id");
     }
     return $this->row['id'] = $id;
+  }
+}
+
+class ReleaseGateway extends pdoext_TableGateway {
+  function __construct(pdoext_Connection $db) {
+    parent::__construct('releases', $db);
+  }
+  function load($row = array()) {
+    return new Release($row);
+  }
+  function validate($release) {
+    if (!$release->projectId()) {
+      $release->errors['project_id'][] = "Missing project_id";
+    }
+    if (!in_array($release->mode(), array('auto', 'manual'))) {
+      $release->errors['mode'][] = "Illegal value";
+    }
+    if (!$release->version()) {
+      $release->errors['version'][] = "Missing version";
+    } elseif (!preg_match('/^\d+\.\d+\.\d+$/', $release->version())) {
+      $release->errors['version'][] = "Format of version must be X.X.X";
+    }
+    if (!in_array($release->status(), array('building', 'completed', 'failed'))) {
+      $release->errors['status'][] = "Illegal value";
+    }
+  }
+  function lastReleaseFor($project) {
+    $result = $this->db->pexecute(
+      "select * from releases where project_id = :project_id order by created desc limit 1",
+      array(':project_id' => $project->id()));
+    $row = $result->fetch(PDO::FETCH_ASSOC);
+    return $row ? $this->load($row) : null;
+  }
+  function insert($release) {
+    if (!$release->created()) {
+      $release->setCreated(date("Y-m-d H:i:s"));
+    }
+    return parent::insert($release);
+  }
+}
+
+class Release extends Accessor {
+  function __construct($row = array('project_id' => null, 'version' => null, 'status' => 'building', 'created' => null, 'mode' => 'auto', 'report' => null)) {
+    parent::__construct($row);
+  }
+  function setCompleted($report) {
+    $this->row['status'] = 'completed';
+    $this->row['report'] = $report;
+  }
+  function setFailed() {
+    $this->row['status'] = 'failed';
+    $this->row['report'] = $report;
   }
 }

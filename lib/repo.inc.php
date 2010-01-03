@@ -6,13 +6,15 @@ require_once 'shell.inc.php';
  */
 class RepoProbe {
   protected $shell;
-  function __construct($shell) {
+  function __construct(Shell $shell) {
     $this->shell = $shell;
   }
   function getRepositoryType($project) {
-    $result = trim($this->shell->run('git ls-remote --heads %s', $project->repository()));
-    if (!preg_match('^fatal', $result)) {
+    try {
+      $this->shell->run('git ls-remote --heads %s', $project->repository());
       return 'git';
+    } catch (ProcessExitException $ex) {
+      /* squelch */
     }
     $svn_base_url = preg_replace('~/trunk(/?)$~', '', $project->repository());
     $result = trim($this->shell->run('svn ls %s', $svn_base_url));
@@ -20,7 +22,7 @@ class RepoProbe {
       throw new Exception("Unable to determine repository type");
     }
     $lines = explode("\n", $result);
-    if (in_array('trunk/', $result) && in_array('tags/', $result)) {
+    if (in_array('trunk/', $lines) && in_array('tags/', $lines)) {
       return 'svn/standard';
     }
     return 'svn/nonstandard';

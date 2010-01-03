@@ -1,5 +1,6 @@
 <?php
 class Shell {
+  public $debug = false;
   public $temp_dir;
   function __construct() {
     $this->temp_dir = sys_get_temp_dir();
@@ -8,9 +9,15 @@ class Shell {
     $args = func_get_args();
     $args[0] .= ' 2>&1';
     $process = call_user_func_array(array($this, 'open'), $args);
+    if ($this->debug) {
+      echo "[Shell] ", implode(" ", $args), "\n";
+    }
     $result = $process->exec();
     if ($result['result'] !== 0) {
-      throw new Exception("Child process exited with error (".$result['result'].")");
+      throw new ProcessExitException($result);
+    }
+    if ($this->debug && $result['stdout']) {
+      echo $result['stdout'], "\n---\n";
     }
     return $result['stdout'];
   }
@@ -40,6 +47,20 @@ class Shell {
       return $temp;
     }
     throw new Exception("Unable to reserve a temporary name");
+  }
+}
+
+class ProcessExitException extends Exception {
+  protected $result;
+  function __construct($result) {
+    parent::__construct("Child process exited with error (".$result['result'].")");
+    $this->result = $result['stderr'];
+  }
+  function stderr() {
+    return $this->result['stderr'];
+  }
+  function stdout() {
+    return $this->result['stdout'];
   }
 }
 
