@@ -6,7 +6,7 @@ require_once 'bucket.inc.php';
 date_default_timezone_set('Europe/Paris');
 
 //$debug_log_path = dirname(dirname(__FILE__)).'/log/debug.log';
-//$sql_log_path = dirname(dirname(__FILE__)).'/log/pdoext.log';
+$sql_log_path = dirname(dirname(__FILE__)).'/log/pdoext.log';
 //$debug_enabled = true;
 
 function create_container() {

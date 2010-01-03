@@ -44,7 +44,7 @@ function task_sweep_projects() {
   $gateway_project = $container->get('ProjectGateway');
   $gateway_releases = $container->get('ReleaseGateway');
   $repo_probe = $container->get('RepoProbe');
-  foreach ($gateway_project->select(array('release_policy' => 'auto')) as $project) {
+  foreach ($gateway_project->selectWithAutomaticReleasePolicy() as $project) {
     $repo = $repo_probe->getRepositoryAccess($project);
     $latestTag = $repo->latestTag();
     if ($latestTag) {
@@ -61,7 +61,7 @@ function get_pending_releases() {
   $gateway_project = $container->get('ProjectGateway');
   $gateway_release = $container->get('ReleaseGateway');
   $result = array();
-  foreach ($gateway_release->select(array('status' => "building")) as $release) {
+  foreach ($gateway_release->selectPendingBuild() as $release) {
     $project = $gateway_project->fetch(array('id' => $release->projectId()));
     $result[] = array('project' => $project, 'release' => $release);
   }

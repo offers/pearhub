@@ -100,7 +100,7 @@ class ManifestCompiler {
       $this->manifest->startElement("file");
       $this->manifest->writeAttribute("baseinstalldir", "/");
       $this->manifest->writeAttribute("md5sum", md5_file($file['fullpath']));
-      $this->manifest->writeAttribute("name", $file['path']);
+      $this->manifest->writeAttribute("name", $file['destination']);
       $this->manifest->writeAttribute("role", "php");
       $this->manifest->endElement();
     }
@@ -112,10 +112,8 @@ class ManifestCompiler {
     $this->manifest->startElement("filelist");
     foreach ($files->files() as $file) {
       $this->manifest->startElement("install");
-      $this->manifest->writeAttribute("name", $file['path']);
-      if ($file['destination']) {
-        $this->manifest->writeAttribute("as", $file['destination']);
-      }
+      $this->manifest->writeAttribute("name", $file['destination']);
+      $this->manifest->writeAttribute("as", $file['destination']);
       $this->manifest->endElement();
     }
     $this->manifest->endElement();
@@ -209,7 +207,7 @@ class PackageBuilder {
     $compiler = new ManifestCompiler($project);
     file_put_contents(
       $root . '/package.xml',
-      $compiler->build($files, $project, $version));
+      $compiler->build($files, $project, $version, "pear.php.net"));
     $package_name = $project->name() . '-' . $version;
     $package_dir = $root . '/' . $package_name;
     $this->shell->run('mkdir -p %s', $package_dir);

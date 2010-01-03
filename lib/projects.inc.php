@@ -271,6 +271,11 @@ WHERE
     }
     return $res;
   }
+  function selectWithAutomaticReleasePolicy() {
+    $result = $this->db->query("select * from projects where release_policy = 'auto'");
+    $result->setFetchMode(PDO::FETCH_ASSOC);
+    return new pdoext_Resultset($result, $this);
+  }
 }
 
 class MaintainerGateway extends pdoext_TableGateway {
@@ -479,18 +484,21 @@ class ReleaseGateway extends pdoext_TableGateway {
     }
     return parent::insert($release);
   }
+  function selectPendingBuild() {
+    $result = $this->db->query("select * from releases where status = 'building'");
+    $result->setFetchMode(PDO::FETCH_ASSOC);
+    return new pdoext_Resultset($result, $this);
+  }
 }
 
 class Release extends Accessor {
-  function __construct($row = array('project_id' => null, 'version' => null, 'status' => 'building', 'created' => null, 'mode' => 'auto', 'report' => null)) {
+  function __construct($row = array('project_id' => null, 'version' => null, 'status' => 'building', 'created' => null, 'mode' => 'auto')) {
     parent::__construct($row);
   }
-  function setCompleted($report) {
+  function setCompleted() {
     $this->row['status'] = 'completed';
-    $this->row['report'] = $report;
   }
   function setFailed() {
     $this->row['status'] = 'failed';
-    $this->row['report'] = $report;
   }
 }
