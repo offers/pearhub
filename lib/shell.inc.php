@@ -1,5 +1,9 @@
 <?php
 class Shell {
+  public $temp_dir;
+  function __construct() {
+    $this->temp_dir = sys_get_temp_dir();
+  }
   function run($command /*[, ...]*/) {
     $args = func_get_args();
     $args[0] .= ' 2>&1';
@@ -30,7 +34,7 @@ class Shell {
     return new ShellProcess(implode($tokens));
   }
   function getTempname() {
-    $temp = tempnam(sys_get_temp_dir(), 'php');
+    $temp = tempnam($this->temp_dir, 'php');
     if (file_exists($temp)) {
       unlink($temp);
       return $temp;
