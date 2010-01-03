@@ -5,3 +5,5 @@ thirdparty/pdoext/
 thirdparty/zf/
 www/get
 www/rest
+www/channel.xml
+www/feed.xml

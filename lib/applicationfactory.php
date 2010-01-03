@@ -10,6 +10,7 @@ class ApplicationFactory {
   public $pdo_log_target;
   public $temp_dir;
   public $package_dir;
+  public $pirum_channel_dir;
   function new_pdoext_Connection($c) {
     $conn = new pdoext_Connection($this->pdo_dsn, $this->pdo_username, $this->pdo_password);
     if ($this->pdo_log_target) {
@@ -33,4 +34,10 @@ class ApplicationFactory {
   function new_PackageBuilder($c) {
     return new PackageBuilder($c->get('Shell'), $this->package_dir);
   }
+  function new_Pearhub_PirumBuilder($c) {
+    return new Pearhub_PirumBuilder(
+      $this->pirum_channel_dir,
+      new Pirum_CLI_Formatter());
+  }
+
 }

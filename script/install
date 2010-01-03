@@ -4,10 +4,10 @@
 svn export http://konstrukt.googlecode.com/svn/trunk thirdparty/konstrukt
 svn export http://pdoext.googlecode.com/svn/trunk thirdparty/pdoext
 svn export http://framework.zend.com/svn/framework/standard/tags/release-1.9.5/library/ thirdparty/zf
-
-wget http://svn.php.net/viewvc/pear2/sandbox/SimpleChannelServer/trunk/pearscs.phar?view=co
-mv "pearscs.phar?view=co" script/pearscs.phar
-chmod +x script/pearscs.phar
+pushd thirdparty || exit -1
+wget http://github.com/troelskn/Pirum/raw/master/pirum
+chmod +x pirum
+popd
 
 # Set file permissions
 chmod 777 log
@@ -16,7 +16,11 @@ chmod 777 log
 pushd www || exit -1
 ln -s ../var/channel/get get
 ln -s ../var/channel/rest rest
+ln -s ../var/channel/feed.xml feed.xml
+ln -s ../var/channel/channel.xml channel.xml
 popd
-mkdir var/channel
-mkdir var/channel/get && chmod 777 var/channel/get
-mkdir var/channel/rest && chmod 777 var/channel/rest
+mkdir var/channel && chmod 777 var/channel
+pushd var/channel || exit -1
+ln -s ../../config/pirum.xml pirum.xml
+popd
+script/tasks pirum_build_channel

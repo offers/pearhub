@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<server>
+  <name>pearhub.org</name>
+  <summary>pearhub PEAR channel</summary>
+  <alias>pearhub</alias>
+  <url>http://pearhub.org/</url>
+</server>

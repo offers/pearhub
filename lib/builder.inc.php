@@ -207,7 +207,7 @@ class PackageBuilder {
     $compiler = new ManifestCompiler($project);
     file_put_contents(
       $root . '/package.xml',
-      $compiler->build($files, $project, $version, "pear.php.net"));
+      $compiler->build($files, $project, $version));
     $package_name = $project->name() . '-' . $version;
     $package_dir = $root . '/' . $package_name;
     $this->shell->run('mkdir -p %s', $package_dir);

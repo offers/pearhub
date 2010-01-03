@@ -6,7 +6,7 @@ require_once 'bucket.inc.php';
 date_default_timezone_set('Europe/Paris');
 
 //$debug_log_path = dirname(dirname(__FILE__)).'/log/debug.log';
-$sql_log_path = dirname(dirname(__FILE__)).'/log/pdoext.log';
+//$sql_log_path = dirname(dirname(__FILE__)).'/log/pdoext.log';
 //$debug_enabled = true;
 
 function create_container() {
@@ -19,7 +19,8 @@ function create_container() {
     $factory->pdo_log_target = $GLOBALS['sql_log_path'];
   }
   $factory->temp_dir = realpath(dirname(__FILE__) . '/../var/tmp');
-  $factory->package_dir = realpath(dirname(__FILE__) . '/../var/channel/get');
+  $factory->package_dir = realpath(dirname(__FILE__) . '/../var/tmp/packages');
+  $factory->pirum_channel_dir = dirname(__FILE__).'/../var/channel';
   $container->registerImplementation('PDO', 'pdoext_Connection');
   $container->registerImplementation('k_DefaultNotAuthorizedComponent', 'NotAuthorizedComponent');
   $container->registerImplementation('k_IdentityLoader', 'CookieIdentityLoader');
