@@ -2,6 +2,45 @@
 require_once 'shell.inc.php';
 
 /**
+ * Detects repository type from a URL and returns an appropriate RepoInfo
+ */
+class RepoProbe {
+  protected $shell;
+  function __construct($shell) {
+    $this->shell = $shell;
+  }
+  function getRepositoryType($project) {
+    $result = trim($this->shell->run('git ls-remote --heads %s', $project->repository()));
+    if (!preg_match('^fatal', $result)) {
+      return 'git';
+    }
+    $svn_base_url = preg_replace('~/trunk(/?)$~', '', $project->repository());
+    $result = trim($this->shell->run('svn ls %s', $svn_base_url));
+    if (preg_match('/^svn:/', $result)) {
+      throw new Exception("Unable to determine repository type");
+    }
+    $lines = explode("\n", $result);
+    if (in_array('trunk/', $result) && in_array('tags/', $result)) {
+      return 'svn/standard';
+    }
+    return 'svn/nonstandard';
+  }
+  /**
+   * @return RepoInfo
+   */
+  function getRepositoryAccess($project) {
+    switch ($this->getRepositoryType($project)) {
+    case 'git':
+      return new GitRepoInfo($project->repository(), $this->shell);
+    case 'svn/standard':
+      return new SvnStandardRepoInfo(preg_replace('~/trunk(/?)$~', '', $project->repository()), $this->shell);
+    case 'svn/nonstandard':
+      return new SvnRepoInfo($project->repository(), $this->shell);
+    }
+  }
+}
+
+/**
  * Provides a uniform access to remote repositries.
  */
 interface RepoInfo {

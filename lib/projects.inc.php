@@ -283,18 +283,8 @@ class Project extends Accessor {
   protected $files = array();
   protected $dependencies = array();
   protected $project_maintainers = array();
-  function __construct($row = array('php_version' => '5.0.0')) {
+  function __construct($row = array('php_version' => '5.0.0', 'release_policy' => 'auto')) {
     parent::__construct($row);
-  }
-  function repositoryAccess($shell) {
-    $url = $this->repository();
-    // TODO: Is this regexp reliable? I think not.
-    if (preg_match('/(^git:|\.git$)/', $url)) {
-      return new GitRepoInfo($url, $shell);
-    } else {
-      // TODO: strip away trunk if it's there.
-      return new SvnStandardRepoInfo($url, $shell);
-    }
   }
   function displayName() {
     return $this->name();
