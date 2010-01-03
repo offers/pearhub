@@ -3,6 +3,7 @@ var/
 thirdparty/konstrukt/
 thirdparty/pdoext/
 thirdparty/zf/
+thirdparty/pirum
 www/get
 www/rest
 www/channel.xml
