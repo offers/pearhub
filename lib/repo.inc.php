@@ -6,6 +6,7 @@ require_once 'shell.inc.php';
  */
 interface RepoInfo {
   function listTags();
+  function latestTag();
   function exportTag($tagname);
   function validateRevision($revision);
   function exportRevision($revision);
@@ -26,6 +27,9 @@ class SvnRepoInfo implements RepoInfo {
     $this->shell = $shell;
   }
   function listTags() {
+    throw new Exception("Unable to list tags for non-standard svn repo");
+  }
+  function latestTag() {
     throw new Exception("Unable to list tags for non-standard svn repo");
   }
   function exportTag($tagname) {
@@ -64,6 +68,13 @@ class SvnStandardRepoInfo extends SvnRepoInfo {
     }
     return $tags;
   }
+  function latestTag() {
+    $tags = $this->listTags();
+    if (count($tags) > 0) {
+      sort($tags);
+      return $tags[count($tags) - 1];
+    }
+  }
   function exportTag($tagname) {
     $name = $this->shell->getTempname();
     $this->shell->run('svn export %s %s', $this->url . '/tags/' . $tagname, $name);
@@ -90,6 +101,13 @@ class GitRepoInfo implements RepoInfo {
       }
     }
     return $tags;
+  }
+  function latestTag() {
+    $tags = $this->listTags();
+    if (count($tags) > 0) {
+      sort($tags);
+      return $tags[count($tags) - 1];
+    }
   }
   function exportTag($tagname) {
     $name = $this->shell->getTempname();
