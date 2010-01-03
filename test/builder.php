@@ -8,7 +8,7 @@ $db = new pdoext_Connection('mysql:host=localhost;dbname=pearhub', 'root');
 $gateway = new ProjectGateway($db, new MaintainersGateway($db));
 $project = $gateway->fetch(array('name' => 'konstrukt'));
 $sh = new Shell();
-$sh->temp_dir = dirname(__FILE__) . '/../var/tmp';
+$sh->temp_dir = $tmp_path;
 $repo = new SvnStandardRepoInfo($project->repository(), $sh);
 $tags = $repo->listTags();
 $version = $tags[count($tags)-1];

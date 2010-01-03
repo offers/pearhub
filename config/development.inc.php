@@ -9,6 +9,8 @@ date_default_timezone_set('Europe/Paris');
 //$sql_log_path = dirname(dirname(__FILE__)).'/log/pdoext.log';
 //$debug_enabled = true;
 
+$tmp_path = realpath(dirname(__FILE__) . '/../var/tmp');
+
 function create_container() {
   $factory = new ApplicationFactory();
   $container = new bucket_Container($factory);
