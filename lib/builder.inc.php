@@ -202,6 +202,9 @@ class PackageBuilder {
     $this->destination = rtrim($destination, '/');
   }
   function build($local_copy, $files, $project, $version) {
+    if (!is_dir($this->destination)) {
+      throw new Exception("Destination doesn't exist");
+    }
     $root = $this->shell->getTempname();
     $this->shell->run('mkdir -p %s', $root);
     $compiler = new ManifestCompiler($project);
@@ -216,5 +219,6 @@ class PackageBuilder {
       $this->shell->run('mv %s %s', $file['fullpath'], $package_dir . '/' . $file['destination']);
     }
     $this->shell->run('cd %s ; tar -zcvf %s %s package.xml', $root, $this->destination . '/' . $package_name . '.tgz', $package_name);
+    $this->shell->run('cd %s ; gunzip -c %s.gz >%s', $this->destination, $package_name, $package_name);
   }
 }

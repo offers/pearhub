@@ -90,6 +90,22 @@ function task_list_tasks() {
   }
 }
 
+ob_start();
+require_once 'thirdparty/pirum';
+ob_clean();
+class Pearhub_PirumBuilder extends Pirum_Builder {
+  protected function buildIndex() {}
+  protected function buildCss() {}
+  protected function updateIndex() {}
+  protected function updateCss() {}
+}
+
+function task_pirum_build_channel() {
+  global $container;
+  $builder = $container->get('Pearhub_PirumBuilder');
+  $builder->build();
+}
+
 if (realpath($_SERVER['PHP_SELF']) == __FILE__) {
   if (isset($_SERVER['argv'][1]) && function_exists('task_'.$_SERVER['argv'][1])) {
     $args = $_SERVER['argv'];
