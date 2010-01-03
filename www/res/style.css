@@ -152,6 +152,7 @@ a:hover {
 .form label {
   color: #888;
   display: block;
+  clear: left;
 }
 .form label span {
   display: block;
@@ -166,11 +167,11 @@ a:hover {
   font-size: 150%;
   font-family: Monaco, Deja Vu Sans Mono, Inconsolata, Consolas, monospace;
 }
-.form input,
+.form input[type=text],
 .form textarea {
   width: 12em;
 }
-.full input,
+.full input[type=text],
 .full textarea,
 .full select {
   width: 100%;
@@ -256,6 +257,27 @@ a:hover {
   color: #000;
   background-color: #E0ECFF;
 }
+
+/* * * * tooltip * * * */
+#tooltip {
+  display: none;
+  position: absolute;
+  padding: .25em;
+  color: #fff;
+  font-size: 1em;
+  background: rgba(0, 0, 0, 0.6); /* todo: this doesn't work in ie */
+  -moz-border-radius: 5px;
+  -webkit-border-radius: 5px;
+  max-width: 39em;
+}
+#tooltip h3 {
+  font-size: 1.5em;
+}
+#tooltip p {
+  color: #fff;
+  margin: 0;
+}
+
 
 /* * * * zurb awesome-button * * * */
 

@@ -1,18 +1,16 @@
 var map = function(it, fn) {
     var result = [];
-    for (var key in it) {
-        if (it.hasOwnProperty(key)) {
-            result.push(fn(it[key], key));
-        }
+    for (var i=0,l=it.length; i < l; i++) {
+        result.push(fn(it[i], i));
     }
     return result;
 };
 
 var select = function(it, fn) {
     var result = [];
-    for (var key in it) {
-        if (it.hasOwnProperty(key) && fn(it[key])) {
-            result[key] = it[key];
+    for (var i=0,l=it.length; i < l; i++) {
+        if (fn(it[i])) {
+            result[i] = it[i];
         }
     }
     return result;
@@ -305,6 +303,39 @@ var hideAutoComplete = function() {
         }, 100);
 };
 
+var tooltipDefer = makeDeferrer();
+
+var showTooltip = function(element, message) {
+    tooltipDefer(
+        function() {
+            var div = document.getElementById("tooltip");
+            div.innerHTML = message;
+            var pos = getElementPosition(element);
+            div.style.display = "block";
+            div.style.top = (pos.y + (element.offsetHeight || 0)) + "px";
+            div.style.left = pos.x + "px";
+        }, 10);
+};
+
+var hideTooltip = function() {
+    tooltipDefer(
+        function() {
+            var div = document.getElementById("tooltip");
+            div.style.display = "none";
+        }, 100);
+};
+
+var installTooltip = function(element, message) {
+    if (typeof(element) == "string") {
+        element = document.getElementById(element);
+    }
+    if (element) {
+        bind(element, 'onmouseover', function() { showTooltip(element, message); });
+        bind(element, 'onmouseout', hideTooltip);
+    }
+    return element;
+};
+
 var wrapInLabel = function(name, input) {
     var label = document.createElement("label");
     var span = document.createElement("span");
@@ -315,6 +346,15 @@ var wrapInLabel = function(name, input) {
 };
 
 var init = function() {
+    var tooltext = {};
+    tooltext['path'] = "<h3>Path in repository.</h3><p>Select the location of files, relative to the repository root. Typically <code>/lib</code> or <code>/src</code></p>";
+    tooltext['destination'] = "<h3>Install path.</h3><p>Select the path where the files will be installed to.</p>";
+    tooltext['ignore'] = "<h3>Ignore pattern.</h3><p>Perl compatible regular expression. Filenames that match this expression will not be included. Use to skip tests etc. from the repository.</p>";
+    tooltext['channel'] = "<h3>Package URL</h3><p>Enter the URL to the package. This should be on the form <code>channel/Package_Name</code>. For example: <code>pearhub.org/Konstrukt</code></p>";
+    tooltext['version'] = "<h3>Minimum required version.</h3><p>Should be on the form <code>X.X.X</code></p>";
+    tooltext['user'] = "<h3>Username</h3><p>Should be a single, short name. The username is unique across projects.</p>";
+    tooltext['name'] = "<h3>Name</h3><p>Enter the full name of the person. This field is optional.</p>";
+    tooltext['email'] = "<h3>E-mail address.</h3><p>This field is optional.</p>";
     initContainer(
         document.getElementById("files-append"),
         document.getElementById("files-container"),
@@ -324,17 +364,20 @@ var init = function() {
             fieldset.className = "files-fieldset fieldset";
             makeRemoveButton(fieldset, "path");
             fieldset.appendChild(
-                wrapInLabel(
-                    "path",
-                    createElement("input", {type: "text", name: "files[" + id + "][path]"})));
+                installTooltip(
+                    wrapInLabel(
+                        "path",
+                        createElement("input", {type: "text", name: "files[" + id + "][path]"})), tooltext['path']));
             fieldset.appendChild(
-                wrapInLabel(
-                    "destination",
-                    createElement("input", {type: "text", name: "files[" + id + "][destination]", value: "/"})));
+                installTooltip(
+                    wrapInLabel(
+                        "destination",
+                        createElement("input", {type: "text", name: "files[" + id + "][destination]", value: "/"})), tooltext['destination']));
             fieldset.appendChild(
-                wrapInLabel(
-                    "ignore",
-                    createElement("input", {type: "text", name: "files[" + id + "][ignore]"})));
+                installTooltip(
+                    wrapInLabel(
+                        "ignore",
+                        createElement("input", {type: "text", name: "files[" + id + "][ignore]"})), tooltext['ignore']));
             container.appendChild(fieldset);
             return fieldset;
         });
@@ -347,9 +390,15 @@ var init = function() {
             fieldset.className = "dependencies-fieldset fieldset";
             makeRemoveButton(fieldset, "dependency");
             fieldset.appendChild(
-                wrapInLabel("channel", createElement("input", {type: "text", name: "dependencies[" + id + "][channel]"})));
+                installTooltip(
+                    wrapInLabel(
+                        "channel",
+                        createElement("input", {type: "text", name: "dependencies[" + id + "][channel]"})), tooltext['channel']));
             fieldset.appendChild(
-                wrapInLabel("version", createElement("input", {type: "text", name: "dependencies[" + id + "][version]"})));
+                installTooltip(
+                    wrapInLabel(
+                        "version",
+                        createElement("input", {type: "text", name: "dependencies[" + id + "][version]"})), tooltext['version']));
             container.appendChild(fieldset);
             return fieldset;
         });
@@ -369,6 +418,9 @@ var init = function() {
                 input.name = "maintainers[" + id + "][" + name + "]";
                 label.appendChild(input);
                 fieldset.appendChild(label);
+                if (typeof(tooltext[name]) != "undefined") {
+                    installTooltip(input, tooltext[name]);
+                }
                 return input;
             };
 
@@ -412,5 +464,11 @@ var init = function() {
                 });
 
         });
-
+    installTooltip("field-name", "<h3>Enter the projects name.</h3><p>This must be unique. If you're maintaining an unofficial fork of a project, you should prefix the name with your name/handle to prevent conflicts.</p><p>Eg. <code>troelskn-konstrukt</code>, rather than <code>konstrukt</code></p>");
+    installTooltip("field-summary", "<h3>Enter a short summary.</h3>");
+    installTooltip("field-repository", "<h3>Repository URL</h3><p>Enter the URL for the projects repository here. Currently only subversion and git repositories are supported. If you use subversion, you should enter the top-level path.</p><p>Eg. if your trunk is at <code>http://example.com/foo/svn/trunk</code> you should enter <code>http://example.com/foo/svn</code></p>");
+    installTooltip("field-href", "<h3>Enter URL to the projects website.</h3><p>This field is optional</p>");
+    installTooltip("field-php-version", "<h3>Minimum supported PHP version.</h3><p>If in doubt, leave this untouched</p>");
+    installTooltip("field-license-title", "<h3>Enter the project license.</h3>");
+    installTooltip("field-license-href", "<h3>Enter a URL to the license text.</h3><p>This field is optional</p>");
 };

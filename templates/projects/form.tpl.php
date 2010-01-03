@@ -118,6 +118,8 @@
 
 <div id="maintainers-autocomplete">
 </div>
+<div id="tooltip">
+</div>
 
 <?php add_onload('URL_AUTOCOMPLETE_MAINTAINERS = "'. url('/projects?maintainers') .'";'); ?>
 <?php add_onload('init();'); ?>
