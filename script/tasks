@@ -1,0 +1,42 @@
+#!/usr/bin/env
+<?php
+
+require_once(dirname(__FILE__) . '/../config/global.inc.php');
+require_once 'repo.inc.php';
+require_once 'builder.inc.php';
+require_once 'projects.inc.php';
+
+$container = create_container();
+$shell = $container->get('Shell');
+$shell->temp_dir = $tmp_path;
+
+function create_release($version, $project) {
+  global $container;
+}
+
+function build_release($version, $project) {
+  global $container;
+}
+
+function task_sweep_projects() {
+  global $container;
+  $gateway = $container->get('ProjectGateway');
+  $shell = $container->get('Shell');
+  foreach ($gateway->select(array('release_policy' => 'auto')) as $project) {
+    $repo = $project->repositoryAccess($shell);
+    $latestTag = $repo->latestTag();
+    if ($latestTag) {
+      $lastRelease = $project->lastRelease();
+      if (!$lastRelease || ($latestTag > $lastRelease->version())) {
+        create_release($latestTag, $project);
+      }
+    }
+  }
+}
+
+function task_build_releases() {
+  $gateway = $container->get('ReleaseGateway');
+  foreach ($gateway->select('status' => "building") as $release) {
+    build_release($release->version(), $release->project());
+  }
+}
