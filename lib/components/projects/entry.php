@@ -13,6 +13,19 @@ class components_projects_Entry extends k_Component {
     $this->maintainers = $maintainers;
     $this->db = $db;
   }
+  function getProject() {
+    return $this->project;
+  }
+  function map($name) {
+    if ($name === 'releases') {
+      return 'components_Releases';
+    }
+    return parent::map($name);
+  }
+  function forward($class_name, $namespace = "") {
+    $this->document->addCrumb($this->project->name(), $this->url());
+    return parent::forward($class_name, $namespace);
+  }
   function dispatch() {
     $this->project = $this->projects->fetch(array('name' => $this->name()));
     if (!$this->project) {
@@ -48,7 +61,7 @@ class components_projects_Entry extends k_Component {
       throw new k_Forbidden();
     }
     $this->document->addScript($this->url('/res/form.js'));
-    $this->document->setTitle("edit " . $this->project->displayName());
+    $this->document->setTitle("Edit " . $this->project->displayName());
     $this->document->addCrumb($this->project->displayName(), $this->url());
     $this->document->addCrumb("edit", $this->url('', array('edit')));
     $t = $this->templates->create("projects/edit");
@@ -98,7 +111,7 @@ class components_projects_Entry extends k_Component {
     if ($this->project->owner() != $this->identity()->user()) {
       throw new k_Forbidden();
     }
-    $this->document->setTitle("delete " . $this->project->displayName());
+    $this->document->setTitle("Delete " . $this->project->displayName());
     $this->document->addCrumb($this->project->displayName(), $this->url());
     $this->document->addCrumb("delete", $this->url('', array('delete')));
     $t = $this->templates->create("projects/delete");

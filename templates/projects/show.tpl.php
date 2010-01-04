@@ -1,6 +1,7 @@
 <p>
   <a href="<?php e(url('', array('edit'))); ?>">edit</a>
   <a href="<?php e(url('', array('delete'))); ?>">delete</a>
+  <a href="<?php e(url('releases')); ?>">releases</a>
 </p>
 
 <h2>Summary</h2>

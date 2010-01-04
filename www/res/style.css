@@ -143,6 +143,22 @@ a:hover {
   text-align: right;
   top: 1.5em;
 }
+/* * * * releases * * * */
+#releases {
+  border-top: 1px solid #888;
+  margin: 1em 0 2em;
+}
+#releases li {
+  border-bottom: 1px solid #888;
+}
+#releases h3 {
+  font-size: 1.5em;
+}
+#releases p {
+  font-size: 1em;
+  margin-bottom: .5em;
+}
+
 /* * * * form * * * */
 .form {
   padding: .25em;

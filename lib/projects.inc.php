@@ -478,6 +478,13 @@ class ReleaseGateway extends pdoext_TableGateway {
     $row = $result->fetch(PDO::FETCH_ASSOC);
     return $row ? $this->load($row) : null;
   }
+  function selectByProject($project) {
+    $result = $this->db->pexecute(
+      "select * from releases where project_id = :project_id order by created desc",
+      array(':project_id' => $project->id()));
+    $result->setFetchMode(PDO::FETCH_ASSOC);
+    return new pdoext_Resultset($result, $this);
+  }
   function insert($release) {
     if (!$release->created()) {
       $release->setCreated(date("Y-m-d H:i:s"));

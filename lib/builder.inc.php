@@ -219,6 +219,6 @@ class PackageBuilder {
       $this->shell->run('mv %s %s', $file['fullpath'], $package_dir . '/' . $file['destination']);
     }
     $this->shell->run('cd %s ; tar -zcvf %s %s package.xml', $root, $this->destination . '/' . $package_name . '.tgz', $package_name);
-    $this->shell->run('cd %s ; gunzip -c %s.gz >%s', $this->destination, $package_name, $package_name);
+    $this->shell->run('cd %s ; gunzip -c %s >%s', $this->destination, $package_name . '.tgz', $package_name . '.tar');
   }
 }

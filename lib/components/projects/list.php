@@ -17,7 +17,7 @@ class components_projects_List extends k_Component {
     return 'components_projects_Entry';
   }
   function renderHtml() {
-    $this->document->setTitle("projects");
+    $this->document->setTitle("Projects");
     $this->document->addCrumb('projects', $this->url());
     $t = $this->templates->create('projects/list');
     $selection = $this->projects->selectPaginated($this->query('page'));
@@ -41,7 +41,7 @@ class components_projects_List extends k_Component {
       $this->project = new Project();
     }
     $this->document->addScript($this->url('/res/form.js'));
-    $this->document->setTitle("new project");
+    $this->document->setTitle("New project");
     $this->document->addCrumb('projects', $this->url());
     $this->document->addCrumb('new', $this->url('', array('new')));
     $t = $this->templates->create('projects/new');

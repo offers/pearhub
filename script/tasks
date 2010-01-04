@@ -27,7 +27,11 @@ function build_release($release, $project) {
   $gateway_releases = $container->get('ReleaseGateway');
   $shell = $container->get('Shell');
   $repo = $repo_probe->getRepositoryAccess($project);
-  $local_copy = $repo->exportTag($release->version());
+  if ($release->mode() == 'auto') {
+    $local_copy = $repo->exportTag($release->version());
+  } else {
+    $local_copy = $repo->exportRevision('HEAD');
+  }
   $files = new FileFinder($local_copy->getPath());
   foreach ($project->files() as $file) {
     $files->traverse($file['path'], $file['ignore'], $file['destination']);
@@ -36,7 +40,7 @@ function build_release($release, $project) {
   $builder->build($local_copy, $files, $project, $release->version());
   $local_copy->destroy($shell);
   $release->setCompleted();
-  $gateway_releases->update($release);
+  $gateway_releases->update($release, array('project_id' => $project->id(), 'version' => $release->version()));
 }
 
 function task_sweep_projects() {
@@ -68,10 +72,11 @@ function get_pending_releases() {
   return $result;
 }
 
-function task_build_releases() {
+function task_build_pending_releases() {
   foreach (get_pending_releases() as $release) {
     build_release($release['release'], $release['project']);
   }
+  task_pirum_build_channel();
 }
 
 function task_list_pending_releases() {
