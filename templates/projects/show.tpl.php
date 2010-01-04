@@ -1,7 +1,7 @@
 <p>
-  <a href="<?php e(url('', array('edit'))); ?>">edit</a>
-  <a href="<?php e(url('', array('delete'))); ?>">delete</a>
-  <a href="<?php e(url('releases')); ?>">releases</a>
+  <?php echo html_link(url('', array('edit')), "edit"); ?> |
+  <?php echo html_link(url('', array('delete')), "delete"); ?> |
+  <?php echo html_link(url('releases'), "releases"); ?>
 </p>
 
 <h2>Summary</h2>
@@ -9,6 +9,12 @@
 <p>
   <?php e($project->summary()); ?>
 </p>
+
+<?php if ($project->href()) : ?>
+<p>
+  <?php echo html_link($project->href()); ?>
+</p>
+<?php endif; ?>
 
 <h2>Dependencies</h2>
 
