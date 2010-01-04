@@ -72,10 +72,14 @@ function get_pending_releases() {
 }
 
 function task_build_pending_releases() {
+  $found = false;
   foreach (get_pending_releases() as $release) {
     build_release($release['release'], $release['project']);
+    $found = true;
   }
-  task_pirum_build_channel();
+  if ($found) {
+    task_pirum_build_channel();
+  }
 }
 
 function task_list_pending_releases() {
