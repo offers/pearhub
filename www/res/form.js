@@ -1,16 +1,18 @@
 var map = function(it, fn) {
     var result = [];
-    for (var i=0,l=it.length; i < l; i++) {
-        result.push(fn(it[i], i));
+    for (var key in it) {
+        if (it.hasOwnProperty(key)) {
+            result.push(fn(it[key], key));
+        }
     }
     return result;
 };
 
 var select = function(it, fn) {
     var result = [];
-    for (var i=0,l=it.length; i < l; i++) {
-        if (fn(it[i])) {
-            result[i] = it[i];
+    for (var key in it) {
+        if (it.hasOwnProperty(key) && fn(it[key])) {
+            result[key] = it[key];
         }
     }
     return result;
