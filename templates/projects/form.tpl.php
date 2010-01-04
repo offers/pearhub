@@ -1,7 +1,13 @@
 <div class="form full">
   <label for="field-summary">summary</label>
-  <?php echo html_text_area("summary", $project->summary(), array('id' => "field-summary")); ?>
+  <?php echo html_text_field("summary", $project->summary(), array('id' => "field-summary")); ?>
   <?php echo krudt_errors_for($project, 'summary'); ?>
+</div>
+
+<div class="form full">
+  <label for="field-description">description</label>
+  <?php echo html_text_area("description", $project->description(), array('id' => "field-description")); ?>
+  <?php echo krudt_errors_for($project, 'description'); ?>
 </div>
 
 <div class="form full">

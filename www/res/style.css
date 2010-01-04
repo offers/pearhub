@@ -119,6 +119,14 @@ a:hover {
   margin-bottom: 1em;
 }
 
+#content pre {
+  font-size: 1.5em;
+  margin-bottom: 1em;
+  padding: .5em;
+  background-color: #333;
+  color: #0f0;
+}
+
 /* * * * list * * * */
 .list {
   border-top: 1px solid #888;
@@ -126,7 +134,6 @@ a:hover {
 }
 .list li {
   border-bottom: 1px solid #888;
-  position: relative;
 }
 .list li a {
   display: block;
@@ -135,13 +142,10 @@ a:hover {
   line-height: 1.2;
   padding: 0.25em;
 }
-.list li .meta {
+.list li a .summary {
   color: #888;
-  font-size: 0.8em;
-  position: absolute;
-  right: 0.6em;
-  text-align: right;
-  top: 1.5em;
+  font-size: 0.5em;
+  font-weight: normal;
 }
 /* * * * releases * * * */
 #releases {

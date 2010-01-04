@@ -28,7 +28,7 @@ class ManifestCompiler {
     $this->manifest->writeElement("name", $project->name());
     $this->manifest->writeElement("channel", $channel);
     $this->manifest->writeElement("summary", $project->summary());
-    $this->manifest->writeElement("description", $project->summary());
+    $this->manifest->writeElement("description", $project->description());
     $this->writeMaintainers($project);
     $this->manifest->writeElement("date", date("Y-m-d"));
     $this->manifest->writeElement("time", date("H:i:s"));

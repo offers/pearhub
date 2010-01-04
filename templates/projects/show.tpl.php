@@ -4,6 +4,12 @@
   <?php echo html_link(url('releases'), "releases"); ?>
 </p>
 
+<p>
+  To install this package run the following from the console:
+</p>
+<pre>$ pear channel-discover pearhub.org
+$ pear install pearhub/<?php e($project->name()) ?></pre>
+
 <h2>Summary</h2>
 
 <p>

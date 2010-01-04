@@ -9,8 +9,11 @@
 <ul class="list">
 <?php foreach ($projects as $entry): ?>
   <li>
-    <?php echo html_link(url($entry->name()), $entry->displayName()); ?>
-    <div class="meta"><?php e($entry->repository()); ?></div>
+<a href="<?php e(url($entry->name())) ?>">
+<?php e($entry->displayName()) ?>
+<br/>
+<span class="summary"><?php e($entry->summary()); ?></span>
+</a>
   </li>
 <?php endforeach; ?>
 </ul>
