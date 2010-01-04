@@ -7,7 +7,6 @@ require_once 'builder.inc.php';
 require_once 'projects.inc.php';
 
 $container = create_container();
-$container->get('Shell')->debug = true;
 
 function create_release($version, $project) {
   global $container;
