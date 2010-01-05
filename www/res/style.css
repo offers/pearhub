@@ -1,6 +1,8 @@
 /* * * * common * * * */
 html {
-  background-color: #e0e0e0;
+  /*background-color: #e0e0e0;*/
+  /*background: url(bg.jpg);*/
+  background: #111111 url(bg.jpg) repeat 0 0;
 }
 
 body {
@@ -27,7 +29,9 @@ a:hover {
 }
 
 #header {
-  background: white;
+  margin: 1em auto;
+  border-top: .5em solid #eee;
+  border-bottom: .5em solid #eee;
 }
 
 #header strong {
