@@ -51,4 +51,17 @@ echo implode(' / ', $tmp);
       <?php echo $javascript; ?>
     </script>
 <?php endforeach; ?>
+<script type="text/javascript" src="http://include.reinvigorate.net/re_.js"></script>
+<script type="text/javascript">
+re_("ls8sp-7n86etz791");
+</script>
+<script type="text/javascript">
+var gaJsHost = (("https:" == document.location.protocol) ? "https://ssl." : "http://www.");
+document.write(unescape("%3Cscript src='" + gaJsHost + "google-analytics.com/ga.js' type='text/javascript'%3E%3C/script%3E"));
+</script>
+<script type="text/javascript">
+try {
+var pageTracker = _gat._getTracker("UA-2258159-8");
+pageTracker._trackPageview();
+} catch(err) {}</script>
 </html>
