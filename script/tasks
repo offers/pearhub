@@ -42,7 +42,7 @@ function build_release($release, $project) {
   $gateway_releases->update($release, array('project_id' => $project->id(), 'version' => $release->version()));
 }
 
-function task_project_release_rebuild($project_name, $release_version) {
+function task_rebuild_release($project_name, $release_version) {
   global $container;
   $gateway_project = $container->get('ProjectGateway');
   $gateway_releases = $container->get('ReleaseGateway');
@@ -58,7 +58,7 @@ function task_project_release_rebuild($project_name, $release_version) {
   $gateway_releases->update($release, array('project_id' => $project->id(), 'version' => $release->version()));
 }
 
-function task_project_release_delete($project_name, $release_version) {
+function task_delete_release($project_name, $release_version) {
   global $container;
   $gateway_project = $container->get('ProjectGateway');
   $gateway_releases = $container->get('ReleaseGateway');
@@ -74,6 +74,28 @@ function task_project_release_delete($project_name, $release_version) {
   $gateway_releases->delete(array('project_id' => $project->id(), 'version' => $release->version()));
   $builder->deletePackage($project, $release_version);
   task_pirum_build_channel();
+}
+
+function task_list_projects() {
+  global $container;
+  $gateway_project = $container->get('ProjectGateway');
+  foreach ($gateway_project->select() as $project) {
+    echo "  ", $project->name(), "\n";
+  }
+}
+
+function task_list_project_releases($project_name) {
+  global $container;
+  $gateway_project = $container->get('ProjectGateway');
+  $gateway_releases = $container->get('ReleaseGateway');
+  $project = $gateway_project->fetch(array('name' => $project_name));
+  if (!$project) {
+    throw new Exception("Can't find project " . $project);
+  }
+  echo "Releases for ", $project_name, "\n";
+  foreach ($gateway_releases->selectByProject($project) as $release) {
+    echo "  ", $release->version(), "\n";
+  }
 }
 
 function task_sweep_projects() {

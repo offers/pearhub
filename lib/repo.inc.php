@@ -95,19 +95,27 @@ class SvnRepoInfo implements RepoInfo {
  * Standard svn repository access.
  */
 class SvnStandardRepoInfo extends SvnRepoInfo {
+  protected $tags;
   function __construct($url, $shell) {
     parent::__construct($url, $shell);
     $this->trunk = $this->url . '/trunk';
   }
   function listTags() {
-    $tags = array();
-    $result = explode("\n", trim($this->shell->run('svn ls %s', $this->url . '/tags')));
-    foreach ($result as $line) {
-      if (preg_match('~^[0-9]+(\.[0-9]+)?(\.[0-9]+)?\/$~', $line)) {
-        $tags[] = rtrim($line, '/');
+    if ($this->tags === null) {
+      $this->tags = array();
+      $result = explode("\n", trim($this->shell->run('svn ls %s', $this->url . '/tags')));
+      foreach ($result as $line) {
+        if (preg_match('~^(v?([0-9]+)(\.([0-9]+))?(\.([0-9]+))?)/?$~', $line, $reg)) {
+          $raw = $reg[1];
+          $v = array(
+            $reg[2],
+            isset($reg[4]) ? $reg[4] : 0,
+            isset($reg[6]) ? $reg[6] : 0);
+          $this->tags[implode('.', $v)] = $raw;
+        }
       }
     }
-    return $tags;
+    return array_keys($this->tags);
   }
   function latestTag() {
     $tags = $this->listTags();
@@ -117,8 +125,10 @@ class SvnStandardRepoInfo extends SvnRepoInfo {
     }
   }
   function exportTag($tagname) {
+    $this->listTags();
+    $raw = $this->tags[$tagname];
     $name = $this->shell->getTempname();
-    $this->shell->run('svn export %s %s', $this->url . '/tags/' . $tagname, $name);
+    $this->shell->run('svn export %s %s', $this->url . '/tags/' . $raw, $name);
     return new LocalCopy($name);
   }
 }
@@ -129,19 +139,25 @@ class SvnStandardRepoInfo extends SvnRepoInfo {
 class GitRepoInfo implements RepoInfo {
   protected $url;
   protected $shell;
+  protected $tags;
   function __construct($url, $shell) {
     $this->url = $url;
     $this->shell = $shell;
   }
   function listTags() {
-    $tags = array();
-    $result = explode("\n", trim($this->shell->run('git ls-remote --tags %s', $this->url)));
-    foreach ($result as $line) {
-      if (preg_match('~^[0-9a-f]{40}\s+refs/tags/v([0-9]+(\.[0-9]+)?(\.[0-9]+))?$~', $line, $reg)) {
-        $tags[] = $reg[1];
+    if ($this->tags === null) {
+      $this->tags = array();
+      $result = explode("\n", trim($this->shell->run('git ls-remote --tags %s', $this->url)));
+      if (preg_match('~^[0-9a-f]{40}\s+refs/tags/(v?([0-9]+)(\.([0-9]+))?(\.([0-9]+))?)$~', $line, $reg)) {
+        $raw = $reg[1];
+        $v = array(
+          $reg[2],
+          isset($reg[4]) ? $reg[4] : 0,
+          isset($reg[6]) ? $reg[6] : 0);
+        $this->tags[implode('.', $v)] = $raw;
       }
     }
-    return $tags;
+    return array_keys($this->tags);
   }
   function latestTag() {
     $tags = $this->listTags();
@@ -151,9 +167,11 @@ class GitRepoInfo implements RepoInfo {
     }
   }
   function exportTag($tagname) {
+    $this->listTags();
+    $raw = $this->tags[$tagname];
     $name = $this->shell->getTempname();
     $this->shell->run('git clone %s %s', $this->url, $name);
-    $this->shell->run('cd %s && git checkout %s', $name, 'v'.$tagname);
+    $this->shell->run('cd %s && git checkout %s', $name, $raw);
     $this->shell->run('rm -rf %s', $name . '/.git');
     return new LocalCopy($name);
   }
