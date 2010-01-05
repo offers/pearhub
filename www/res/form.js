@@ -1,18 +1,24 @@
-var map = function(it, fn) {
+var map = function(array, fn) {
     var result = [];
-    for (var key in it) {
-        if (it.hasOwnProperty(key)) {
-            result.push(fn(it[key], key));
-        }
+    for (var i=0, l=array.length; i < l; i++) {
+        result.push(fn(array[i]));
     }
     return result;
 };
 
-var select = function(it, fn) {
+var pairs = function(hash, fn) {
+    for (var key in hash) {
+        if (hash.hasOwnProperty(key)) {
+            fn(key, hash[key]);
+        }
+    }
+};
+
+var select = function(array, fn) {
     var result = [];
-    for (var key in it) {
-        if (it.hasOwnProperty(key) && fn(it[key])) {
-            result[key] = it[key];
+    for (var i=0, l=array.length; i < l; i++) {
+        if (fn(array[i])) {
+            result.push(array[i]);
         }
     }
     return result;
@@ -35,18 +41,18 @@ var getElementPosition = function(obj) {
 var createElement = function(nodeName, attributes) {
     var el;
     try {
-        var html = "<" + nodeName + map(
+        var html = "<" + nodeName + pairs(
             attributes,
-            function(v, k) {
+            function(k, v) {
                 return k + '="' + v + '"';
             }
         ).join(" ") + "/>";
         el = document.createElement(html);
     } catch (err) {
         el = document.createElement(nodeName);
-        map(
+        pairs(
             attributes,
-            function(v, k) {
+            function(k, v) {
                 el.setAttribute(k, v);
             });
     }
