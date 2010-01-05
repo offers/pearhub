@@ -28,7 +28,7 @@ class components_Releases extends k_Component {
       throw new k_NotAuthorized();
     }
     $project = $this->context->getProject();
-    if ($project->owner() != $this->identity()->user()) {
+    if (!$this->canCreate()) {
       throw new k_Forbidden();
     }
     if ($this->body('version')) {
@@ -54,6 +54,9 @@ class components_Releases extends k_Component {
         'error' => $this->error));
   }
   function postForm() {
+    if (!$this->canCreate()) {
+      throw new k_Forbidden();
+    }
     if ($this->processCreate()) {
       return new k_SeeOther($this->url());
     }
@@ -83,5 +86,12 @@ class components_Releases extends k_Component {
       return false;
     }
     return true;
+  }
+  function canCreate() {
+    if ($this->identity()->anonymous()) {
+      return false;
+    }
+    $project = $this->context->getProject();
+    return $project->owner() == $this->identity()->user();
   }
 }

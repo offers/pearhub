@@ -1,5 +1,7 @@
 <p>
+<?php if ($context->canEdit()): ?>
   <?php echo html_link(url('', array('edit')), "Edit project"); ?> |
+<?php endif; ?>
   <?php echo html_link(url('releases'), "Show releases"); ?>
 </p>
 

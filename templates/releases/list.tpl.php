@@ -1,10 +1,18 @@
 <?php if ($project->releasePolicy() === 'auto'): ?>
 <p>
-  This project is on automatic release policy. To roll a new release just make a tag in the repository. Having trouble? Check the <?php echo html_link(url('/faq'), 'FAQ'); ?>.
+  This project is on automatic release policy.
+<?php if ($context->canCreate()): ?>
+  To roll a new release just make a tag in the repository. Having trouble? Check the <?php echo html_link(url('/faq'), 'FAQ'); ?>.
+<?php else: ?>
+  New releases will appear here, shortly after they are tagged in the projects repository.
+<?php endif; ?>
 </p>
 <?php else: ?>
 <p>
-  This project is on manual release policy. <?php echo html_link(url('', array('create')), "You can create a new release right now"); ?>.
+  This project is on manual release policy.
+<?php if ($context->canCreate()): ?>
+  <?php echo html_link(url('', array('create')), "You can create a new release right now"); ?>.
+<?php endif; ?>
 </p>
 <?php endif; ?>
 
@@ -16,8 +24,7 @@
 <p>
   To install a particular version, use:
 </p>
-<pre>$ pear channel-discover pearhub.org
-$ pear install pearhub/<?php e($project->name()) ?>-X.X.X</pre>
+<pre>$ pear install pearhub/<?php e($project->name()) ?>-X.X.X</pre>
 
 <?php endif; ?>
 

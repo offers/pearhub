@@ -66,7 +66,7 @@ $ git push origin : vX.X.X</pre>
 </p>
 
 <p class="question">
-  I have a not-so-frequesnt question. Where should I direct it?
+  I have a not-so-frequent question. Where should I direct it?
 </p>
 <p class="answer">
   Try <a href="mailto:troelskn@gmail.com?subject=Question%20about%20pearhub">mailing me</a>.

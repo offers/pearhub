@@ -13,9 +13,6 @@ class components_projects_Entry extends k_Component {
     $this->maintainers = $maintainers;
     $this->db = $db;
   }
-  function getProject() {
-    return $this->project;
-  }
   function map($name) {
     if ($name === 'releases') {
       return 'components_Releases';
@@ -57,7 +54,7 @@ class components_projects_Entry extends k_Component {
     if ($this->identity()->anonymous()) {
       throw new k_NotAuthorized();
     }
-    if ($this->project->owner() != $this->identity()->user()) {
+    if (!$this->canEdit()) {
       throw new k_Forbidden();
     }
     $this->document->addScript($this->url('/res/form.js'));
@@ -77,7 +74,7 @@ class components_projects_Entry extends k_Component {
     if ($this->identity()->anonymous()) {
       throw new k_NotAuthorized();
     }
-    if ($this->project->owner() != $this->identity()->user()) {
+    if (!$this->canEdit()) {
       throw new k_Forbidden();
     }
     $this->project->unmarshal($this->body());
@@ -108,7 +105,7 @@ class components_projects_Entry extends k_Component {
     if ($this->identity()->anonymous()) {
       throw new k_NotAuthorized();
     }
-    if ($this->project->owner() != $this->identity()->user()) {
+    if (!$this->canEdit()) {
       throw new k_Forbidden();
     }
     $this->document->setTitle("Delete " . $this->project->displayName());
@@ -121,12 +118,21 @@ class components_projects_Entry extends k_Component {
     if ($this->identity()->anonymous()) {
       throw new k_NotAuthorized();
     }
-    if ($this->project->owner() != $this->identity()->user()) {
+    if (!$this->canEdit()) {
       throw new k_Forbidden();
     }
     if ($this->projects->delete(array('id' => $this->project->id()))) {
       return new k_SeeOther($this->url('..'));
     }
     return $this->render();
+  }
+  function getProject() {
+    return $this->project;
+  }
+  function canEdit() {
+    if ($this->identity()->anonymous()) {
+      return false;
+    }
+    return $this->project->owner() == $this->identity()->user();
   }
 }

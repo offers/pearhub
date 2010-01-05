@@ -24,6 +24,10 @@
             | <input type="submit" value="log out" id="logout" />
           </p>
         </form>
+<?php else: ?>
+        <p>
+          <?php echo html_link(url('login'), 'login'); ?>
+        </p>
 <?php endif; ?>
       </div>
 
