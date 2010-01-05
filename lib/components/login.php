@@ -11,7 +11,7 @@ class components_Login extends k_Component {
     $this->errors = array();
   }
   function execute() {
-    $this->url_state->init("continue", $this->url('/account'));
+    $this->url_state->init("continue", $this->url('/'));
     return parent::execute();
   }
   function GET() {
