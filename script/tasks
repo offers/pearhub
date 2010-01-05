@@ -42,6 +42,22 @@ function build_release($release, $project) {
   $gateway_releases->update($release, array('project_id' => $project->id(), 'version' => $release->version()));
 }
 
+function task_rebuild_project_release($project_name, $release_version) {
+  global $container;
+  $gateway_project = $container->get('ProjectGateway');
+  $gateway_releases = $container->get('ReleaseGateway');
+  $project = $gateway_project->fetch(array('name' => $project_name));
+  if (!$project) {
+    throw new Exception("Can't find project " . $project);
+  }
+  $release = $gateway_releases->fetch(array('project_id' => $project->id(), 'version' => $release_version));
+  if (!$release) {
+    throw new Exception("Can't find release " . $release_version);
+  }
+  $release->setBuilding();
+  $gateway_releases->update($release, array('project_id' => $project->id(), 'version' => $release->version()));
+}
+
 function task_sweep_projects() {
   global $container;
   $gateway_project = $container->get('ProjectGateway');

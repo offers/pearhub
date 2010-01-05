@@ -513,6 +513,9 @@ class Release extends Accessor {
   function __construct($row = array('project_id' => null, 'version' => null, 'status' => 'building', 'created' => null, 'mode' => 'auto')) {
     parent::__construct($row);
   }
+  function setBuilding() {
+    $this->row['status'] = 'building';
+  }
   function setCompleted() {
     $this->row['status'] = 'completed';
   }

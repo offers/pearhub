@@ -205,13 +205,19 @@ class PackageBuilder {
     if (!is_dir($this->destination)) {
       throw new Exception("Destination doesn't exist");
     }
+    $package_name = $project->name() . '-' . $version;
+    if (is_file($this->destination . '/' . $package_name . '.tgz')) {
+      $this->shell->run('rm %s', $this->destination . '/' . $package_name . '.tgz');
+    }
+    if (is_file($this->destination . '/' . $package_name . '.tar')) {
+      $this->shell->run('rm %s', $this->destination . '/' . $package_name . '.tar');
+    }
     $root = $this->shell->getTempname();
     $this->shell->run('mkdir -p %s', $root);
     $compiler = new ManifestCompiler($project);
     file_put_contents(
       $root . '/package.xml',
       $compiler->build($files, $project, $version));
-    $package_name = $project->name() . '-' . $version;
     $package_dir = $root . '/' . $package_name;
     $this->shell->run('mkdir -p %s', $package_dir);
     foreach ($files->files() as $file) {
