@@ -44,5 +44,5 @@
   Who's behind this?
 </p>
 <p class="answer">
-  Me. I made it in my spare time, because noone else did. I'm Troels Knak-Nielsen.
+  Me. I made it in my spare time, because noone else did. I'm Troels Knak-Nielsen. The channel publishing is driven by <a href="http://www.pirum-project.org/">pirum</a>. The frontend is driven by <a href="http://www.konstrukt.dk/">Konstrukt</a>. The open-id integration comes from <a href="http://framework.zend.com/manual/en/zend.openid.html">Zend Framework</a>.
 </p>
