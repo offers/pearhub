@@ -17,9 +17,9 @@
   </li>
 <?php endforeach; ?>
 </ul>
-<p>
-  <a href="<?php e(url('', array('new'))); ?>">Add new project</a>
-</p>
 
 <?php echo krudt_paginate($projects, array('q')); ?>
 
+<p>
+  <a href="<?php e(url('', array('new'))); ?>">Add new project</a>
+</p>

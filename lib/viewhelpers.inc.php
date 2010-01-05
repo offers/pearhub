@@ -283,7 +283,7 @@ function krudt_paginate($collection, $sticky_parameters = array(), $page_size = 
       $html .= "\n" . '  <span class="current">' . $ii . '</span>';
     } else {
       $params['page'] = $ii;
-      $html .= "\n" . '  <a href="' . escape(url($params)) . '">' . $ii . '</a>';
+      $html .= "\n" . '  <a href="' . escape(url('', $params)) . '">' . $ii . '</a>';
     }
   }
   $html .= "\n" . '</div>';
