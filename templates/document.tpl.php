@@ -53,6 +53,9 @@ echo implode(' / ', $tmp);
 <?php endforeach; ?>
 <script type="text/javascript" src="http://include.reinvigorate.net/re_.js"></script>
 <script type="text/javascript">
+<?php if (!$context->identity()->anonymous()): ?>
+var re_name_tag = "<?php e($context->identity()->user()) ?>";
+<?php endif; ?>
 re_("ls8sp-7n86etz791");
 </script>
 <script type="text/javascript">
