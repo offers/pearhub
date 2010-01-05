@@ -227,4 +227,13 @@ class PackageBuilder {
     $this->shell->run('cd %s ; tar -zcvf %s %s package.xml', $root, $this->destination . '/' . $package_name . '.tgz', $package_name);
     $this->shell->run('cd %s ; gunzip -c %s >%s', $this->destination, $package_name . '.tgz', $package_name . '.tar');
   }
+  function deletePackage($project, $version) {
+    $package_name = $project->name() . '-' . $version;
+    if (is_file($this->destination . '/' . $package_name . '.tgz')) {
+      $this->shell->run('rm %s', $this->destination . '/' . $package_name . '.tgz');
+    }
+    if (is_file($this->destination . '/' . $package_name . '.tar')) {
+      $this->shell->run('rm %s', $this->destination . '/' . $package_name . '.tar');
+    }
+  }
 }
