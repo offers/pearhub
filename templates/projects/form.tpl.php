@@ -116,7 +116,7 @@
 
     <?php echo html_radio("release-policy", "manual", $project->releasePolicy() == "manual", array('id' => "field-release-policy-manual", 'label' => "Manual")); ?>
     <p>
-      Releases are made by explicitly requesting a new release from this site. You can use this if you don't want to follow the standard repository layout or if you don't have control over the repository (<a href="#">See the FAQ on managing someone else's project</a>)
+      Releases are made by explicitly requesting a new release from this site. You can use this if you don't want to follow the standard repository layout or if you don't have control over the repository (<?php echo html_link(url('/faq'), 'See the FAQ on managing someone else's project'); ?>)
     </p>
 
   </div>

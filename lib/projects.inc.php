@@ -190,8 +190,8 @@ WHERE
   function validate($project) {
     if (!$project->name()) {
       $project->errors['name'][] = "Missing name";
-    } elseif (!preg_match('/^[a-z]+[a-z_]+$/i', $project->name())) {
-      $project->errors['name'][] = 'Name is illegal. Must match the regexp /^[a-z]+[a-z_]{,2}$/i';
+    } elseif (!preg_match('/^[a-z]+[a-z0-9_]+[a-z0-9]+$/i', $project->name()) || preg_match('/__/', $project->name())) {
+      $project->errors['name'][] = 'Name is illegal. You can only use alphanumeric names. Separate with underscores.';
     }
     if (strlen($project->summary()) > 200) {
       $project->errors['summary'][] = "Summary is too long. It's supposed to be a one-liner.";

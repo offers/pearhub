@@ -1,12 +1,17 @@
 <html>
   <head>
+<?php if ($title): ?>
     <title><?php e($title); ?> | pearhub.org</title>
+<?php else: ?>
+    <title>pearhub.org</title>
+<?php endif; ?>
 <?php foreach ($styles as $style): ?>
     <link rel="stylesheet" href="<?php e($style); ?>" />
 <?php endforeach; ?>
 <?php foreach ($scripts as $script): ?>
     <script type="text/javascript" src="<?php e($script); ?>"></script>
 <?php endforeach; ?>
+    <link href="/feed.xml" rel="alternate" title="Latest packages | pearhub.org" type="application/atom+xml" />
   </head>
   <body>
 
@@ -34,7 +39,9 @@ echo implode(' / ', $tmp);
     </div>
 
     <div id="content">
+<?php if ($title): ?>
 <h1><?php e($title); ?></h1>
+<?php endif; ?>
 <?php echo $content; ?>
     </div>
 

@@ -98,6 +98,18 @@ a:hover {
   margin: .25em 0;
 }
 
+#content h4 {
+  color: #444;
+  font-size: 400%;
+  font-weight: bold;
+  text-align: center;
+}
+
+#content p.question {
+  font-weight: bold;
+  margin-bottom: 0;
+}
+
 #content p, #content dl, #content ul, #content label.radio-button {
   font-size: 125%;
   color: #888;
@@ -123,7 +135,7 @@ a:hover {
   font-size: 1.5em;
   margin-bottom: 1em;
   padding: .5em;
-  background-color: #333;
+  background-color: #444;
   color: #0f0;
 }
 

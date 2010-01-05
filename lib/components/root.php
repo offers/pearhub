@@ -12,6 +12,8 @@ class components_Root extends k_Component {
       return 'components_Login';
     case 'logout':
       return 'components_Logout';
+    case 'faq':
+      return 'components_Faq';
     }
   }
   function dispatch() {
@@ -37,7 +39,7 @@ class components_Root extends k_Component {
           'onload' => $this->document->onload()));
   }
   function renderHtml() {
-    $this->document->setTitle('welcome');
+    $this->document->setTitle('');
     $t = $this->templates->create("root");
     return $t->render($this);
   }

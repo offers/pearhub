@@ -1,7 +1,6 @@
 <p>
-  <?php echo html_link(url('', array('edit')), "edit"); ?> |
-  <?php echo html_link(url('', array('delete')), "delete"); ?> |
-  <?php echo html_link(url('releases'), "releases"); ?>
+  <?php echo html_link(url('', array('edit')), "Edit project"); ?> |
+  <?php echo html_link(url('releases'), "Show releases"); ?>
 </p>
 
 <p>
