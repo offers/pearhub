@@ -1,5 +1,6 @@
 <?php
 require_once 'projects.inc.php';
+require_once 'repo.inc.php';
 
 class components_projects_Entry extends k_Component {
   protected $templates;
@@ -81,7 +82,6 @@ class components_projects_Entry extends k_Component {
     if (!$this->project->unmarshalMaintainers($this->body(), $this->identity()->user(), $this->maintainers)) {
       return false;
     }
-
     $this->db->beginTransaction();
     try {
       if (!$this->projects->update($this->project)) {
@@ -105,7 +105,7 @@ class components_projects_Entry extends k_Component {
     if ($this->identity()->anonymous()) {
       throw new k_NotAuthorized();
     }
-    if (!$this->canEdit()) {
+    if (!$this->canDelete()) {
       throw new k_Forbidden();
     }
     $this->document->setTitle("Delete " . $this->project->displayName());
@@ -118,7 +118,7 @@ class components_projects_Entry extends k_Component {
     if ($this->identity()->anonymous()) {
       throw new k_NotAuthorized();
     }
-    if (!$this->canEdit()) {
+    if (!$this->canDelete()) {
       throw new k_Forbidden();
     }
     if ($this->projects->delete(array('id' => $this->project->id()))) {
@@ -134,5 +134,15 @@ class components_projects_Entry extends k_Component {
       return false;
     }
     return $this->project->owner() == $this->identity()->user();
+  }
+  function canDelete() {
+    if ($this->identity()->anonymous()) {
+      return false;
+    }
+    if ($this->project->owner() != $this->identity()->user()) {
+      return false;
+    }
+    // Allow deleting a project for up to 24h
+    return strtotime($this->project->created()) + 86400 > time();
   }
 }

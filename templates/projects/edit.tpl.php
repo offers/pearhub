@@ -1,6 +1,8 @@
 <p>
-  <?php echo html_link(url(), "Cancel"); ?> |
-  <?php echo html_link(url('', array('delete')), "Delete project?"); ?>
+  <?php echo html_link(url(), "Cancel"); ?>
+<?php if ($context->canDelete()): ?>
+  | <?php echo html_link(url('', array('delete')), "Delete project?"); ?>
+<?php endif; ?>
 </p>
 <?php echo html_form_tag('put', url('', array('edit')), array('id' => 'project-form')); ?>
 <?php echo krudt_errors($project); ?>
