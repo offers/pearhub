@@ -196,6 +196,12 @@ WHERE
     if (strlen($project->summary()) > 200) {
       $project->errors['summary'][] = "Summary is too long. It's supposed to be a one-liner.";
     }
+    if (!$project->summary()) {
+      $project->errors['summary'][] = "Summary missing.";
+    }
+    if (!$project->description()) {
+      $project->errors['description'][] = "Description missing.";
+    }
     if (!$project->repository()) {
       $project->errors['repository'][] = "Missing repository";
     }

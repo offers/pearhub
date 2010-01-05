@@ -468,7 +468,7 @@ var init = function() {
         });
     installTooltip("field-name", "<h3>Enter the projects name.</h3><p>This must be unique. If you're maintaining an unofficial fork of a project, you should prefix the name with your name/handle to prevent conflicts. Eg. <code>troelskn_Konstrukt</code>, rather than <code>Konstrukt</code></p><p>You can only use alphanumeric characters and underscores for names.</p>");
     installTooltip("field-summary", "<h3>Short summary.</h3><p>Enter a single line, summarising your project.</p>");
-    installTooltip("field-description", "<h3>A longer description.</h3><p>Enter a paragraph or two, describing your project</p><p>This field is optional.</p>");
+    installTooltip("field-description", "<h3>A longer description.</h3><p>Enter a paragraph or two, describing your project.</p>");
     installTooltip("field-repository", "<h3>Repository URL</h3><p>Enter the URL for the projects repository here. Currently only subversion and git repositories are supported.</p><p>If you use subversion, you should enter the URL to the main branch or trunk.</p><p>If your project is hosted at github, use the read-only URL.</p>");
     installTooltip("field-href", "<h3>Enter URL to the projects website.</h3><p>This field is optional</p>");
     installTooltip("field-php-version", "<h3>Minimum supported PHP version.</h3><p>If in doubt, leave this untouched</p>");
