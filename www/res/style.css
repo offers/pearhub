@@ -9,7 +9,8 @@ body {
 }
 
 body,
-#profile #logout {
+#profile #logout,
+#openid .submit {
   font-family: Bookman, Georgia;
 }
 
@@ -70,17 +71,21 @@ strong, strong em {
 #profile #logout, #profile a {
   padding: 0;
   margin: 0;
-  border: 0;
+  border: 2px solid #333;
   font-size: 1em;
-  background-color: #fff;
-  color: #808;
+  background-color: #333;
+  color: #eee;
+
   font-weight: bold;
   cursor: pointer;
+  -moz-border-radius: 5px;
+  -webkit-border-radius: 5px;
 }
 
 #profile #logout:hover, #profile a:hover {
   color: #c28;
   background-color: #808;
+  border-color: #808;
 }
 
 #content {
@@ -161,15 +166,20 @@ strong, strong em {
 }
 .list li a {
   display: block;
-  font-size: 175%;
+  padding: 0.5em;
+  color: #888;
+  font-size: 0.8em;
+  font-weight: normal;
+}
+.list li a span {
+  color: #808;
+  font-size: 250%;
   font-weight: bold;
   line-height: 1.2;
-  padding: 0.25em;
 }
-.list li a .summary {
-  color: #888;
-  font-size: 0.5em;
-  font-weight: normal;
+.list li a:hover span {
+  color: #c28;
+  background-color: #808;
 }
 /* * * * releases * * * */
 #releases {

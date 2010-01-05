@@ -9,11 +9,11 @@
 <ul class="list">
 <?php foreach ($projects as $entry): ?>
   <li>
-<a href="<?php e(url($entry->name())) ?>" title="<?php e($entry->description()); ?>">
-<?php e($entry->displayName()) ?>
-<br/>
-<span class="summary"><?php e($entry->summary()); ?></span>
-</a>
+    <a href="<?php e(url($entry->name())) ?>" title="<?php e($entry->description()); ?>">
+      <span><?php e($entry->displayName()) ?></span>
+      <br/>
+      <?php e($entry->summary()); ?>
+    </a>
   </li>
 <?php endforeach; ?>
 </ul>
