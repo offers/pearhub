@@ -22,7 +22,10 @@ class components_projects_List extends k_Component {
     $t = $this->templates->create('projects/list');
     $selection = $this->projects->selectPaginated($this->query('page'));
     if ($this->query('q')) {
+      $selection->setConjunctionOr();
       $selection->addCriterion('name', '%' . $this->query('q') . '%', 'like');
+      $selection->addCriterion('summary', '%' . $this->query('q') . '%', 'like');
+      $selection->addCriterion('description', '%' . $this->query('q') . '%', 'like');
     }
     return $t->render(
       $this,
