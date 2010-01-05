@@ -12,6 +12,13 @@
 <p>
   There are no releases yet.
 </p>
+<?php else: ?>
+<p>
+  To install a particular version, use:
+</p>
+<pre>$ pear channel-discover pearhub.org
+$ pear install pearhub/<?php e($project->name()) ?>-X.X.X</pre>
+
 <?php endif; ?>
 
 <ul id="releases">

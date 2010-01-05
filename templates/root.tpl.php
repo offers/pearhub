@@ -13,7 +13,7 @@
 
 <h4>Publish</h4>
 
-<p>Already have a project, and want to provide an easy way to install and update it?</p>
+<p>Already have a project on github, google code or another public repository? Want to provide an easy way to install and update it?</p>
 <p><?php echo html_link(url('projects', array('new')), "Register your project on pearhub"); ?> and have it appear in the channel in minutes. Promise!</p>
 
 <h4>¿Confused?</h4>

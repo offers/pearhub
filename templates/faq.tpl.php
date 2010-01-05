@@ -9,7 +9,39 @@
   How do manual releases work?
 </p>
 <p class="answer">
-  While we recommend automatic releases, it isn't always possible to change the naming convension. In these cases, you can use manual releases. A manual release is initiated by going to a projects releases page and select the link "Create a new release". Enter the new version number and press the button. Then wait for the crontab to come by. This can take up to 15 minutes.
+  While I recommend automatic releases, it isn't always possible to change the naming convension. In these cases, you can use manual releases. A manual release is initiated by going to a projects releases page and select the link "Create a new release". Enter the new version number and press the button. Then wait for the crontab to come by. This can take up to 15 minutes.
+</p>
+
+<p class="question">
+  What's this naming convension?
+</p>
+<p class="answer">
+  For pearhub to pick up a tagged release, you need to follow a namingconvension. If you use subversion, you should tag your releases in <code>tags/X.X.X</code>, where the X's are replaced with numbers. If you use git, tag your releases as <code>vX.X.X</code>. Note that you should prefix the version number with a lowercase <strong>v</strong>.
+</p>
+
+<p class="question">
+  How do I tag a release in subversion?
+</p>
+<p class="answer">
+  From the console, assuming that you stand in the repository root, type:
+</p>
+<pre>$ svn cp trunk tags/X.X.X
+$ svn commit -m "Tagged release X.X.X" tags/X.X.X</pre>
+
+<p class="question">
+  How do I tag a release in git?
+</p>
+<p class="answer">
+  From the console, type:
+</p>
+<pre>$ git tag -a vX.X.X -m "Tagged release X.X.X"
+$ git push origin : vX.X.X</pre>
+
+<p class="question">
+  What's the meaning of those diferent numbers?
+</p>
+<p class="answer">
+  The meaning of these are <em>major</em>, <em>minor</em> and <em>patch</em>. The first publicly available release should be <code>1.0.0</code>. When you add new features, bump the minor number a notch. If you make major changes, breaking backwards compatibility, bump the major number. For smaller bug-fixes and additions, use the patch number. Note that numbers are not restricted to be a single digit - it's perfectly valid to have version numbers like <code>1.23.0</code>.
 </p>
 
 <p class="question">
