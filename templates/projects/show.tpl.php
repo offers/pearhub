@@ -6,8 +6,7 @@
 <p>
   To install this package run the following from the console:
 </p>
-<pre>$ pear channel-discover pearhub.org
-$ pear install pearhub/<?php e($project->name()) ?></pre>
+<pre>$ pear install pearhub/<?php e($project->name()) ?></pre>
 
 <h2>Summary</h2>
 

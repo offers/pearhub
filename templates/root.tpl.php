@@ -1,9 +1,10 @@
+<p>
+  Pearhub is a pear channel and a pear package publishing platform. As a user, you can <strong><em>install</em></strong> packages. As a developer, you can <strong><em>publish</em></strong> packages.
+</p>
+
 <h4>Install</h4>
 <p>
-  Pearhub is a pear channel. This means that you can install packages through the pear installer, with a single line of code.
-</p>
-<p>
-  First initialize the pearhub channel. You only need to do this once:
+  Packages are installed through the pear installer. Before you can use pearhub, you need to initialize the channel. You only need to do this once:
 </p>
 <pre>$ pear channel-discover pearhub.org</pre>
 <p>

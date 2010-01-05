@@ -1,7 +1,5 @@
 /* * * * common * * * */
 html {
-  /*background-color: #e0e0e0;*/
-  /*background: url(bg.jpg);*/
   background: #111111 url(bg.jpg) repeat 0 0;
 }
 
@@ -20,6 +18,10 @@ a:hover {
   background-color: #808;
 }
 
+strong, strong em {
+  font-weight: bold;
+}
+
 #header, #content {
   width: 40em;
   margin: 0 auto;
@@ -34,9 +36,11 @@ a:hover {
   border-bottom: .5em solid #eee;
 }
 
+/*
 #header strong {
   font-weight: bold;
 }
+*/
 
 #crumbtrail {
   font-size: 150%;
@@ -103,8 +107,9 @@ a:hover {
 }
 
 #content h4 {
-  color: #444;
-  font-size: 400%;
+  color: #888;
+  font-size: 300%;
+  font-weight: bold;
   text-align: center;
 }
 
@@ -353,3 +358,4 @@ a:hover {
 #openid label {
   color: #888;
 }
+
