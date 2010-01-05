@@ -1,25 +1,29 @@
 <?php
 require_once 'shell.inc.php';
+require_once 'pdoext.inc.php';
+require_once 'pdoext/connection.inc.php';
 
 /**
  * Detects repository type from a URL and returns an appropriate RepoInfo
  */
 class RepoProbe {
   protected $shell;
-  function __construct(Shell $shell) {
+  protected $db;
+  function __construct(Shell $shell, pdoext_Connection $db) {
     $this->shell = $shell;
+    $this->db = $db;
   }
-  function getRepositoryType($project) {
+  function getRepositoryType($url) {
     try {
-      $this->shell->run('git ls-remote --heads %s', $project->repository());
+      $this->shell->run('git ls-remote --heads %s', $url);
       return 'git';
     } catch (ProcessExitException $ex) {
       /* squelch */
     }
-    $svn_base_url = preg_replace('~/trunk(/?)$~', '', $project->repository());
+    $svn_base_url = preg_replace('~/trunk(/?)$~', '', $url);
     $result = trim($this->shell->run('svn ls %s', $svn_base_url));
     if (preg_match('/^svn:/', $result)) {
-      throw new Exception("Unable to determine repository type");
+      return null;
     }
     $lines = explode("\n", $result);
     if (in_array('trunk/', $lines) && in_array('tags/', $lines)) {
@@ -31,14 +35,35 @@ class RepoProbe {
    * @return RepoInfo
    */
   function getRepositoryAccess($project) {
-    switch ($this->getRepositoryType($project)) {
+    switch ($this->getRepositoryTypeAndCache($project->repository())) {
     case 'git':
       return new GitRepoInfo($project->repository(), $this->shell);
     case 'svn/standard':
       return new SvnStandardRepoInfo(preg_replace('~/trunk(/?)$~', '', $project->repository()), $this->shell);
     case 'svn/nonstandard':
       return new SvnRepoInfo($project->repository(), $this->shell);
+    default:
+      throw new Exception("Unable to determine repository type");
     }
+  }
+  function getRepositoryTypeAndCache($url) {
+    $result = $this->db->pexecute(
+      "select type from repository_types where url = :url",
+      array(
+        ':url' => $url));
+    $row = $result->fetch(PDO::FETCH_ASSOC);
+    if ($row) {
+      return $row['type'];
+    }
+    $type = $this->getRepositoryType($url);
+    if ($type) {
+      $this->db->pexecute(
+        "insert into repository_types (url, type) values (:url, :type)",
+        array(
+          ':url' => $url,
+          ':type' => $type));
+    }
+    return $type;
   }
 }
 
@@ -148,13 +173,15 @@ class GitRepoInfo implements RepoInfo {
     if ($this->tags === null) {
       $this->tags = array();
       $result = explode("\n", trim($this->shell->run('git ls-remote --tags %s', $this->url)));
-      if (preg_match('~^[0-9a-f]{40}\s+refs/tags/(v?([0-9]+)(\.([0-9]+))?(\.([0-9]+))?)$~', $line, $reg)) {
-        $raw = $reg[1];
-        $v = array(
-          $reg[2],
-          isset($reg[4]) ? $reg[4] : 0,
-          isset($reg[6]) ? $reg[6] : 0);
-        $this->tags[implode('.', $v)] = $raw;
+      foreach ($result as $line) {
+        if (preg_match('~^[0-9a-f]{40}\s+refs/tags/(v?([0-9]+)(\.([0-9]+))?(\.([0-9]+))?)$~', $line, $reg)) {
+          $raw = $reg[1];
+          $v = array(
+            $reg[2],
+            isset($reg[4]) ? $reg[4] : 0,
+            isset($reg[6]) ? $reg[6] : 0);
+          $this->tags[implode('.', $v)] = $raw;
+        }
       }
     }
     return array_keys($this->tags);
