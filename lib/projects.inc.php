@@ -360,7 +360,7 @@ class Project extends Accessor {
     $hash = $h;
     $fields = array(
       'name', 'owner', 'created', 'repository',
-      'summary', 'href', 'license_title', 'license_href',
+      'summary', 'description', 'href', 'license_title', 'license_href',
       'php_version', 'release_policy');
     foreach ($fields as $field) {
       if (array_key_exists($field, $hash)) {

@@ -15,6 +15,10 @@ $ pear install pearhub/<?php e($project->name()) ?></pre>
   <?php e($project->summary()); ?>
 </p>
 
+<p>
+  <?php e($project->description()); ?>
+</p>
+
 <?php if ($project->href()) : ?>
 <p>
   <?php echo html_link($project->href()); ?>

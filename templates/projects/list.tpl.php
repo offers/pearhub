@@ -9,7 +9,7 @@
 <ul class="list">
 <?php foreach ($projects as $entry): ?>
   <li>
-<a href="<?php e(url($entry->name())) ?>">
+<a href="<?php e(url($entry->name())) ?>" title="<?php e($entry->description()); ?>">
 <?php e($entry->displayName()) ?>
 <br/>
 <span class="summary"><?php e($entry->summary()); ?></span>
