@@ -5,8 +5,12 @@ html {
 
 body {
   font-size: 100%;
-  font-family: Helvetica Neue, Helvetica, Arial, sans-serif;
   color: #333;
+}
+
+body,
+#profile #logout {
+  font-family: Bookman, Georgia;
 }
 
 a {
@@ -60,13 +64,13 @@ strong, strong em {
 }
 
 #profile {
+  text-align: right;
 }
 
-#profile #logout {
+#profile #logout, #profile a {
   padding: 0;
   margin: 0;
   border: 0;
-  font-family: Helvetica Neue, Helvetica, Arial, sans-serif;
   font-size: 1em;
   background-color: #fff;
   color: #808;
@@ -74,7 +78,7 @@ strong, strong em {
   cursor: pointer;
 }
 
-#profile #logout:hover {
+#profile #logout:hover, #profile a:hover {
   color: #c28;
   background-color: #808;
 }
@@ -110,7 +114,7 @@ strong, strong em {
   color: #888;
   font-size: 300%;
   font-weight: bold;
-  text-align: center;
+  /*text-align: center;*/
 }
 
 #content p.question {
@@ -210,6 +214,9 @@ strong, strong em {
 .form input[type=text],
 .form textarea {
   width: 12em;
+}
+.form textarea {
+  height: 6em;
 }
 .full input[type=text],
 .full textarea,
