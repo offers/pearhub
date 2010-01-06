@@ -13,7 +13,7 @@ class components_Releases extends k_Component {
   }
   function renderHtml() {
     $project = $this->context->getProject();
-    $selection = $this->releases->selectByProject($project);
+    $selection = iterator_to_array($this->releases->selectByProject($project));
     $this->document->setTitle('Releases for ' . $project->displayName());
     $this->document->addCrumb('releases', $this->url());
     $t = $this->templates->create("releases/list");
