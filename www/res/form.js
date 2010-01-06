@@ -104,6 +104,7 @@ var uniqueId = (function() {
 
 /** Registers an event handler. Returns a detach function. */
 var bind = function(element, signal, fnc) {
+    signal = signal.replace(/^(on)/, "");
     if (element.addEventListener) {
         var wrapper = function(e) {
             var evt = {
@@ -120,9 +121,9 @@ var bind = function(element, signal, fnc) {
             };
             fnc(evt);
         };
-        element.addEventListener(signal.replace(/^(on)/, ""), wrapper, false);
+        element.addEventListener(signal, wrapper, false);
         return function() {
-            element.removeEventListener(signal.replace(/^(on)/, ""), wrapper, false);
+            element.removeEventListener(signal, wrapper, false);
         };
     } else if (element.attachEvent) {
         var wrapper = function() {
@@ -139,9 +140,9 @@ var bind = function(element, signal, fnc) {
             };
             fnc(evt);
         };
-        element.attachEvent(signal, wrapper);
+        element.attachEvent("on" + signal, wrapper);
         return function() {
-            element.detachEvent(signal, wrapper);
+            element.detachEvent("on" + signal, wrapper);
         };
     } else {
         throw new Error("Can't register event handler");
@@ -445,10 +446,19 @@ var init = function() {
                 });
 
             var inputType = createElement("select", {name: "maintainers[" + id + "][type]"});
-            inputType.appendChild(new Option("lead"));
-            inputType.appendChild(new Option("developer"));
-            inputType.appendChild(new Option("contributor"));
-            inputType.appendChild(new Option("helper"));
+            map(
+                ["lead", "developer", "contributor", "helper"],
+                function(type) {
+                    var option = new Option(type, type);
+                    try {
+                        inputType.add(option, null); // standards compliant; doesn't work in IE
+                    } catch(ex) {
+                        inputType.add(option); // IE only
+                    }
+                }
+            );
+
+
             makeElement("type", inputType);
 
             container.appendChild(fieldset);

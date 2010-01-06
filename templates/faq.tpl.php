@@ -2,7 +2,7 @@
   How do automatic releases work?
 </p>
 <p class="answer">
-  Automatic releases are the preferred mode of publishing packages. When this is selected, pearhub will routinely check the repository for new tags, following the naming convention of <code>X.X.X</code>. If a new tag is found, a package will be generated. This means that all you have to do to roll a new release is to tag it in your repository. Nothing more.
+  Automatic releases are the preferred mode of publishing packages. When this is selected, pearhub will routinely check the repository for new tags, following the naming convention of <code>X.X.X</code>. If a new tag is found, a package will be generated. This means that all you have to do to roll a new release is to tag it in your repository. Nothing more. (Note that the system only checks remote repositories once per hour, so it may take that long for your release to appear)
 </p>
 
 <p class="question">
@@ -16,7 +16,7 @@
   What's this naming convension?
 </p>
 <p class="answer">
-  For pearhub to pick up a tagged release, you need to follow a namingconvension. If you use subversion, you should tag your releases in <code>tags/X.X.X</code>, where the X's are replaced with numbers. If you use git, tag your releases as <code>vX.X.X</code>. Note that you should prefix the version number with a lowercase <strong>v</strong>.
+  For pearhub to pick up a tagged release, you need to follow a naming convension called <a href="http://semver.org/">Semantic Versioning</a>. If you use subversion, you should tag your releases in <code>tags/vX.X.X</code>, where the X's are replaced with numbers. If you use git, tag your releases as <code>vX.X.X</code>. You may leave out the leading <strong>v</strong>.
 </p>
 
 <p class="question">

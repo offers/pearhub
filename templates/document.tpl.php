@@ -21,7 +21,7 @@
         <form method="post" action="<?php e(url('/logout')) ?>">
           <p>
             Hello <strong><?php e(preg_replace('~^(http|https)://(.*)/$~', '$2', $context->identity()->user())) ?></strong>
-            | <input type="submit" value="log out" id="logout" />
+            <input type="submit" value="log out" id="logout" />
           </p>
         </form>
 <?php else: ?>
