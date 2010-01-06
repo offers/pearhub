@@ -162,22 +162,25 @@ WHERE
         ));
     }
   }
-  function updateAggregates($project) {
+  function deleteAggregates($project) {
     $this->db->prepare(
       'delete from project_maintainers where project_id = :project_id'
     )->execute(
         array(
-          ':project_id' => $project->id()));
+          ':project_id' => is_object($project) ? $project->id() : $project));
     $this->db->prepare(
       'delete from files where project_id = :project_id'
     )->execute(
         array(
-          ':project_id' => $project->id()));
+          ':project_id' => is_object($project) ? $project->id() : $project));
     $this->db->prepare(
       'delete from dependencies where project_id = :project_id'
     )->execute(
         array(
-          ':project_id' => $project->id()));
+          ':project_id' => is_object($project) ? $project->id() : $project));
+  }
+  function updateAggregates($project) {
+    $this->deleteAggregates($project);
     $this->insertAggregates($project);
     $this->db->exec(
       'delete from maintainers where user not in (select user from project_maintainers)');
@@ -281,6 +284,11 @@ WHERE
       $this->updateAggregates($project);
     }
     return $res;
+  }
+  function delete($condition) {
+    $result = parent::delete($condition);
+    $this->deleteAggregates($condition['id']);
+    return $result;
   }
   function selectWithAutomaticReleasePolicy() {
     $result = $this->db->query("select * from projects where release_policy = 'auto'");
@@ -519,7 +527,7 @@ class ReleaseGateway extends pdoext_TableGateway {
     return $result;
   }
   function update($release, $condition = null) {
-    $result = parent::delete($release, $condition);
+    $result = parent::update($release, $condition);
     $this->project_gateway->updateRevisionInfo(
       $release->projectId(),
       $this->lastReleaseFor($release->projectId()));
