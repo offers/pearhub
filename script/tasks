@@ -181,13 +181,24 @@ function task_pirum_build_channel() {
   $builder->build();
 }
 
+function task_fail() {
+  throw new Exception("yay!");
+}
+
 if (realpath($_SERVER['PHP_SELF']) == __FILE__) {
-  if (isset($_SERVER['argv'][1]) && function_exists('task_'.$_SERVER['argv'][1])) {
-    $args = $_SERVER['argv'];
-    array_shift($args);
-    array_shift($args);
-    call_user_func_array('task_'.$_SERVER['argv'][1], $args);
-  } else {
-    task_list_tasks();
+  flock($file_lock = fopen(__FILE__, 'r'), LOCK_EX | LOCK_NB) or exit;
+  try {
+    if (isset($_SERVER['argv'][1]) && function_exists('task_'.$_SERVER['argv'][1])) {
+      $args = $_SERVER['argv'];
+      array_shift($args);
+      array_shift($args);
+      call_user_func_array('task_'.$_SERVER['argv'][1], $args);
+    } else {
+      task_list_tasks();
+    }
+  } catch (Exception $ex) {
+    if (isset($_SERVER['EMAIL_FAILURE'])) {
+      mail($_SERVER['EMAIL_FAILURE'], implode(" ", $_SERVER['argv']) . "FAILED!", $ex->__toString());
+    }
   }
 }
