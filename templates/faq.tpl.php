@@ -42,6 +42,8 @@ $ git push origin : vX.X.X</pre>
 </p>
 <p class="answer">
   The meaning of these are <em>major</em>, <em>minor</em> and <em>patch</em>. The first publicly available release should be <code>1.0.0</code>. When you add new features, bump the minor number a notch. If you make major changes, breaking backwards compatibility, bump the major number. For smaller bug-fixes and additions, use the patch number. Note that numbers are not restricted to be a single digit - it's perfectly valid to have version numbers like <code>1.23.0</code>.
+  <br/>
+  See: <a href="http://semver.org/">Semantic Versioning</a> for a more detailed explanation.
 </p>
 
 <p class="question">
