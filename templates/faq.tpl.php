@@ -9,7 +9,7 @@
   How do manual releases work?
 </p>
 <p class="answer">
-  While I recommend automatic releases, it isn't always possible to change the naming convension. In these cases, you can use manual releases. A manual release is initiated by going to a projects releases page and select the link "Create a new release". Enter the new version number and press the button. Then wait for the crontab to come by. This can take up to 15 minutes.
+  While I recommend automatic releases, it isn't always possible to change the naming convension. In these cases, you can use manual releases. A manual release is initiated by going to a projects releases page and select the link "Create a new release". Enter the new version number and press the button. Then wait for the crontab to come by. This can take up a few minutes.
 </p>
 
 <p class="question">
@@ -47,6 +47,13 @@ $ git push origin : vX.X.X</pre>
 </p>
 
 <p class="question">
+  How do I create a profile?
+</p>
+<p class="answer">
+  You don't - there's no need. Just login with an <a href="http://openid.net/">OpenID</a> service, and we'll use that for controlling access rights.
+</p>
+
+<p class="question">
   Can I manage someone else's project?
 </p>
 <p class="answer">
@@ -78,5 +85,5 @@ $ git push origin : vX.X.X</pre>
   Who's behind this?
 </p>
 <p class="answer">
-  Me. I made it in my spare time, because noone else did. I'm Troels Knak-Nielsen. The channel publishing is driven by <a href="http://www.pirum-project.org/">pirum</a>. The frontend is driven by <a href="http://www.konstrukt.dk/">Konstrukt</a>. The open-id integration comes from <a href="http://framework.zend.com/manual/en/zend.openid.html">Zend Framework</a>.
+  Me. I made it in my spare time, because noone else did. I'm Troels Knak-Nielsen. The channel publishing is driven by <a href="http://www.pirum-project.org/">pirum</a>. The frontend is driven by <a href="http://www.konstrukt.dk/">Konstrukt</a>. The OpenID integration comes from <a href="http://framework.zend.com/manual/en/zend.openid.html">Zend Framework</a>.
 </p>

@@ -5,7 +5,7 @@
   </p>
   <div>
     <label>
-      open-id url:
+      OpenID url:
       <input type="text" name="openid_identifier" value="" />
       <input type="submit" value="Login" class="submit" />
     </label>
