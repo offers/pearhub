@@ -92,6 +92,13 @@ class components_Releases extends k_Component {
       return false;
     }
     $project = $this->context->getProject();
-    return $project->owner() == $this->identity()->user();
+    if ($project->owner() != $this->identity()->user()) {
+      return false;
+    }
+    $last_release = $this->releases->lastReleaseFor($project);
+    if ($last_release && $last_release->status() == 'building') {
+      return false;
+    }
+    return true;
   }
 }

@@ -2,7 +2,7 @@
   How do automatic releases work?
 </p>
 <p class="answer">
-  Automatic releases are the preferred mode of publishing packages. When this is selected, pearhub will routinely check the repository for new tags, following the naming convention of <code>X.X.X</code>. If a new tag is found, a package will be generated. This means that all you have to do to roll a new release is to tag it in your repository. Nothing more. (Note that the system only checks remote repositories once per hour, so it may take that long for your release to appear)
+  Automatic releases are the preferred mode of publishing packages. When this is selected, pearhub will routinely check the repository for new tags, following the naming convention of <code>X.X.X</code>. If a new tag is found, a package will be generated. This means that all you have to do to roll a new release is to tag it in your repository. Nothing more. (Note that the system only checks remote repositories once per 15 minutes, so it may take that long for your release to appear)
 </p>
 
 <p class="question">

@@ -24,7 +24,11 @@ a:hover {
   background-color: #808;
 }
 
-strong, strong em {
+em, em strong, strong em {
+  font-style: italic;
+}
+
+strong, em strong, strong em {
   font-weight: bold;
 }
 
@@ -95,14 +99,6 @@ strong, strong em {
   padding-bottom: 2em;
 }
 
-#content strong {
-  font-weight: bold;
-}
-
-#content em {
-  font-style: italic;
-}
-
 #content h1 {
   font-weight: normal;
   font-size: 300%;
@@ -163,10 +159,12 @@ strong, strong em {
 /* * * * list * * * */
 .list {
   border-top: 1px solid #888;
-  margin: 1em 0 2em;
+  margin: 0 0 2em 0;
+  clear: both;
 }
 .list li {
   border-bottom: 1px solid #888;
+  font-size: 1em;
 }
 .list li a {
   display: block;
@@ -179,11 +177,17 @@ strong, strong em {
   color: #808;
   font-size: 250%;
   font-weight: bold;
-  line-height: 1.2;
 }
 .list li a:hover span {
   color: #c28;
   background-color: #808;
+}
+.list li a em {
+  color: #ccc;
+  font-size: 250%;
+  font-weight: bold;
+  font-style: normal;
+  margin-left: .5em;
 }
 /* * * * releases * * * */
 #releases {

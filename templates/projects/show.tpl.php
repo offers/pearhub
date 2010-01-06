@@ -5,19 +5,19 @@
   <?php echo html_link(url('releases'), "Show releases"); ?>
 </p>
 
+<?php if ($project->latestVersion()) : ?>
 <p>
   To install this package run the following from the console:
 </p>
 <pre>$ pear install pearhub/<?php e($project->name()) ?></pre>
+<?php else: ?>
+<p>There are no releases for this project yet.</p>
+<?php endif; ?>
 
 <h2>Summary</h2>
 
 <p>
   <?php e($project->summary()); ?>
-</p>
-
-<p>
-  <?php e($project->description()); ?>
 </p>
 
 <?php if ($project->href()) : ?>
@@ -26,6 +26,11 @@
 </p>
 <?php endif; ?>
 
+<p>
+  <?php e($project->description()); ?>
+</p>
+
+<?php if (count($project->dependencies())): ?>
 <h2>Dependencies</h2>
 
 <ul>
@@ -33,6 +38,7 @@
   <li><?php e($dep['channel']) ?> <?php e($dep['version']) ?></li>
 <?php endforeach; ?>
 </ul>
+<?php endif; ?>
 
 <h2>Details</h2>
 

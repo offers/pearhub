@@ -8,9 +8,7 @@
 
 <ul class="list">
 <?php foreach ($projects as $entry): ?>
-  <li>
-    <a href="<?php e(url($entry->name())) ?>" title="<?php e($entry->description()); ?>">
-      <span><?php e($entry->displayName()) ?></span>
+  <li><a href="<?php e(url($entry->name())) ?>" title="<?php e($entry->description()); ?>"><span><?php e($entry->displayName()) ?></span><em><?php e($entry->latestVersion()) ?></em>
       <br/>
       <?php e($entry->summary()); ?>
     </a>

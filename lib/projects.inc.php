@@ -287,6 +287,13 @@ WHERE
     $result->setFetchMode(PDO::FETCH_ASSOC);
     return new pdoext_Resultset($result, $this);
   }
+  function updateRevisionInfo($project_id, $release) {
+    $this->db->pexecute(
+      "update projects set :latest_version = :latest_version where id = :project_id",
+      array(
+        ':latest_version' => $release ? $release->version() : null,
+        ':project_id' => $project_id));
+  }
 }
 
 class MaintainerGateway extends pdoext_TableGateway {
@@ -460,8 +467,10 @@ class Maintainer extends Accessor {
 }
 
 class ReleaseGateway extends pdoext_TableGateway {
-  function __construct(pdoext_Connection $db) {
+  protected $project_gateway;
+  function __construct(pdoext_Connection $db, ProjectGateway $project_gateway) {
     parent::__construct('releases', $db);
+    $this->project_gateway = $project_gateway;
   }
   function load($row = array()) {
     return new Release($row);
@@ -482,10 +491,13 @@ class ReleaseGateway extends pdoext_TableGateway {
       $release->errors['status'][] = "Illegal value";
     }
   }
+  /**
+   * @param $project integer | Project
+   */
   function lastReleaseFor($project) {
     $result = $this->db->pexecute(
       "select * from releases where project_id = :project_id order by created desc limit 1",
-      array(':project_id' => $project->id()));
+      array(':project_id' => is_object($project) ? $project->id() : $project));
     $row = $result->fetch(PDO::FETCH_ASSOC);
     return $row ? $this->load($row) : null;
   }
@@ -500,7 +512,26 @@ class ReleaseGateway extends pdoext_TableGateway {
     if (!$release->created()) {
       $release->setCreated(date("Y-m-d H:i:s"));
     }
-    return parent::insert($release);
+    $result = parent::insert($release);
+    $this->project_gateway->updateRevisionInfo(
+      $release->projectId(),
+      $this->lastReleaseFor($release->projectId()));
+    return $result;
+  }
+  function update($release, $condition = null) {
+    $result = parent::delete($release, $condition);
+    $this->project_gateway->updateRevisionInfo(
+      $release->projectId(),
+      $this->lastReleaseFor($release->projectId()));
+    return $result;
+  }
+  function delete($condition) {
+    $result = parent::delete($condition);
+    $project_id = is_array($condition) ? $condition['project_id'] : $release->projectId();
+    $this->project_gateway->updateRevisionInfo(
+      $project_id,
+      $this->lastReleaseFor($project_id));
+    return $result;
   }
   function selectPendingBuild() {
     $result = $this->db->query("select * from releases where status = 'building'");
