@@ -289,7 +289,7 @@ WHERE
   }
   function updateRevisionInfo($project_id, $release) {
     $this->db->pexecute(
-      "update projects set :latest_version = :latest_version where id = :project_id",
+      "update projects set latest_version = :latest_version where id = :project_id",
       array(
         ':latest_version' => $release ? $release->version() : null,
         ':project_id' => $project_id));

@@ -76,6 +76,17 @@ function task_delete_release($project_name, $release_version) {
   task_pirum_build_channel();
 }
 
+function task_update_latest_versions() {
+  global $container;
+  $gateway_project = $container->get('ProjectGateway');
+  $gateway_releases = $container->get('ReleaseGateway');
+  foreach ($gateway_project->select() as $project) {
+    $gateway_project->updateRevisionInfo(
+      $project->id(),
+      $gateway_releases->lastReleaseFor($project->id()));
+  }
+}
+
 function task_list_projects() {
   global $container;
   $gateway_project = $container->get('ProjectGateway');
