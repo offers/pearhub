@@ -198,7 +198,7 @@ if (realpath($_SERVER['PHP_SELF']) == __FILE__) {
     }
   } catch (Exception $ex) {
     if (isset($_SERVER['EMAIL_FAILURE'])) {
-      mail($_SERVER['EMAIL_FAILURE'], implode(" ", $_SERVER['argv']) . "FAILED!", $ex->__toString());
+      mail($_SERVER['EMAIL_FAILURE'], implode(" ", $_SERVER['argv']) . " FAILED!", $ex->__toString());
     }
   }
 }
