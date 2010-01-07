@@ -78,7 +78,7 @@ $ git push origin : vX.X.X</pre>
   I have a not-so-frequent question. Where should I direct it?
 </p>
 <p class="answer">
-  Try <a href="mailto:troelskn@gmail.com?subject=Question%20about%20pearhub">mailing me</a>.
+  You really should use the feedback forum at <a href="http://pearhub.uservoice.com/">uservoice</a>, but if you can also contact me directly at <a href="mailto:troelskn@gmail.com?subject=Question%20about%20pearhub">mailing me</a>.
 </p>
 
 <p class="question">
