@@ -22,26 +22,38 @@ function create_release($version, $project) {
 
 function build_release($release, $project) {
   global $container;
-  try {
   $repo_probe = $container->get('RepoProbe');
   $gateway_releases = $container->get('ReleaseGateway');
   $shell = $container->get('Shell');
-  $repo = $repo_probe->getRepositoryAccess($project);
-  if ($release->mode() == 'auto') {
-    $local_copy = $repo->exportTag($release->version());
-  } else {
-    $local_copy = $repo->exportRevision('HEAD');
+  try {
+    $repo = $repo_probe->getRepositoryAccess($project);
+    if ($release->mode() == 'auto') {
+      $local_copy = $repo->exportTag($release->version());
+    } else {
+      $local_copy = $repo->exportRevision('HEAD');
+    }
+    $files = new FileFinder($local_copy->getPath());
+    foreach ($project->files() as $file) {
+      $files->traverse($file['path'], $file['ignore'], $file['destination']);
+    }
+    $builder = $container->get('PackageBuilder');
+    $builder->build($local_copy, $files, $project, $release->version());
+    $local_copy->destroy($shell);
+    $release->setCompleted();
+    $gateway_releases->update(
+      $release,
+      array(
+        'project_id' => $project->id(),
+        'version' => $release->version()));
+  } catch (ProcessExitException $ex) {
+    // TODO: Log error
+    $release->setFailed($ex->__toString());
+    $gateway_releases->update(
+      $release,
+      array(
+        'project_id' => $project->id(),
+        'version' => $release->version()));
   }
-  $files = new FileFinder($local_copy->getPath());
-  foreach ($project->files() as $file) {
-    $files->traverse($file['path'], $file['ignore'], $file['destination']);
-  }
-  $builder = $container->get('PackageBuilder');
-  $builder->build($local_copy, $files, $project, $release->version());
-  $local_copy->destroy($shell);
-  $release->setCompleted();
-  $gateway_releases->update($release, array('project_id' => $project->id(), 'version' => $release->version()));
-  } catch (Exeption $e) {}
 }
 
 function task_rebuild_release($project_name, $release_version) {
@@ -114,20 +126,22 @@ function task_list_project_releases($project_name) {
 function task_sweep_projects() {
   global $container;
   try {
-  $gateway_project = $container->get('ProjectGateway');
-  $gateway_releases = $container->get('ReleaseGateway');
-  $repo_probe = $container->get('RepoProbe');
-  foreach ($gateway_project->selectWithAutomaticReleasePolicy() as $project) {
-    $repo = $repo_probe->getRepositoryAccess($project);
-    $latestTag = $repo->latestTag();
-    if ($latestTag) {
-      $lastRelease = $gateway_releases->lastReleaseFor($project);
-      if (!$lastRelease || ($latestTag > $lastRelease->version())) {
-        create_release($latestTag, $project);
+    $gateway_project = $container->get('ProjectGateway');
+    $gateway_releases = $container->get('ReleaseGateway');
+    $repo_probe = $container->get('RepoProbe');
+    foreach ($gateway_project->selectWithAutomaticReleasePolicy() as $project) {
+      $repo = $repo_probe->getRepositoryAccess($project);
+      $latestTag = $repo->latestTag();
+      if ($latestTag) {
+        $lastRelease = $gateway_releases->lastReleaseFor($project);
+        if (!$lastRelease || ($latestTag > $lastRelease->version())) {
+          create_release($latestTag, $project);
+        }
       }
     }
+  } catch (ProcessExitException $ex) {
+    // TODO: Log error
   }
-  } catch (Exception $e) {}
 }
 
 function get_pending_releases() {
@@ -185,10 +199,6 @@ function task_pirum_build_channel() {
   $builder->build();
 }
 
-function task_fail() {
-  throw new Exception("yay!");
-}
-
 if (realpath($_SERVER['PHP_SELF']) == __FILE__) {
   flock($file_lock = fopen(__FILE__, 'r'), LOCK_EX | LOCK_NB) or exit;
   try {
@@ -203,6 +213,9 @@ if (realpath($_SERVER['PHP_SELF']) == __FILE__) {
   } catch (Exception $ex) {
     if (isset($_SERVER['EMAIL_FAILURE'])) {
       mail($_SERVER['EMAIL_FAILURE'], implode(" ", $_SERVER['argv']) . " FAILED!", $ex->__toString());
+    } else {
+      echo $ex;
+      exit -1;
     }
   }
 }

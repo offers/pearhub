@@ -44,7 +44,15 @@
     <p>
       Download: <a href="<?php e(url('/get/' . $package_name)) ?>"><?php e($package_name) ?></a> (For manual installation only)
     </p>
+<?php elseif ($release->status() == 'failed'): ?>
+    <p>
+      There was a problem building this release. Probably, the repository couldn't be reached. Please check that the <?php echo html_link(url('../', array('edit')), "repository URL"); ?> is correct and is accessible without any username/password or other type of authentication.
+      <br/>
+      Pearhub will keep trying to build the release.
+    </p>
+
 <?php endif; ?>
+
   </li>
 <?php endforeach; ?>
 </ul>

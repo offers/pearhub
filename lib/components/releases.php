@@ -96,7 +96,7 @@ class components_Releases extends k_Component {
       return false;
     }
     $last_release = $this->releases->lastReleaseFor($project);
-    if ($last_release && $last_release->status() == 'building') {
+    if ($last_release && in_array($last_release->status(), array('building', 'failed'))) {
       return false;
     }
     return true;
