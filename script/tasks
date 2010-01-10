@@ -44,12 +44,13 @@ function build_release($release, $project) {
         'project_id' => $project->id(),
         'version' => $release->version()));
   } catch (ProcessExitException $ex) {
-    $release->setFailed($ex->__toString() . "\n---\n" . $ex->stderr());
+    $release->setFailed($ex->__toString());
     $gateway_releases->update(
       $release,
       array(
         'project_id' => $project->id(),
         'version' => $release->version()));
+    echo $ex;
   }
 }
 
@@ -122,11 +123,11 @@ function task_list_project_releases($project_name) {
 
 function task_sweep_projects() {
   global $container;
-  try {
-    $gateway_project = $container->get('ProjectGateway');
-    $gateway_releases = $container->get('ReleaseGateway');
-    $repo_probe = $container->get('RepoProbe');
-    foreach ($gateway_project->selectWithAutomaticReleasePolicy() as $project) {
+  $gateway_project = $container->get('ProjectGateway');
+  $gateway_releases = $container->get('ReleaseGateway');
+  $repo_probe = $container->get('RepoProbe');
+  foreach ($gateway_project->selectWithAutomaticReleasePolicy() as $project) {
+    try {
       $repo = $repo_probe->getRepositoryAccess($project);
       $latestTag = $repo->latestTag();
       if ($latestTag) {
@@ -135,9 +136,10 @@ function task_sweep_projects() {
           create_release($latestTag, $project);
         }
       }
+    } catch (ProcessExitException $ex) {
+      echo "Caught Exception at " . __FILE__ . " : " . __LINE__ . "\n";
+      echo $ex;
     }
-  } catch (ProcessExitException $ex) {
-    // TODO: Log error
   }
 }
 
