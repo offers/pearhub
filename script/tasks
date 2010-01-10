@@ -22,6 +22,7 @@ function create_release($version, $project) {
 
 function build_release($release, $project) {
   global $container;
+  try {
   $repo_probe = $container->get('RepoProbe');
   $gateway_releases = $container->get('ReleaseGateway');
   $shell = $container->get('Shell');
@@ -40,6 +41,7 @@ function build_release($release, $project) {
   $local_copy->destroy($shell);
   $release->setCompleted();
   $gateway_releases->update($release, array('project_id' => $project->id(), 'version' => $release->version()));
+  } catch (Exeption $e) {}
 }
 
 function task_rebuild_release($project_name, $release_version) {
@@ -111,6 +113,7 @@ function task_list_project_releases($project_name) {
 
 function task_sweep_projects() {
   global $container;
+  try {
   $gateway_project = $container->get('ProjectGateway');
   $gateway_releases = $container->get('ReleaseGateway');
   $repo_probe = $container->get('RepoProbe');
@@ -124,6 +127,7 @@ function task_sweep_projects() {
       }
     }
   }
+  } catch (Exception $e) {}
 }
 
 function get_pending_releases() {
