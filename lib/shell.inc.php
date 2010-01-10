@@ -57,7 +57,7 @@ class ProcessExitException extends Exception {
   protected $result;
   function __construct($result) {
     parent::__construct("Child process exited with error (".$result['result'].")");
-    $this->result = $result['stderr'];
+    $this->result = $result;
   }
   function stderr() {
     return $this->result['stderr'];
