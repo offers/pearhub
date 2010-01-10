@@ -24,7 +24,8 @@ class RepoProbe {
     try {
       $result = trim($this->shell->run('svn --non-interactive ls %s', $svn_base_url));
     } catch (ProcessExitException $ex) {
-      if (preg_match('/Server certificate verification failed: issuer is not trusted/', $ex->stderr())) {
+      if (preg_match('/Server certificate verification failed: issuer is not trusted/', $ex->stdout() . $ex->stderr())) {
+        // throw new SslCertificateException("Server certificate verification failed for: " . $svn_base_url);
         $this->shell->run('yes p | svn info %s', $svn_base_url);
         $result = trim($this->shell->run('svn --non-interactive ls %s', $svn_base_url));
       } else {
@@ -107,7 +108,8 @@ class SvnRepoInfo implements RepoInfo {
     try {
       return $this->shell->runVarArgs($args);
     } catch (ProcessExitException $ex) {
-      if (preg_match('/Server certificate verification failed: issuer is not trusted/', $ex->stderr())) {
+      if (preg_match('/Server certificate verification failed: issuer is not trusted/', $ex->stdout() . $ex->stderr())) {
+        // throw new SslCertificateException("Server certificate verification failed for: " . $this->url);
         $this->shell->run('yes p | svn info %s', $this->url);
         return $this->shell->runVarArgs($args);
       }
