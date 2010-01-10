@@ -150,7 +150,9 @@ function get_pending_releases() {
   $result = array();
   foreach ($gateway_release->selectPendingBuild() as $release) {
     $project = $gateway_project->fetch(array('id' => $release->projectId()));
-    $result[] = array('project' => $project, 'release' => $release);
+    if ($project) {
+      $result[] = array('project' => $project, 'release' => $release);
+    }
   }
   return $result;
 }
