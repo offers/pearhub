@@ -13,19 +13,6 @@ class RepoProbe {
     $this->shell = $shell;
     $this->db = $db;
   }
-  protected function svn($command /*, $args */) {
-    $args = func_get_args();
-    $args[0] = 'svn --non-interactive ' . $args[0];
-    try {
-      return $this->shell->runVarArgs($args);
-    } catch (ProcessExitException $ex) {
-      if (preg_match('/Server certificate verification failed: issuer is not trusted/', $ex->stderr())) {
-        $this->shell->run('yes p | svn info %s', $this->url);
-        return $this->shell->runVarArgs($args);
-      }
-      throw $ex;
-    }
-  }
   function getRepositoryType($url) {
     try {
       $this->shell->run('git ls-remote --heads %s', $url);
