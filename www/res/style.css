@@ -47,6 +47,10 @@ strong, em strong, strong em {
   border-bottom: .5em solid #eee;
 }
 
+#content {
+  margin-bottom: 1em;
+}
+
 /*
 #header strong {
   font-weight: bold;
