@@ -9,7 +9,7 @@ require_once 'pdoext/connection.inc.php';
 class RepoProbe {
   protected $shell;
   protected $db;
-  protected $debug = false;
+  public $debug = false;
   function __construct(Shell $shell, pdoext_Connection $db) {
     $this->shell = $shell;
     $this->db = $db;
