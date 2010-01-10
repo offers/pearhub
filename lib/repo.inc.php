@@ -65,7 +65,7 @@ class RepoProbe {
   }
   function getRepositoryTypeAndCache($url) {
     $result = $this->db->pexecute(
-      "select type from repository_types where url = :url",
+      "select type from repository_types where url = :url and last_probe > date_add(now(), interval -1 hour)",
       array(
         ':url' => $url));
     $row = $result->fetch(PDO::FETCH_ASSOC);
@@ -75,10 +75,12 @@ class RepoProbe {
     $type = $this->getRepositoryType($url);
     if ($type) {
       $this->db->pexecute(
-        "insert into repository_types (url, type) values (:url, :type)",
+        "insert into repository_types set url = :url, type = :type, last_probe = now()
+on duplicate key update type = :type2, last_probe = now()",
         array(
           ':url' => $url,
-          ':type' => $type));
+          ':type' => $type,
+          ':type2' => $type));
     }
     return $type;
   }
@@ -112,16 +114,7 @@ class SvnRepoInfo implements RepoInfo {
   protected function svn($command /*, $args */) {
     $args = func_get_args();
     $args[0] = 'svn --non-interactive ' . $args[0];
-    try {
-      return $this->shell->runVarArgs($args);
-    } catch (ProcessExitException $ex) {
-      if (preg_match('/Server certificate verification failed: issuer is not trusted/', $ex->stdout() . $ex->stderr())) {
-        // throw new SslCertificateException("Server certificate verification failed for: " . $this->url);
-        $this->shell->run('yes p | svn info %s', $this->url);
-        return $this->shell->runVarArgs($args);
-      }
-      throw $ex;
-    }
+    return $this->shell->runVarArgs($args);
   }
   function listTags() {
     throw new Exception("Unable to list tags for non-standard svn repo");
