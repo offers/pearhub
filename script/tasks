@@ -43,13 +43,14 @@ function build_release($release, $project) {
       array(
         'project_id' => $project->id(),
         'version' => $release->version()));
-  } catch (ProcessExitException $ex) {
+  } catch (Exception $ex) {
     $release->setFailed($ex->__toString());
     $gateway_releases->update(
       $release,
       array(
         'project_id' => $project->id(),
         'version' => $release->version()));
+    echo "Caught Exception at " . __FILE__ . " : " . __LINE__ . "\n";
     echo $ex;
   }
 }
@@ -136,7 +137,7 @@ function task_sweep_projects() {
           create_release($latestTag, $project);
         }
       }
-    } catch (ProcessExitException $ex) {
+    } catch (Exception $ex) {
       echo "Caught Exception at " . __FILE__ . " : " . __LINE__ . "\n";
       echo $ex;
     }
@@ -219,9 +220,9 @@ if (realpath($_SERVER['PHP_SELF']) == __FILE__) {
   } catch (Exception $ex) {
     if (isset($_SERVER['EMAIL_FAILURE'])) {
       mail($_SERVER['EMAIL_FAILURE'], implode(" ", $_SERVER['argv']) . " FAILED!", $ex->__toString());
-    } else {
-      echo $ex;
-      exit -1;
     }
+    echo "Caught Exception at " . __FILE__ . " : " . __LINE__ . "\n";
+    echo $ex;
+    exit -1;
   }
 }
