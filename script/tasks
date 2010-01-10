@@ -46,8 +46,7 @@ function build_release($release, $project) {
         'project_id' => $project->id(),
         'version' => $release->version()));
   } catch (ProcessExitException $ex) {
-    // TODO: Log error
-    $release->setFailed($ex->__toString());
+    $release->setFailed($ex->__toString() . "\n---\n" . $ex->stderr());
     $gateway_releases->update(
       $release,
       array(

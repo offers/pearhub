@@ -13,6 +13,19 @@ class RepoProbe {
     $this->shell = $shell;
     $this->db = $db;
   }
+  protected function svn($command /*, $args */) {
+    $args = func_get_args();
+    $args[0] = 'svn --non-interactive ' . $args[0];
+    try {
+      return $this->shell->runVarArgs($args);
+    } catch (ProcessExitException $ex) {
+      if (preg_match('/Server certificate verification failed: issuer is not trusted/', $ex->stderr())) {
+        $this->shell->run('yes p | svn info %s', $this->url);
+        return $this->shell->runVarArgs($args);
+      }
+      throw $ex;
+    }
+  }
   function getRepositoryType($url) {
     try {
       $this->shell->run('git ls-remote --heads %s', $url);
@@ -21,7 +34,16 @@ class RepoProbe {
       /* squelch */
     }
     $svn_base_url = preg_replace('~/trunk(/?)$~', '', $url);
-    $result = trim($this->shell->run('svn ls %s', $svn_base_url));
+    try {
+      $result = trim($this->shell->run('svn --non-interactive ls %s', $svn_base_url));
+    } catch (ProcessExitException $ex) {
+      if (preg_match('/Server certificate verification failed: issuer is not trusted/', $ex->stderr())) {
+        $this->shell->run('yes p | svn info %s', $svn_base_url);
+        $result = trim($this->shell->run('svn --non-interactive ls %s', $svn_base_url));
+      } else {
+        throw $ex;
+      }
+    }
     if (preg_match('/^svn:/', $result)) {
       return null;
     }
@@ -92,6 +114,19 @@ class SvnRepoInfo implements RepoInfo {
     $this->trunk = $this->url;
     $this->shell = $shell;
   }
+  protected function svn($command /*, $args */) {
+    $args = func_get_args();
+    $args[0] = 'svn --non-interactive ' . $args[0];
+    try {
+      return $this->shell->runVarArgs($args);
+    } catch (ProcessExitException $ex) {
+      if (preg_match('/Server certificate verification failed: issuer is not trusted/', $ex->stderr())) {
+        $this->shell->run('yes p | svn info %s', $this->url);
+        return $this->shell->runVarArgs($args);
+      }
+      throw $ex;
+    }
+  }
   function listTags() {
     throw new Exception("Unable to list tags for non-standard svn repo");
   }
@@ -106,12 +141,12 @@ class SvnRepoInfo implements RepoInfo {
       return false;
     }
     $url = $this->trunk . '@' . $revision;
-    $result = $this->shell->run('svn info %s', $url);
+    $result = $this->shell->svn('info %s', $url);
     return trim($result) !== "$url:  (Not a valid URL)";
   }
   function exportRevision($revision) {
     $name = $this->shell->getTempname();
-    $this->shell->run('svn export %s --revision=%s %s', $this->trunk, $revision, $name);
+    $this->shell->svn('export %s --revision=%s %s', $this->trunk, $revision, $name);
     return new LocalCopy($name);
   }
 }
@@ -128,7 +163,7 @@ class SvnStandardRepoInfo extends SvnRepoInfo {
   function listTags() {
     if ($this->tags === null) {
       $this->tags = array();
-      $result = explode("\n", trim($this->shell->run('svn ls %s', $this->url . '/tags')));
+      $result = explode("\n", trim($this->shell->svn('ls %s', $this->url . '/tags')));
       foreach ($result as $line) {
         if (preg_match('~^(v?([0-9]+)(\.([0-9]+))?(\.([0-9]+))?)/?$~', $line, $reg)) {
           $raw = $reg[1];
@@ -153,7 +188,7 @@ class SvnStandardRepoInfo extends SvnRepoInfo {
     $this->listTags();
     $raw = $this->tags[$tagname];
     $name = $this->shell->getTempname();
-    $this->shell->run('svn export %s %s', $this->url . '/tags/' . $raw, $name);
+    $this->shell->svn('export %s %s', $this->url . '/tags/' . $raw, $name);
     return new LocalCopy($name);
   }
 }

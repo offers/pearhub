@@ -5,8 +5,7 @@ class Shell {
   function __construct() {
     $this->temp_dir = sys_get_temp_dir();
   }
-  function run($command /*[, ...]*/) {
-    $args = func_get_args();
+  function runVarArgs($args) {
     $args[0] .= ' 2>&1';
     $process = call_user_func_array(array($this, 'open'), $args);
     if ($this->debug) {
@@ -20,6 +19,10 @@ class Shell {
       echo $result['stdout'], "\n---\n";
     }
     return $result['stdout'];
+  }
+  function run($command /*[, ...]*/) {
+    $args = func_get_args();
+    return $this->runVarArgs($args);
   }
   function open($command /*[, ...]*/) {
     $args = func_get_args();
