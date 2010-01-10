@@ -141,12 +141,12 @@ class SvnRepoInfo implements RepoInfo {
       return false;
     }
     $url = $this->trunk . '@' . $revision;
-    $result = $this->shell->svn('info %s', $url);
+    $result = $this->svn('info %s', $url);
     return trim($result) !== "$url:  (Not a valid URL)";
   }
   function exportRevision($revision) {
     $name = $this->shell->getTempname();
-    $this->shell->svn('export %s --revision=%s %s', $this->trunk, $revision, $name);
+    $this->svn('export %s --revision=%s %s', $this->trunk, $revision, $name);
     return new LocalCopy($name);
   }
 }
@@ -163,7 +163,7 @@ class SvnStandardRepoInfo extends SvnRepoInfo {
   function listTags() {
     if ($this->tags === null) {
       $this->tags = array();
-      $result = explode("\n", trim($this->shell->svn('ls %s', $this->url . '/tags')));
+      $result = explode("\n", trim($this->svn('ls %s', $this->url . '/tags')));
       foreach ($result as $line) {
         if (preg_match('~^(v?([0-9]+)(\.([0-9]+))?(\.([0-9]+))?)/?$~', $line, $reg)) {
           $raw = $reg[1];
@@ -188,7 +188,7 @@ class SvnStandardRepoInfo extends SvnRepoInfo {
     $this->listTags();
     $raw = $this->tags[$tagname];
     $name = $this->shell->getTempname();
-    $this->shell->svn('export %s %s', $this->url . '/tags/' . $raw, $name);
+    $this->svn('export %s %s', $this->url . '/tags/' . $raw, $name);
     return new LocalCopy($name);
   }
 }
