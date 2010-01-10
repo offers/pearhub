@@ -65,6 +65,9 @@ class ProcessExitException extends Exception {
   function stdout() {
     return $this->result['stdout'];
   }
+  function __toString() {
+    return parent::__toString() . "\nProcess stdout:\n" . $this->result['stdout'] . "\nProcess stderr:\n" . $this->result['stderr'];
+  }
 }
 
 class ShellProcess {
