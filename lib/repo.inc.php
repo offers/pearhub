@@ -9,6 +9,7 @@ require_once 'pdoext/connection.inc.php';
 class RepoProbe {
   protected $shell;
   protected $db;
+  protected $debug = false;
   function __construct(Shell $shell, pdoext_Connection $db) {
     $this->shell = $shell;
     $this->db = $db;
@@ -19,11 +20,17 @@ class RepoProbe {
       return 'git';
     } catch (ProcessExitException $ex) {
       /* squelch */
+      if ($this->debug) {
+        echo $ex;
+      }
     }
     $svn_base_url = preg_replace('~/trunk(/?)$~', '', $url);
     try {
       $result = trim($this->shell->run('svn --non-interactive ls %s', $svn_base_url));
     } catch (ProcessExitException $ex) {
+      if ($this->debug) {
+        echo $ex;
+      }
       if (preg_match('/Server certificate verification failed: issuer is not trusted/', $ex->stdout() . $ex->stderr())) {
         // throw new SslCertificateException("Server certificate verification failed for: " . $url);
         $this->shell->run('yes p | svn info %s', $url);

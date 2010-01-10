@@ -6,8 +6,6 @@ require_once 'repo.inc.php';
 require_once 'builder.inc.php';
 require_once 'projects.inc.php';
 
-$container = create_container();
-
 function create_release($version, $project) {
   global $container;
   $gateway_releases = $container->get('ReleaseGateway');
@@ -201,7 +199,12 @@ function task_pirum_build_channel() {
 }
 
 if (realpath($_SERVER['PHP_SELF']) == __FILE__) {
+  $container = create_container();
   flock($file_lock = fopen(__FILE__, 'r'), LOCK_EX | LOCK_NB) or exit;
+  if (isset($_SERVER['DEBUG']) && $_SERVER['DEBUG']) {
+    $container->get('Shell')->debug = true;
+    $container->get('RepoProbe')->debug = true;
+  }
   try {
     if (isset($_SERVER['argv'][1]) && function_exists('task_'.$_SERVER['argv'][1])) {
       $args = $_SERVER['argv'];
