@@ -101,3 +101,10 @@ $ git push origin : vX.X.X</pre>
 <p class="answer">
   Me. I made it in my spare time, because noone else did. I'm Troels Knak-Nielsen. The channel publishing is driven by <a href="http://www.pirum-project.org/">pirum</a>. The frontend is driven by <a href="http://www.konstrukt.dk/">Konstrukt</a>. The OpenID integration comes from <a href="http://framework.zend.com/manual/en/zend.openid.html">Zend Framework</a>.
 </p>
+
+<p class="question">
+  Is pearhub one of a kind or are there any similar projects?
+</p>
+<p class="answer">
+  I'm currently aware of <a href="http://pearfarm.org/">pearfarm</a> and <a href="http://openpear.org/">openpear</a>. They both offer a slightly different experience.
+</p>
