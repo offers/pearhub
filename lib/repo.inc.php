@@ -189,22 +189,13 @@ class SvnStandardRepoInfo extends SvnRepoInfo {
       $this->tags = array();
       $result = explode("\n", trim($this->svn('ls %s', $this->url . '/tags')));
       foreach ($result as $line) {
-        if (preg_match('~^(v?([0-9]+)(\.([0-9]+))?(\.([0-9]+))?([A-Za-z]+[0-9A-Za-z-]*)?)/?$~', $line, $reg)) {
-          /*
-          $raw = $reg[1];
-          $v = array(
-            $reg[2],
-            isset($reg[4]) ? $reg[4] : 0,
-            isset($reg[6]) ? $reg[6] : 0);
-          $stability = isset($reg[7]) ? $reg[7] : 'stable';
-          $this->tags[implode('.', $v)] = $raw;
-          */
+        if (preg_match('~^(([a-zA-Z_-]+)?([0-9]+)(\.([0-9]+))?(\.([0-9]+))?([A-Za-z]+[0-9A-Za-z-]*)?)/?$~', $line, $reg)) {
           $tag_info = new TagInfo(
             $reg[1],
-            $reg[2],
-            isset($reg[4]) ? $reg[4] : 0,
-            isset($reg[6]) ? $reg[6] : 0,
-            isset($reg[7]) ? $reg[7] : 'stable'
+            $reg[3],
+            isset($reg[5]) ? $reg[5] : 0,
+            isset($reg[7]) ? $reg[7] : 0,
+            isset($reg[8]) ? $reg[8] : 'stable'
           );
           $this->tags[$tag_info->version()] = $tag_info;
         }
@@ -248,22 +239,13 @@ class GitRepoInfo implements RepoInfo {
       $this->tags = array();
       $result = explode("\n", trim($this->shell->run('git ls-remote --tags %s', $this->url)));
       foreach ($result as $line) {
-        if (preg_match('~^[0-9a-f]{40}\s+refs/tags/(v?([0-9]+)(\.([0-9]+))?(\.([0-9]+))?([A-Za-z]+[0-9A-Za-z-]*)?)$~', $line, $reg)) {
-          /*
-          $raw = $reg[1];
-          $v = array(
-            $reg[2],
-            isset($reg[4]) ? $reg[4] : 0,
-            isset($reg[6]) ? $reg[6] : 0);
-          $stability = isset($reg[7]) ? $reg[7] : 'stable';
-          $this->tags[implode('.', $v)] = $raw;
-          */
+        if (preg_match('~^[0-9a-f]{40}\s+refs/tags/(([a-zA-Z_-]+)?([0-9]+)(\.([0-9]+))?(\.([0-9]+))?([A-Za-z]+[0-9A-Za-z-]*)?)$~', $line, $reg)) {
           $tag_info = new TagInfo(
             $reg[1],
-            $reg[2],
-            isset($reg[4]) ? $reg[4] : 0,
-            isset($reg[6]) ? $reg[6] : 0,
-            isset($reg[7]) ? $reg[7] : 'stable'
+            $reg[3],
+            isset($reg[5]) ? $reg[5] : 0,
+            isset($reg[7]) ? $reg[7] : 0,
+            isset($reg[8]) ? $reg[8] : 'stable'
           );
           $this->tags[$tag_info->version()] = $tag_info;
         }
