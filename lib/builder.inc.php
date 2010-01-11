@@ -132,16 +132,18 @@ output:
 
 class FileFinder {
   protected $root;
+  protected $skip;
   protected $events = array();
   protected $buffer = array();
-  function __construct($root) {
+  function __construct($root, $skip = 'package.xml') {
     $this->root = rtrim($root, '/');
+    $this->skip = $skip;
   }
   function traverse($path, $ignore_pattern = null, $destination = null) {
     $path = ltrim($path, '/');
     $this->buffer[] = array(false, $path);
     foreach (scandir($this->root . '/' . $path) as $child) {
-      if ($child !== '.' && $child !== '..') {
+      if ($child !== '.' && $child !== '..' && $child !== $this->skip) {
         $full_path = $this->root . '/' . $path . '/' . $child;
         $child_destination = $destination ? (ltrim($destination, '/') . '/' . $child) : null;
         if (!$ignore_pattern || !preg_match('/'.$ignore_pattern.'/', $path)) {
