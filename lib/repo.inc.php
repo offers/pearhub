@@ -108,13 +108,17 @@ class TagInfo {
     $this->major = $major;
     $this->minor = $minor;
     $this->patch = $patch;
-    $this->stability = $stability;
+    if (preg_match('/(stable|beta|alpha|devel|snapshot)/', $stability, $reg)) {
+      $this->stability = $reg[1];
+    } else {
+      $this->stability = 'stable';
+    }
   }
   function raw() {
     return $this->raw;
   }
   function version() {
-    return $this->major . '.' . $this->minor . '.' . $this->patch . '.';
+    return $this->major . '.' . $this->minor . '.' . $this->patch;
   }
   function stability() {
     return $this->stability;

@@ -1,14 +1,14 @@
 <?php
 class ManifestCompiler {
   protected $manifest;
-  function build($files, $project, $version, $channel = "pearhub.org") {
+  function build($files, $project, $version, $stability, $channel = "pearhub.org") {
     $this->manifest = new XmlWriter();
     $this->manifest->openMemory();
     $this->manifest->setIndent(true);
     $this->manifest->setIndentString('  ');
     $this->manifest->startDocument('1.0', 'UTF-8');
     $this->writeHeader();
-    $this->writeDetails($project, $version, $channel);
+    $this->writeDetails($project, $version, $stability, $channel);
     $this->writeContents($files, $project);
     $this->writeDependencies($project);
     $this->writeFilelist($files, $project);
@@ -24,7 +24,7 @@ class ManifestCompiler {
     $this->manifest->writeAttribute("xmlns:xsi", "http://www.w3.org/2001/XMLSchema-instance");
     $this->manifest->writeAttribute("xsi:schemaLocation", "http://pear.php.net/dtd/tasks-1.0 http://pear.php.net/dtd/tasks-1.0.xsd http://pear.php.net/dtd/package-2.0 http://pear.php.net/dtd/package-2.0.xsd");
   }
-  function writeDetails($project, $version, $channel) {
+  function writeDetails($project, $version, $stability, $channel) {
     $this->manifest->writeElement("name", $project->name());
     $this->manifest->writeElement("channel", $channel);
     $this->manifest->writeElement("summary", $project->summary());
