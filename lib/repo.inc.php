@@ -97,6 +97,37 @@ interface RepoInfo {
   function exportRevision($revision);
 }
 
+class TagInfo {
+  protected $raw;
+  protected $major;
+  protected $minor;
+  protected $patch;
+  protected $stability;
+  function __construct($raw, $major, $minor, $patch, $stability) {
+    $this->raw = $raw;
+    $this->major = $major;
+    $this->minor = $minor;
+    $this->patch = $patch;
+    $this->stability = $stability;
+  }
+  function raw() {
+    return $this->raw;
+  }
+  function version() {
+    return $this->major . '.' . $this->minor . '.' . $this->patch . '.';
+  }
+  function stability() {
+    return $this->stability;
+  }
+  function compare($tag_info) {
+    return strcmp($this->version(), $tag_info->version());
+  }
+  function __toString() {
+    throw new Exception("TagInfo to string conversion");
+    //return $this->version();
+  }
+}
+
 /**
  * Baseclass for svn repository access.
  * You probably want to use the subclass `SvnStandardRepoInfo` instead,
@@ -154,14 +185,24 @@ class SvnStandardRepoInfo extends SvnRepoInfo {
       $this->tags = array();
       $result = explode("\n", trim($this->svn('ls %s', $this->url . '/tags')));
       foreach ($result as $line) {
-        if (preg_match('~^(v?([0-9]+)(\.([0-9]+))?(\.([0-9]+))?([a-z]*))/?$~', $line, $reg)) {
+        if (preg_match('~^(v?([0-9]+)(\.([0-9]+))?(\.([0-9]+))?([A-Za-z]+[0-9A-Za-z-]*)?)/?$~', $line, $reg)) {
+          /*
           $raw = $reg[1];
           $v = array(
             $reg[2],
             isset($reg[4]) ? $reg[4] : 0,
             isset($reg[6]) ? $reg[6] : 0);
-          $stability = isset($reg[7]) ? $reg[7] : 'stable',
+          $stability = isset($reg[7]) ? $reg[7] : 'stable';
           $this->tags[implode('.', $v)] = $raw;
+          */
+          $tag_info = new TagInfo(
+            $reg[1],
+            $reg[2],
+            isset($reg[4]) ? $reg[4] : 0,
+            isset($reg[6]) ? $reg[6] : 0,
+            isset($reg[7]) ? $reg[7] : 'stable'
+          );
+          $this->tags[$tag_info->version()] = $tag_info;
         }
       }
     }
@@ -176,10 +217,14 @@ class SvnStandardRepoInfo extends SvnRepoInfo {
   }
   function exportTag($tagname) {
     $this->listTags();
-    $raw = $this->tags[$tagname];
+    $tag = $this->getTaginfo($tagname);
     $name = $this->shell->getTempname();
-    $this->svn('export %s %s', $this->url . '/tags/' . $raw, $name);
+    $this->svn('export %s %s', $this->url . '/tags/' . $tag->raw(), $name);
     return new LocalCopy($name);
+  }
+  function getTaginfo($tagname) {
+    $this->listTags();
+    return $this->tags[$tagname];
   }
 }
 
@@ -199,14 +244,24 @@ class GitRepoInfo implements RepoInfo {
       $this->tags = array();
       $result = explode("\n", trim($this->shell->run('git ls-remote --tags %s', $this->url)));
       foreach ($result as $line) {
-        if (preg_match('~^[0-9a-f]{40}\s+refs/tags/(v?([0-9]+)(\.([0-9]+))?(\.([0-9]+))?([a-z]*))$~', $line, $reg)) {
+        if (preg_match('~^[0-9a-f]{40}\s+refs/tags/(v?([0-9]+)(\.([0-9]+))?(\.([0-9]+))?([A-Za-z]+[0-9A-Za-z-]*)?)$~', $line, $reg)) {
+          /*
           $raw = $reg[1];
           $v = array(
             $reg[2],
             isset($reg[4]) ? $reg[4] : 0,
             isset($reg[6]) ? $reg[6] : 0);
-          $stability = isset($reg[7]) ? $reg[7] : 'stable',
+          $stability = isset($reg[7]) ? $reg[7] : 'stable';
           $this->tags[implode('.', $v)] = $raw;
+          */
+          $tag_info = new TagInfo(
+            $reg[1],
+            $reg[2],
+            isset($reg[4]) ? $reg[4] : 0,
+            isset($reg[6]) ? $reg[6] : 0,
+            isset($reg[7]) ? $reg[7] : 'stable'
+          );
+          $this->tags[$tag_info->version()] = $tag_info;
         }
       }
     }
@@ -221,12 +276,16 @@ class GitRepoInfo implements RepoInfo {
   }
   function exportTag($tagname) {
     $this->listTags();
-    $raw = $this->tags[$tagname];
+    $tag = $this->getTaginfo($tagname);
     $name = $this->shell->getTempname();
     $this->shell->run('git clone %s %s', $this->url, $name);
-    $this->shell->run('cd %s && git checkout %s', $name, $raw);
+    $this->shell->run('cd %s && git checkout %s', $name, $tag->raw());
     $this->shell->run('rm -rf %s', $name . '/.git');
     return new LocalCopy($name);
+  }
+  function getTaginfo($tagname) {
+    $this->listTags();
+    return $this->tags[$tagname];
   }
   function validateRevision($revision) {
     if (!preg_match('/^[0-9a-f]{40}$/', $revision)) {

@@ -201,7 +201,7 @@ class PackageBuilder {
     $this->shell = $shell;
     $this->destination = rtrim($destination, '/');
   }
-  function build($local_copy, $files, $project, $version) {
+  function build($local_copy, $files, $project, $version, $stability) {
     if (!is_dir($this->destination)) {
       throw new Exception("Destination doesn't exist");
     }
@@ -217,7 +217,7 @@ class PackageBuilder {
     $compiler = new ManifestCompiler($project);
     file_put_contents(
       $root . '/package.xml',
-      $compiler->build($files, $project, $version));
+      $compiler->build($files, $project, $version, $stability));
     $package_dir = $root . '/' . $package_name;
     $this->shell->run('mkdir -p %s', $package_dir);
     foreach ($files->files() as $file) {

@@ -27,15 +27,17 @@ function build_release($release, $project) {
     $repo = $repo_probe->getRepositoryAccess($project);
     if ($release->mode() == 'auto') {
       $local_copy = $repo->exportTag($release->version());
+      $stability = $repo->getTagInfo($release->version())->stability();
     } else {
       $local_copy = $repo->exportRevision('HEAD');
+      $stability = 'stable';
     }
     $files = new FileFinder($local_copy->getPath());
     foreach ($project->files() as $file) {
       $files->traverse($file['path'], $file['ignore'], $file['destination']);
     }
     $builder = $container->get('PackageBuilder');
-    $builder->build($local_copy, $files, $project, $release->version());
+    $builder->build($local_copy, $files, $project, $release->version(), $stability);
     $local_copy->destroy($shell);
     $release->setCompleted();
     $gateway_releases->update(
