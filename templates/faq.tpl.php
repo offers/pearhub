@@ -1,10 +1,16 @@
 <p class="question">
+  What is PEAR?
+</p>
+<p class="answer">
+  PEAR is two things; It's a public repository of libraries, and it's a distribution system for publishing php libraries. Pearhub has nothing to do with the PEAR repository - it just uses the protocols of the distribution system. You can read more about PEAR on <a href="http://pear.php.net/manual/en/guide.users.concepts.php">the pear website</a>.
+</p>
+
+<p class="question">
   Is there a tutorial somewhere?
 </p>
 <p class="answer">
   Glad you asked; Rob Morgan has put together <a href="http://robmorgan.id.au/post/322528178/howto-publish-a-pear-package-on-pearhub">a nice little tutorial</a>, showing how to use pearhub with a project hosted on github. Give it a try.
 </p>
-
 
 <p class="question">
   How do automatic releases work?
