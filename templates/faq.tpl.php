@@ -1,4 +1,12 @@
 <p class="question">
+  Is there a tutorial somewhere?
+</p>
+<p class="answer">
+  Glad you asked; Rob Morgan has put together <a href="http://robmorgan.id.au/post/322528178/howto-publish-a-pear-package-on-pearhub">a nice little tutorial</a>, showing how to use pearhub with a project hosted on github. Give it a try.
+</p>
+
+
+<p class="question">
   How do automatic releases work?
 </p>
 <p class="answer">
