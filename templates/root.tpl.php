@@ -2,6 +2,14 @@
   Pearhub is a pear channel and a pear package publishing platform. As a user, you can <strong><em>install</em></strong> packages. As a developer, you can <strong><em>publish</em></strong> packages.
 </p>
 
+<p style="text-align:center">
+  <strong>
+    <?php echo html_link(url('projects'), 'Find Projects'); ?>,
+    <?php echo html_link(url('projects', array('new')), 'Add a new project'); ?>,
+    <?php echo html_link(url('faq'), 'Read the FAQ'); ?>
+  </strong>
+</p>
+
 <h4>Install</h4>
 <p>
   Packages are installed through the pear installer. Before you can use pearhub, you need to initialize the channel. You only need to do this once:
