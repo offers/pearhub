@@ -25,20 +25,7 @@ class RepoProbe {
       }
     }
     $svn_base_url = preg_replace('~/trunk(/?)$~', '', $url);
-    try {
-      $result = trim($this->shell->run('svn --non-interactive ls %s', $svn_base_url));
-    } catch (ProcessExitException $ex) {
-      if ($this->debug) {
-        echo $ex;
-      }
-      if (preg_match('/Server certificate verification failed: issuer is not trusted/', $ex->stdout() . $ex->stderr())) {
-        // throw new SslCertificateException("Server certificate verification failed for: " . $url);
-        $this->shell->run('yes p | svn info %s', $url);
-        $result = trim($this->shell->run('svn --non-interactive ls %s', $url));
-      } else {
-        throw $ex;
-      }
-    }
+    $result = trim($this->shell->run('svn --non-interactive --trust-server-cert ls %s', $svn_base_url));
     if (preg_match('/^svn:/', $result)) {
       return null;
     }
@@ -148,7 +135,7 @@ class SvnRepoInfo implements RepoInfo {
   }
   protected function svn($command /*, $args */) {
     $args = func_get_args();
-    $args[0] = 'svn --non-interactive ' . $args[0];
+    $args[0] = 'svn --non-interactive --trust-server-cert ' . $args[0];
     return $this->shell->runVarArgs($args);
   }
   function listTags() {
