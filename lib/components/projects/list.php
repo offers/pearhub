@@ -1,17 +1,20 @@
 <?php
 require_once 'projects.inc.php';
+require_once 'repo.inc.php';
 
 class components_projects_List extends k_Component {
   protected $templates;
   protected $projects;
   protected $maintainers;
   protected $db;
+  protected $repo_probe;
   protected $project;
-  function __construct(k_TemplateFactory $templates, ProjectGateway $projects, MaintainerGateway $maintainers, PDO $db) {
+  function __construct(k_TemplateFactory $templates, ProjectGateway $projects, MaintainerGateway $maintainers, PDO $db, RepoProbe $repo_probe) {
     $this->templates = $templates;
     $this->projects = $projects;
     $this->maintainers = $maintainers;
     $this->db = $db;
+    $this->repo_probe = $repo_probe;
   }
   function map($name) {
     return 'components_projects_Entry';
@@ -82,10 +85,18 @@ class components_projects_List extends k_Component {
       throw new k_NotAuthorized();
     }
     $this->project = new Project();
+    $this->project->unmarshal($this->body());
+    $this->project->unmarshalMaintainers($this->body(), $this->identity()->user(), $this->maintainers);
+    /*
+    try {
+      $this->repo_probe->getRepositoryTypeAndCache($this->project->repository(), true);
+    } catch (Exception $ex) {
+      $this->project->errors['repository'] = "Unable to detect repository. Please check that the URL is valid.";
+      return false;
+    }
+    */
     $this->db->beginTransaction();
     try {
-      $this->project->unmarshal($this->body());
-      $this->project->unmarshalMaintainers($this->body(), $this->identity()->user(), $this->maintainers);
       $this->project->setOwner($this->identity()->user());
       if (!$this->projects->insert($this->project)) {
         $this->db->rollback();

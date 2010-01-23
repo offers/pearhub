@@ -7,12 +7,14 @@ class components_projects_Entry extends k_Component {
   protected $projects;
   protected $maintainers;
   protected $db;
+  protected $repo_probe;
   protected $project;
-  function __construct(k_TemplateFactory $templates, ProjectGateway $projects, MaintainerGateway $maintainers, PDO $db) {
+  function __construct(k_TemplateFactory $templates, ProjectGateway $projects, MaintainerGateway $maintainers, PDO $db, RepoProbe $repo_probe) {
     $this->templates = $templates;
     $this->projects = $projects;
     $this->maintainers = $maintainers;
     $this->db = $db;
+    $this->repo_probe = $repo_probe;
   }
   function map($name) {
     if ($name === 'releases') {
@@ -82,6 +84,14 @@ class components_projects_Entry extends k_Component {
     if (!$this->project->unmarshalMaintainers($this->body(), $this->identity()->user(), $this->maintainers)) {
       return false;
     }
+    /*
+    try {
+      $this->repo_probe->getRepositoryTypeAndCache($this->project->repository(), true);
+    } catch (Exception $ex) {
+      $this->project->errors['repository'] = "Unable to detect repository. Please check that the URL is valid.";
+      return false;
+    }
+    */
     $this->db->beginTransaction();
     try {
       if (!$this->projects->update($this->project)) {

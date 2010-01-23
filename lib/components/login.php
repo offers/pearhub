@@ -1,4 +1,6 @@
 <?php
+require_once 'openid.inc.php';
+
 class components_Login extends k_Component {
   protected $templates;
   protected $zend_auth;

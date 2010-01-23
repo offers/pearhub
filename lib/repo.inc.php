@@ -50,14 +50,16 @@ class RepoProbe {
       throw new Exception("Unable to determine repository type");
     }
   }
-  function getRepositoryTypeAndCache($url) {
-    $result = $this->db->pexecute(
-      "select type from repository_types where url = :url and last_probe > date_add(now(), interval -1 hour)",
-      array(
-        ':url' => $url));
-    $row = $result->fetch(PDO::FETCH_ASSOC);
-    if ($row) {
-      return $row['type'];
+  function getRepositoryTypeAndCache($url, $ignore_cache = false) {
+    if (!$ignore_cache) {
+      $result = $this->db->pexecute(
+        "select type from repository_types where url = :url and last_probe > date_add(now(), interval -1 hour)",
+        array(
+          ':url' => $url));
+      $row = $result->fetch(PDO::FETCH_ASSOC);
+      if ($row) {
+        return $row['type'];
+      }
     }
     $type = $this->getRepositoryType($url);
     if ($type) {
