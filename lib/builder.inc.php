@@ -81,10 +81,14 @@ class ManifestCompiler {
         $this->manifest->startElement($type);
         if ($m->name()) {
           $this->manifest->writeElement("name", $m->name());
+        } else {
+          $this->manifest->writeElement("name", $m->user());
         }
         $this->manifest->writeElement("user", $m->user());
         if ($m->email()) {
           $this->manifest->writeElement("email", $m->email());
+        } else {
+          $this->manifest->writeElement("email", "dummy+".$m->user()."@example.com");
         }
         $this->manifest->writeElement("active", "yes");
         $this->manifest->endElement();
