@@ -174,9 +174,9 @@ class SvnRepoInfo implements RepoInfo {
       array_unshift($args, $this->location->username());
       array_unshift($args, $command);
     } else {
-      $args[0] = 'svn --non-interactive --trust-server-cert ' . $args[0];
+      $args[0] = '--non-interactive --trust-server-cert ' . $args[0];
     }
-    $args[0] = 'svn --non-interactive --trust-server-cert ' . $args[0];
+    $args[0] = 'svn ' . $args[0];
     return $this->shell->runVarArgs($args);
   }
   function listTags() {
