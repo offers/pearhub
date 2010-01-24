@@ -61,9 +61,6 @@ SELECT
   maintainers.user,
   maintainers.name,
   maintainers.email,
-  null as path,
-  null as destination,
-  null as `ignore`,
   null as channel,
   null as version
 FROM
@@ -82,33 +79,12 @@ SELECT
   null,
   null,
   null,
-  path,
-  destination,
-  `ignore`,
-  null,
-  null
-FROM
-  files
-WHERE
-  files.project_id = :id2
-
-UNION
-
-SELECT
-  null,
-  null,
-  null,
-  null,
-  null,
-  null,
-  null,
-  null,
   channel,
   version
 FROM
   dependencies
 WHERE
-  dependencies.project_id = :id3
+  dependencies.project_id = :id2
 '
       );
       $this->sql_load_aggregates->setFetchMode(PDO::FETCH_ASSOC);
@@ -116,13 +92,10 @@ WHERE
     $this->sql_load_aggregates->execute(
       array(
         'id1' => $project->id(),
-        'id2' => $project->id(),
-        'id3' => $project->id()));
+        'id2' => $project->id()));
     foreach ($this->sql_load_aggregates as $row) {
       if ($row['name']) {
         $project->addProjectMaintainer(new ProjectMaintainer($this->maintainers->load($row), $row['type'], $project->id()));
-      } elseif ($row['path']) {
-        $project->addFile($row['path'], $row['destination'], $row['ignore']);
       } elseif ($row['channel']) {
           $project->addDependency($row['channel'], $row['version']);
       }
@@ -140,17 +113,6 @@ WHERE
           ':type' => $pm->type()
         ));
     }
-    $insert_files = $this->db->prepare(
-      'insert into files (project_id, path, destination, `ignore`) values (:project_id, :path, :destination, :ignore)');
-    foreach ($project->files() as $file) {
-      $insert_files->execute(
-        array(
-          ':project_id' => $project->id(),
-          ':path' => $file['path'],
-          ':destination' => $file['destination'],
-          ':ignore' => $file['ignore']
-        ));
-    }
     $insert_dependency = $this->db->prepare(
       'insert into dependencies (project_id, channel, version) values (:project_id, :channel, :version)');
     foreach ($project->dependencies() as $dep) {
@@ -165,11 +127,6 @@ WHERE
   function deleteAggregates($project) {
     $this->db->prepare(
       'delete from project_maintainers where project_id = :project_id'
-    )->execute(
-        array(
-          ':project_id' => is_object($project) ? $project->id() : $project));
-    $this->db->prepare(
-      'delete from files where project_id = :project_id'
     )->execute(
         array(
           ':project_id' => is_object($project) ? $project->id() : $project));
@@ -234,20 +191,14 @@ WHERE
     if (count(array_unique($names)) < count($names)) {
       $project->errors['maintainers'][] = "Each maintainer can only be entered once";
     }
-    if (count($project->files()) === 0) {
-      $project->errors['files'][] = "You must enter at least one file";
-    }
-    $paths = array();
-    foreach ($project->files() as $file) {
-      if (!trim($file['path'])) {
-        $project->errors['files'][] = "File path is missing";
-      } elseif (!trim($file['destination'])) {
-        $project->errors['files'][] = "File destination is missing";
-      }
-      $paths[] = $file['path'];
-    }
-    if (count(array_unique($paths)) < count($paths)) {
-      $project->errors['files'][] = "Each path can only be entered once";
+    if (!trim($project->path())) {
+      $project->errors['path'][] = "File path is missing";
+    } elseif (!preg_match('~^/~', $project->path())) {
+      $project->errors['path'][] = "File path must begin with a /";
+    } elseif (!trim($project->destination())) {
+      $project->errors['destination'][] = "File destination is missing";
+    } elseif (!preg_match('~^/~', $project->destination())) {
+      $project->errors['destination'][] = "File destination must begin with a /";
     }
     foreach ($project->dependencies() as $dep) {
       if (!trim($dep['channel'])) {
@@ -314,17 +265,13 @@ class MaintainerGateway extends pdoext_TableGateway {
 }
 
 class Project extends Accessor {
-  protected $files = array();
   protected $dependencies = array();
   protected $project_maintainers = array();
-  function __construct($row = array('php_version' => '5.0.0', 'release_policy' => 'auto')) {
+  function __construct($row = array('php_version' => '5.0.0', 'release_policy' => 'auto', 'path' => '/')) {
     parent::__construct($row);
   }
   function displayName() {
     return $this->name();
-  }
-  function files() {
-    return $this->files;
   }
   function dependencies() {
     return $this->dependencies;
@@ -340,21 +287,6 @@ class Project extends Accessor {
       $project_maintainer->setProjectId($id);
     }
     return $this->row['id'] = $id;
-  }
-  function addFile($path, $destination, $ignore = null) {
-    $this->files[] = array('path' => $path, 'destination' => $destination, 'ignore' => $ignore);
-    return $path;
-  }
-  function setFiles($files) {
-    foreach ($files as $file) {
-      if (!isset($file['path'])) {
-        throw new Exception("Missing property 'path'");
-      }
-      if (!isset($file['destination'])) {
-        throw new Exception("Missing property 'destination'");
-      }
-    }
-    return $this->files = $files;
   }
   function setDependencies($dependencies) {
     $this->dependencies = $dependencies;
@@ -382,19 +314,11 @@ class Project extends Accessor {
     $fields = array(
       'name', 'owner', 'created', 'repository',
       'summary', 'description', 'href', 'license_title', 'license_href',
-      'php_version', 'release_policy');
+      'php_version', 'release_policy',
+      'path', 'description', 'ignore');
     foreach ($fields as $field) {
       if (array_key_exists($field, $hash)) {
         $this->{"set$field"}($hash[$field]);
-      }
-    }
-    $this->setFiles(array());
-    if (isset($hash['files'])) {
-      foreach ($hash['files'] as $row) {
-        $this->addFile(
-          $row['path'],
-          isset($row['destination']) ? $row['destination'] : '/',
-          isset($row['ignore']) ? $row['ignore'] : null);
       }
     }
     $this->setDependencies(array());

@@ -19,21 +19,20 @@
 <h2>files</h2>
 
 <div class="form">
-  <div id="files-container" class="container">
-<?php foreach ($project->files() as $file): ?>
-    <div class="files-fieldset fieldset">
-      <a href="#" class="remove" title="Click to remove this path">&#8855;</a>
-<?php $unique = uniqid(); ?>
-      <label><span>path:</span><?php echo html_text_field("files[$unique][path]", $file['path']); ?></label>
-      <label><span>destination:</span><?php echo html_text_field("files[$unique][destination]", $file['destination']); ?></label>
-      <label><span>ignore:</span><?php echo html_text_field("files[$unique][ignore]", $file['ignore']); ?></label>
-    </div>
-<?php endforeach; ?>
+  <div class="container">
+    <label><span>path:</span>
+    <?php echo html_text_field("path", $project->path(), array('id' => "field-path")); ?>
+    </label>
+    <?php echo krudt_errors_for($project, 'path'); ?>
+    <label><span>destination:</span>
+    <?php echo html_text_field("destination", $project->destination(), array('id' => "field-destination")); ?>
+    </label>
+    <?php echo krudt_errors_for($project, 'destination'); ?>
+    <label><span>ignore:</span>
+    <?php echo html_text_field("ignore", $project->ignore(), array('id' => "field-ignore")); ?>
+    </label>
+    <?php echo krudt_errors_for($project, 'ignore'); ?>
   </div>
-  <div class="append-wrapper">
-    <a href="#" id="files-append" class="append" title="Click to add a path">Add path</a>
-  </div>
-  <?php echo krudt_errors_for($project, 'files'); ?>
 </div>
 
 <h2>maintainers</h2>
@@ -46,9 +45,9 @@
     <div class="maintainers-fieldset fieldset">
       <a href="#" class="remove" title="Click to remove this maintainer">&#8855;</a>
 <?php $unique = uniqid(); ?>
-      <label><span>user:</span><input type="text" name="maintainers[<?=$unique?>][user]" value="<?=e($m->maintainer()->user())?>"<?=$more?> /></label>
-      <label><span>name:</span><input type="text" name="maintainers[<?=$unique?>][name]" value="<?=e($m->maintainer()->name())?>"<?=$more?> /></label>
-      <label><span>email:</span><input type="text" name="maintainers[<?=$unique?>][email]" value="<?=e($m->maintainer()->email())?>"<?=$more?> /></label>
+      <label><span>user:</span><input type="text" name="maintainers[<?php echo $unique?>][user]" value="<?php echo e($m->maintainer()->user())?>"<?php echo $more?> /></label>
+      <label><span>name:</span><input type="text" name="maintainers[<?php echo $unique?>][name]" value="<?php echo e($m->maintainer()->name())?>"<?php echo $more?> /></label>
+      <label><span>email:</span><input type="text" name="maintainers[<?php echo $unique?>][email]" value="<?php echo e($m->maintainer()->email())?>"<?php echo $more?> /></label>
       <label>
         <span>type:</span>
         <?php echo html_select("maintainers[$unique][type]", array('lead', 'developer', 'contributor', 'helper'), $m->type()); ?>

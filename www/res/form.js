@@ -356,40 +356,11 @@ var wrapInLabel = function(name, input) {
 
 var init = function() {
     var tooltext = {};
-    tooltext['path'] = "<h3>Path in repository.</h3><p>Select the location of files, relative to the repository root. Typically <code>/lib</code> or <code>/src</code></p>";
-    tooltext['destination'] = "<h3>Install path.</h3><p>Select the path where the files will be installed to.</p>";
-    tooltext['ignore'] = "<h3>Ignore pattern.</h3><p>Perl compatible regular expression. Filenames that match this expression will not be included. Use to skip tests etc. from the repository.</p>";
     tooltext['channel'] = "<h3>Package URL</h3><p>Enter the URL to the package. This should be on the form <code>channel/Package_Name</code>. For example: <code>pearhub.org/Konstrukt</code></p>";
     tooltext['version'] = "<h3>Minimum required version.</h3><p>Should be on the form <code>X.X.X</code></p>";
     tooltext['user'] = "<h3>Username</h3><p>Should be a single, short name. The username is unique across projects.</p>";
     tooltext['name'] = "<h3>Name</h3><p>Enter the full name of the person. This field is optional.</p>";
     tooltext['email'] = "<h3>E-mail address.</h3><p>This field is optional.</p>";
-    initContainer(
-        document.getElementById("files-append"),
-        document.getElementById("files-container"),
-        function(container) {
-            var id = uniqueId();
-            var fieldset = document.createElement("div");
-            fieldset.className = "files-fieldset fieldset";
-            makeRemoveButton(fieldset, "path");
-            fieldset.appendChild(
-                installTooltip(
-                    wrapInLabel(
-                        "path",
-                        createElement("input", {type: "text", name: "files[" + id + "][path]"})), tooltext['path']));
-            fieldset.appendChild(
-                installTooltip(
-                    wrapInLabel(
-                        "destination",
-                        createElement("input", {type: "text", name: "files[" + id + "][destination]", value: "/"})), tooltext['destination']));
-            fieldset.appendChild(
-                installTooltip(
-                    wrapInLabel(
-                        "ignore",
-                        createElement("input", {type: "text", name: "files[" + id + "][ignore]"})), tooltext['ignore']));
-            container.appendChild(fieldset);
-            return fieldset;
-        });
     initContainer(
         document.getElementById("dependencies-append"),
         document.getElementById("dependencies-container"),
@@ -486,8 +457,22 @@ var init = function() {
     installTooltip("field-summary", "<h3>Short summary.</h3><p>Enter a single line, summarising your project.</p>");
     installTooltip("field-description", "<h3>A longer description.</h3><p>Enter a paragraph or two, describing your project.</p>");
     installTooltip("field-repository", "<h3>Repository URL</h3><p>Enter the URL for the projects repository here. Currently only subversion and git repositories are supported.</p><p>If you use subversion, you should enter the URL to the main branch or trunk.</p><p>If your project is hosted at github, use the read-only URL.</p>");
+    installTooltip("field-path", "<h3>Path in repository.</h3><p>Select the location of files, relative to the repository root. Typically <code>/lib</code> or <code>/src</code></p>");
+    installTooltip("field-destination", "<h3>Install path.</h3><p>Select the path where the files will be installed to.</p><p>This is relative to the PEAR install directory.</p>");
+    installTooltip("field-ignore", "<h3>Ignore pattern.</h3><p>Perl compatible regular expression. Filenames that match this expression will not be included. Use to skip tests etc. from the repository.</p>");
     installTooltip("field-href", "<h3>Enter URL to the projects website.</h3><p>This field is optional</p>");
     installTooltip("field-php-version", "<h3>Minimum supported PHP version.</h3><p>If in doubt, leave this untouched</p>");
     installTooltip("field-license-title", "<h3>Enter the project license.</h3>");
     installTooltip("field-license-href", "<h3>Enter a URL to the license text.</h3><p>This field is optional</p>");
+    var name = document.getElementById("field-name");
+    if (name) {
+        var destination = document.getElementById("field-destination");
+        bind(
+            name, 'change',
+            function() {
+                if (destination.value == "") {
+                    destination.value = "/" + name.value;
+                }
+            });
+    }
 };
