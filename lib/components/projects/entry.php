@@ -86,7 +86,7 @@ class components_projects_Entry extends k_Component {
     }
     /*
     try {
-      $this->repo_probe->getRepositoryTypeAndCache($this->project->repository(), true);
+      $this->repo_probe->getRepositoryTypeAndCache($this->project->repositoryLocation(), true);
     } catch (Exception $ex) {
       $this->project->errors['repository'] = "Unable to detect repository. Please check that the URL is valid.";
       return false;

@@ -273,6 +273,12 @@ class Project extends Accessor {
   function displayName() {
     return $this->name();
   }
+  function repositoryLocation() {
+    return new RepoLocation(
+      $this->row['repository'],
+      $this->row['repository_username'],
+      $this->row['repository_password']);
+  }
   function dependencies() {
     return $this->dependencies;
   }
@@ -312,7 +318,8 @@ class Project extends Accessor {
     }
     $hash = $h;
     $fields = array(
-      'name', 'owner', 'created', 'repository',
+      'name', 'owner', 'created',
+      'repository', 'repository_username', 'repository_password',
       'summary', 'description', 'href', 'license_title', 'license_href',
       'php_version', 'release_policy',
       'path', 'description', 'ignore');

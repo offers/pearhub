@@ -3,8 +3,28 @@ require_once 'shell.inc.php';
 require_once 'pdoext.inc.php';
 require_once 'pdoext/connection.inc.php';
 
+class RepoLocation {
+  protected $url;
+  protected $username;
+  protected $password;
+  function __construct($url, $username = null, $password = null) {
+    $this->url = rtrim($url, '/');
+    $this->username = $username;
+    $this->password = $password;
+  }
+  function url() {
+    return $this->url;
+  }
+  function username() {
+    return $this->username;
+  }
+  function password() {
+    return $this->password;
+  }
+}
+
 /**
- * Detects repository type from a URL and returns an appropriate RepoInfo
+ * Detects repository type from a RepoLocation and returns an appropriate RepoInfo
  */
 class RepoProbe {
   protected $shell;
@@ -14,9 +34,9 @@ class RepoProbe {
     $this->shell = $shell;
     $this->db = $db;
   }
-  function getRepositoryType($url) {
+  function getRepositoryType(RepoLocation $location) {
     try {
-      $this->shell->run('git ls-remote --heads %s', $url);
+      $this->shell->run('git ls-remote --heads %s', $location->url());
       return 'git';
     } catch (ProcessExitException $ex) {
       /* squelch */
@@ -24,7 +44,7 @@ class RepoProbe {
         echo $ex;
       }
     }
-    $svn_base_url = preg_replace('~/trunk(/?)$~', '', $url);
+    $svn_base_url = preg_replace('~/trunk(/?)$~', '', $location->url());
     $result = trim($this->shell->run('svn --non-interactive --trust-server-cert ls %s', $svn_base_url));
     if (preg_match('/^svn:/', $result)) {
       return null;
@@ -39,35 +59,40 @@ class RepoProbe {
    * @return RepoInfo
    */
   function getRepositoryAccess($project) {
-    switch ($this->getRepositoryTypeAndCache($project->repository())) {
+    switch ($this->getRepositoryTypeAndCache($project->repositoryLocation())) {
     case 'git':
-      return new GitRepoInfo($project->repository(), $this->shell);
+      return new GitRepoInfo($project->repositoryLocation(), $this->shell);
     case 'svn/standard':
-      return new SvnStandardRepoInfo(preg_replace('~/trunk(/?)$~', '', $project->repository()), $this->shell);
+      $location = $project->repositoryLocation();
+      $location = new RepoLocation(
+        preg_replace('~/trunk(/?)$~', '', $location->url()),
+        $location->username(),
+        $location->password());
+      return new SvnStandardRepoInfo($location, $this->shell);
     case 'svn/nonstandard':
-      return new SvnRepoInfo($project->repository(), $this->shell);
+      return new SvnRepoInfo($project->repositoryLocation(), $this->shell);
     default:
       throw new Exception("Unable to determine repository type");
     }
   }
-  function getRepositoryTypeAndCache($url, $ignore_cache = false) {
+  function getRepositoryTypeAndCache(RepoLocation $location, $ignore_cache = false) {
     if (!$ignore_cache) {
       $result = $this->db->pexecute(
         "select type from repository_types where url = :url and last_probe > date_add(now(), interval -1 hour)",
         array(
-          ':url' => $url));
+          ':url' => $location->url()));
       $row = $result->fetch(PDO::FETCH_ASSOC);
       if ($row) {
         return $row['type'];
       }
     }
-    $type = $this->getRepositoryType($url);
+    $type = $this->getRepositoryType($location);
     if ($type) {
       $this->db->pexecute(
         "insert into repository_types set url = :url, type = :type, last_probe = now()
 on duplicate key update type = :type2, last_probe = now()",
         array(
-          ':url' => $url,
+          ':url' => $location->url(),
           ':type' => $type,
           ':type2' => $type));
     }
@@ -127,12 +152,12 @@ class TagInfo {
  * if your repo has a standard layout (`/trunk` and `/tags`)
  */
 class SvnRepoInfo implements RepoInfo {
-  protected $url;
+  protected $location;
   protected $shell;
   protected $trunk;
-  function __construct($url, $shell) {
-    $this->url = rtrim($url, '/');
-    $this->trunk = $this->url;
+  function __construct(RepoLocation $location, $shell) {
+    $this->location = $location;
+    $this->trunk = $this->location->url();
     $this->shell = $shell;
   }
   protected function svn($command /*, $args */) {
@@ -169,14 +194,14 @@ class SvnRepoInfo implements RepoInfo {
  */
 class SvnStandardRepoInfo extends SvnRepoInfo {
   protected $tags;
-  function __construct($url, $shell) {
-    parent::__construct($url, $shell);
-    $this->trunk = $this->url . '/trunk';
+  function __construct(RepoLocation $location, $shell) {
+    parent::__construct($location, $shell);
+    $this->trunk = $this->location->url() . '/trunk';
   }
   function listTags() {
     if ($this->tags === null) {
       $this->tags = array();
-      $result = explode("\n", trim($this->svn('ls %s', $this->url . '/tags')));
+      $result = explode("\n", trim($this->svn('ls %s', $this->location->url() . '/tags')));
       foreach ($result as $line) {
         if (preg_match('~^(([a-zA-Z_-]+)?([0-9]+)(\.([0-9]+))?(\.([0-9]+))?([A-Za-z]+[0-9A-Za-z-]*)?)/?$~', $line, $reg)) {
           $tag_info = new TagInfo(
@@ -203,7 +228,7 @@ class SvnStandardRepoInfo extends SvnRepoInfo {
     $this->listTags();
     $tag = $this->getTaginfo($tagname);
     $name = $this->shell->getTempname();
-    $this->svn('export %s %s', $this->url . '/tags/' . $tag->raw(), $name);
+    $this->svn('export %s %s', $this->location->url() . '/tags/' . $tag->raw(), $name);
     return new LocalCopy($name);
   }
   function getTaginfo($tagname) {
@@ -216,17 +241,17 @@ class SvnStandardRepoInfo extends SvnRepoInfo {
  * git repository access.
  */
 class GitRepoInfo implements RepoInfo {
-  protected $url;
+  protected $location;
   protected $shell;
   protected $tags;
-  function __construct($url, $shell) {
-    $this->url = $url;
+  function __construct(RepoLocation $location, $shell) {
+    $this->location = $location;
     $this->shell = $shell;
   }
   function listTags() {
     if ($this->tags === null) {
       $this->tags = array();
-      $result = explode("\n", trim($this->shell->run('git ls-remote --tags %s', $this->url)));
+      $result = explode("\n", trim($this->shell->run('git ls-remote --tags %s', $this->location->url())));
       foreach ($result as $line) {
         if (preg_match('~^[0-9a-f]{40}\s+refs/tags/(([a-zA-Z_-]+)?([0-9]+)(\.([0-9]+))?(\.([0-9]+))?([A-Za-z]+[0-9A-Za-z-]*)?)$~', $line, $reg)) {
           $tag_info = new TagInfo(
@@ -253,7 +278,7 @@ class GitRepoInfo implements RepoInfo {
     $this->listTags();
     $tag = $this->getTaginfo($tagname);
     $name = $this->shell->getTempname();
-    $this->shell->run('git clone %s %s', $this->url, $name);
+    $this->shell->run('git clone %s %s', $this->location->url(), $name);
     $this->shell->run('cd %s && git checkout %s', $name, $tag->raw());
     $this->shell->run('rm -rf %s', $name . '/.git');
     return new LocalCopy($name);
@@ -267,7 +292,7 @@ class GitRepoInfo implements RepoInfo {
       return false;
     }
     $name = $this->shell->getTempname();
-    $this->shell->run('git clone %s %s', $this->url, $name);
+    $this->shell->run('git clone %s %s', $this->location->url(), $name);
     $result = explode("\n", trim($this->shell->run('cd %s && git log --pretty=oneline', $name)));
     $this->shell->run('rm -rf %s', $name);
     $revisions = array();
@@ -280,7 +305,7 @@ class GitRepoInfo implements RepoInfo {
   }
   function exportRevision($revision) {
     $name = $this->shell->getTempname();
-    $this->shell->run('git clone %s %s', $this->url, $name);
+    $this->shell->run('git clone %s %s', $this->location->url(), $name);
     $this->shell->run('cd %s && git checkout %s', $name, $revision);
     $this->shell->run('rm -rf %s', $name . '/.git');
     return new LocalCopy($name);
