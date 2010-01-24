@@ -457,6 +457,8 @@ var init = function() {
     installTooltip("field-summary", "<h3>Short summary.</h3><p>Enter a single line, summarising your project.</p>");
     installTooltip("field-description", "<h3>A longer description.</h3><p>Enter a paragraph or two, describing your project.</p>");
     installTooltip("field-repository", "<h3>Repository URL</h3><p>Enter the URL for the projects repository here. Currently only subversion and git repositories are supported.</p><p>If you use subversion, you should enter the URL to the main branch or trunk.</p><p>If your project is hosted at github, use the read-only URL.</p>");
+    installTooltip("field-repository-username", "<h3>Username</h3><p>Username for accessing the repository. This is optional. Note that this currently only works with subversion repositories.</p>");
+    installTooltip("field-repository-password", "<h3>Password</h3><p>Password for accessing the repository. This is optional.</p><p>Password won't be viewable by others than you. It will however be stored in clear text, so you shouldn't use a valuable password. Note that this currently only works with subversion repositories.</p>");
     installTooltip("field-path", "<h3>Path in repository.</h3><p>Select the location of files, relative to the repository root. Typically <code>/lib</code> or <code>/src</code></p>");
     installTooltip("field-destination", "<h3>Install path.</h3><p>Select the path where the files will be installed to.</p><p>This is relative to the PEAR install directory.</p>");
     installTooltip("field-ignore", "<h3>Ignore pattern.</h3><p>Perl compatible regular expression. Filenames that match this expression will not be included. Use to skip tests etc. from the repository.</p>");

@@ -16,6 +16,19 @@
   <?php echo krudt_errors_for($project, 'repository'); ?>
 </div>
 
+<div class="form">
+  <div class="container">
+    <label><span>username:</span>
+    <?php echo html_text_field("repository-username", $project->repositoryUsername(), array('id' => "field-repository-username")); ?>
+    </label>
+    <?php echo krudt_errors_for($project, 'repository-username'); ?>
+    <label><span>password:</span>
+    <?php echo html_text_field("repository-password", $project->repositoryPassword(), array('id' => "field-repository-password")); ?>
+    </label>
+    <?php echo krudt_errors_for($project, 'repository-password'); ?>
+  </div>
+</div>
+
 <h2>files</h2>
 
 <div class="form">
