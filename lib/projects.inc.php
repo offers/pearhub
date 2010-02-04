@@ -322,7 +322,7 @@ class Project extends Accessor {
       'repository', 'repository_username', 'repository_password',
       'summary', 'description', 'href', 'license_title', 'license_href',
       'php_version', 'release_policy',
-      'path', 'description', 'ignore');
+      'path', 'destination', 'ignore');
     foreach ($fields as $field) {
       if (array_key_exists($field, $hash)) {
         $this->{"set$field"}($hash[$field]);
