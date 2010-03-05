@@ -15,6 +15,9 @@ class RepoLocation {
   function url() {
     return $this->url;
   }
+  function baseUrl() {
+    return preg_replace('~/trunk(/?)$~', '', $this->url());
+  }
   function username() {
     return $this->username;
   }
@@ -44,11 +47,10 @@ class RepoProbe {
         echo $ex;
       }
     }
-    $svn_base_url = preg_replace('~/trunk(/?)$~', '', $location->url());
     if ($location->username()) {
-      $result = trim($this->shell->run('svn --username %s --password %s --non-interactive --trust-server-cert ls %s', $location->username(), $location->password(), $svn_base_url));
+      $result = trim($this->shell->run('svn --username %s --password %s --non-interactive --trust-server-cert ls %s', $location->username(), $location->password(), $location->baseUrl()));
     } else {
-      $result = trim($this->shell->run('svn --non-interactive --trust-server-cert ls %s', $svn_base_url));
+      $result = trim($this->shell->run('svn --non-interactive --trust-server-cert ls %s', $location->baseUrl()));
     }
     if (preg_match('/^svn:/', $result)) {
       return null;
@@ -167,7 +169,7 @@ class SvnRepoInfo implements RepoInfo {
   protected function svn($command /*, $args */) {
     $args = func_get_args();
     if ($this->location->username()) {
-      $result = trim($this->shell->run('svn --username %s --password %s --non-interactive --trust-server-cert ls %s', $this->location->username(), $this->location->password(), $svn_base_url));
+      $result = trim($this->shell->run('svn --username %s --password %s --non-interactive --trust-server-cert ls %s', $this->location->username(), $this->location->password(), $location->baseUrl()));
       $command = '--username %s --password %s --non-interactive --trust-server-cert ' . $command;
       array_shift($args);
       array_unshift($args, $this->location->password());
