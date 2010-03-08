@@ -10,7 +10,7 @@ require_once('document.php');
 class WebTestOfRoot extends WebTestCase {
   function createBrowser() {
     $this->container = create_container();
-    return new k_VirtualSimpleBrowser('components_Root', new k_InjectorAdapter($this->container, new krudt_Document()));
+    return new k_VirtualSimpleBrowser('components_Root', new k_InjectorAdapter($this->container, new Document()));
   }
   function createInvoker() {
     return new SimpleInvoker($this);

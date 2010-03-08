@@ -4,7 +4,7 @@ require_once('document.php');
 $container = create_container();
 k()
   // Use container for wiring of components
-->setComponentCreator(new k_InjectorAdapter($container, new krudt_Document()))
+->setComponentCreator(new k_InjectorAdapter($container, new Document()))
   ->setIdentityLoader($container->get('k_IdentityLoader'))
   // Location of debug logging
   ->setLog($debug_log_path)

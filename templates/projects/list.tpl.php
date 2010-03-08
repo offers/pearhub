@@ -16,7 +16,7 @@
 <?php endforeach; ?>
 </ul>
 
-<?php echo krudt_paginate($projects, array('q')); ?>
+<?php echo collection_paginate($projects, array('q')); ?>
 
 <p>
   <a href="<?php e(url('', array('new'))); ?>">Add new project</a>

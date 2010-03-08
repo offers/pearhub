@@ -1,19 +1,19 @@
 <div class="form full">
   <label for="field-summary">summary</label>
   <?php echo html_text_field("summary", $project->summary(), array('id' => "field-summary")); ?>
-  <?php echo krudt_errors_for($project, 'summary'); ?>
+  <?php echo form_errors_for($project, 'summary'); ?>
 </div>
 
 <div class="form full">
   <label for="field-description">description</label>
   <?php echo html_text_area("description", $project->description(), array('id' => "field-description")); ?>
-  <?php echo krudt_errors_for($project, 'description'); ?>
+  <?php echo form_errors_for($project, 'description'); ?>
 </div>
 
 <div class="form full">
   <label for="field-repository">repository</label>
   <?php echo html_text_field("repository", $project->repository(), array('id' => "field-repository")); ?>
-  <?php echo krudt_errors_for($project, 'repository'); ?>
+  <?php echo form_errors_for($project, 'repository'); ?>
 </div>
 
 <div class="form">
@@ -21,11 +21,11 @@
     <label><span>username:</span>
     <?php echo html_text_field("repository-username", $project->repositoryUsername(), array('id' => "field-repository-username")); ?>
     </label>
-    <?php echo krudt_errors_for($project, 'repository-username'); ?>
+    <?php echo form_errors_for($project, 'repository-username'); ?>
     <label><span>password:</span>
     <?php echo html_text_field("repository-password", $project->repositoryPassword(), array('id' => "field-repository-password")); ?>
     </label>
-    <?php echo krudt_errors_for($project, 'repository-password'); ?>
+    <?php echo form_errors_for($project, 'repository-password'); ?>
   </div>
 </div>
 
@@ -36,15 +36,15 @@
     <label><span>path:</span>
     <?php echo html_text_field("path", $project->path(), array('id' => "field-path")); ?>
     </label>
-    <?php echo krudt_errors_for($project, 'path'); ?>
+    <?php echo form_errors_for($project, 'path'); ?>
     <label><span>destination:</span>
     <?php echo html_text_field("destination", $project->destination(), array('id' => "field-destination")); ?>
     </label>
-    <?php echo krudt_errors_for($project, 'destination'); ?>
+    <?php echo form_errors_for($project, 'destination'); ?>
     <label><span>ignore:</span>
     <?php echo html_text_field("ignore", $project->ignore(), array('id' => "field-ignore")); ?>
     </label>
-    <?php echo krudt_errors_for($project, 'ignore'); ?>
+    <?php echo form_errors_for($project, 'ignore'); ?>
   </div>
 </div>
 
@@ -71,7 +71,7 @@
   <div class="append-wrapper">
     <a href="#" id="maintainers-append" class="append" title="Click to add a maintainer">Add maintainer</a>
   </div>
-  <?php echo krudt_errors_for($project, 'maintainers'); ?>
+  <?php echo form_errors_for($project, 'maintainers'); ?>
 </div>
 
 <h2>dependencies</h2>
@@ -90,19 +90,19 @@
   <div class="append-wrapper">
     <a href="#" id="dependencies-append" class="append" title="Click to add a dependency">Add Dependency</a>
   </div>
-  <?php echo krudt_errors_for($project, 'dependencies'); ?>
+  <?php echo form_errors_for($project, 'dependencies'); ?>
 </div>
 
 <h2>details</h2>
 
 <div class="form">
   <label><span>web-site:</span><?php echo html_text_field("href", $project->href(), array('id' => "field-href")); ?></label>
-  <?php echo krudt_errors_for($project, 'href'); ?>
+  <?php echo form_errors_for($project, 'href'); ?>
 </div>
 
 <div class="form">
   <label><span>php-version:</span><?php echo html_text_field("php-version", $project->phpVersion(), array('id' => "field-php-version")); ?></label>
-  <?php echo krudt_errors_for($project, 'php-version'); ?>
+  <?php echo form_errors_for($project, 'php-version'); ?>
 </div>
 
 <h2>license</h2>
@@ -112,8 +112,8 @@
     <label><span>title:</span><?php echo html_text_field("license-title", $project->licenseTitle(), array('id' => "field-license-title")); ?></label>
 
     <label><span>href:</span><?php echo html_text_field("license-href", $project->licenseHref(), array('id' => "field-license-href")); ?></label>
-    <?php echo krudt_errors_for($project, 'license-title'); ?>
-    <?php echo krudt_errors_for($project, 'license-href'); ?>
+    <?php echo form_errors_for($project, 'license-title'); ?>
+    <?php echo form_errors_for($project, 'license-href'); ?>
   </div>
 </div>
 

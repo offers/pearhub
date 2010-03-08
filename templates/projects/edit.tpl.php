@@ -5,7 +5,7 @@
 <?php endif; ?>
 </p>
 <?php echo html_form_tag('put', url('', array('edit')), array('id' => 'project-form')); ?>
-<?php echo krudt_errors($project); ?>
+<?php echo form_errors($project); ?>
 <?php include('form.tpl.php'); ?>
 <div class="form-footer">
   <a href="<?php e(url()) ?>">Cancel</a>

@@ -1,6 +1,6 @@
 <?php
 
-class krudt_Document extends k_Document {
+class Document extends k_Document {
   protected $crumbtrail = array();
   function crumbtrail() {
     return $this->crumbtrail;

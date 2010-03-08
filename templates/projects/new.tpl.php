@@ -1,9 +1,9 @@
 <?php echo html_form_tag('post', url('', array('new'))); ?>
-<?php echo krudt_errors($project); ?>
+<?php echo form_errors($project); ?>
 <div class="form full">
   <label for="field-name">name</label>
   <?php echo html_text_field("name", $project->name(), array('id' => "field-name")); ?>
-  <?php echo krudt_errors_for($project, 'name'); ?>
+  <?php echo form_errors_for($project, 'name'); ?>
 </div>
 
 <?php include('form.tpl.php'); ?>

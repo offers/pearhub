@@ -195,7 +195,7 @@ function html_options($values = array(), $value = null) {
 /**
  * Renders global errors for an entity.
  */
-function krudt_errors($entity) {
+function form_errors($entity) {
   $html = array();
   foreach ($entity->errors as $field => $error) {
     if (!is_string($field)) {
@@ -208,7 +208,7 @@ function krudt_errors($entity) {
 /**
  * Renders errors for a single of an entity field,
  */
-function krudt_errors_for($entity, $field) {
+function form_errors_for($entity, $field) {
   if (isset($entity->errors[$field])) {
     return
       '<span style="display:block;color:red">' . "\n"
@@ -220,7 +220,7 @@ function krudt_errors_for($entity, $field) {
 /**
  * Creates a `<input type="text" />` for a record.
  */
-function krudt_text_field($entry, $field, $label = null) {
+function form_text_field($entry, $field, $label = null) {
   $label || $label = ucfirst(str_replace('_', ' ', $field));
   $html = '  <p class="krudt-form">
     <label for="field-' . escape($field) . '">' . escape($label) . '</label>
@@ -237,7 +237,7 @@ function krudt_text_field($entry, $field, $label = null) {
 /**
  * Creates a `<textarea />` for a record.
  */
-function krudt_text_area($entry, $field, $label = null) {
+function form_text_area($entry, $field, $label = null) {
   $label || $label = ucfirst(str_replace('_', ' ', $field));
   $html = '  <p class="krudt-form">
     <label for="field-' . escape($field) . '">' . escape($label) . '</label>
@@ -255,7 +255,7 @@ function krudt_text_area($entry, $field, $label = null) {
  * Just a very simple pagination widget.
  * You might want to have a look at PEAR::Pager for some more elaborate alternatives.
  */
-function krudt_paginate($collection, $sticky_parameters = array(), $page_size = 10) {
+function collection_paginate($collection, $sticky_parameters = array(), $page_size = 10) {
   $page_size = (integer) $page_size;
   if ($page_size < 1) {
     throw new Exception("Can't paginate with size < 1");
