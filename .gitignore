@@ -1,6 +1,5 @@
 log/
 var/
-thirdparty/konstrukt/
 thirdparty/pdoext/
 thirdparty/zf/
 thirdparty/pirum

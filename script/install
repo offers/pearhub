@@ -2,7 +2,6 @@
 
 # Pull thirdparty libraries
 git submodule init
-svn export http://konstrukt.googlecode.com/svn/trunk thirdparty/konstrukt
 svn export http://pdoext.googlecode.com/svn/trunk thirdparty/pdoext
 svn export http://framework.zend.com/svn/framework/standard/tags/release-1.9.5/library/ thirdparty/zf
 pushd thirdparty || exit -1

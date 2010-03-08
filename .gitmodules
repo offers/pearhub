@@ -1,3 +1,6 @@
 [submodule "thirdparty/bucket"]
 	path = thirdparty/bucket
 	url = git@github.com:troelskn/bucket.git
+[submodule "thirdparty/konstrukt"]
+	path = thirdparty/konstrukt
+	url = git://github.com/troelskn/konstrukt.git
