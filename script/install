@@ -23,4 +23,6 @@ mkdir var/channel && chmod 777 var/channel
 pushd var/channel || exit -1
 ln -s ../../config/pirum.xml pirum.xml
 popd
+
+script/migrate
 script/tasks pirum_build_channel
