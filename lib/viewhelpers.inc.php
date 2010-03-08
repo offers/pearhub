@@ -222,7 +222,7 @@ function form_errors_for($entity, $field) {
  */
 function form_text_field($entry, $field, $label = null) {
   $label || $label = ucfirst(str_replace('_', ' ', $field));
-  $html = '  <p class="krudt-form">
+  $html = '  <p class="form">
     <label for="field-' . escape($field) . '">' . escape($label) . '</label>
     <input type="text" id="field-' . escape($field) . '" name="' . escape($field) . '" value="' . escape($entry->{$field}()) . '" />
 ';
@@ -239,7 +239,7 @@ function form_text_field($entry, $field, $label = null) {
  */
 function form_text_area($entry, $field, $label = null) {
   $label || $label = ucfirst(str_replace('_', ' ', $field));
-  $html = '  <p class="krudt-form">
+  $html = '  <p class="form">
     <label for="field-' . escape($field) . '">' . escape($label) . '</label>
     <textarea id="field-' . escape($field) . '" name="' . escape($field) . '">' . escape($entry->{$field}()) . '</textarea>
 ';
