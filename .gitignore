@@ -8,3 +8,6 @@ www/get
 www/rest
 www/channel.xml
 www/feed.xml
+/.buildpath
+/.project
+config/local.inc.php
