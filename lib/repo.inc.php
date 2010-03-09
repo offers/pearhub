@@ -169,7 +169,7 @@ class SvnRepoInfo implements RepoInfo {
   protected function svn($command /*, $args */) {
     $args = func_get_args();
     if ($this->location->username()) {
-      $result = trim($this->shell->run('svn --username %s --password %s --non-interactive --trust-server-cert ls %s', $this->location->username(), $this->location->password(), $location->baseUrl()));
+      $result = trim($this->shell->run('svn --username %s --password %s --non-interactive --trust-server-cert ls %s', $this->location->username(), $this->location->password(), $this->location->baseUrl()));
       $command = '--username %s --password %s --non-interactive --trust-server-cert ' . $command;
       array_shift($args);
       array_unshift($args, $this->location->password());
