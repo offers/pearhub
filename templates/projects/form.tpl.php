@@ -63,7 +63,8 @@
       <label><span>email:</span><input type="text" name="maintainers[<?php echo $unique?>][email]" value="<?php echo e($m->maintainer()->email())?>"<?php echo $more?> /></label>
       <label>
         <span>type:</span>
-        <?php echo html_select("maintainers[$unique][type]", array('lead', 'developer', 'contributor', 'helper'), $m->type()); ?>
+        <?php if ($is_locked) $options = array('disabled' => 'true'); else $options = array(); ?>
+        <?php echo html_select("maintainers[$unique][type]", array('lead', 'developer', 'contributor', 'helper'), $m->type(), $options); ?>
       </label>
     </div>
 <?php endforeach; ?>
