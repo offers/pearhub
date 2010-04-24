@@ -80,8 +80,19 @@ class components_projects_Entry extends k_Component {
     if (!$this->canEdit()) {
       throw new k_Forbidden();
     }
-    $this->project->unmarshal($this->body());
-    if (!$this->project->unmarshalMaintainers($this->body(), $this->identity()->user(), $this->maintainers)) {
+    $body = $this->body();
+
+    foreach ($this->project->projectMaintainers() as $old_maintainer) {
+      if ($old_maintainer->maintainer()->owner() != $this->identity()->user()) {
+        $uniqid = uniqid();
+        $body['maintainers'][$uniqid]['user'] = $old_maintainer->maintainer()->user();
+        $body['maintainers'][$uniqid]['name'] = $old_maintainer->maintainer()->name();
+        $body['maintainers'][$uniqid]['email'] = $old_maintainer->maintainer()->email();
+        $body['maintainers'][$uniqid]['type'] = $old_maintainer->type();
+      }
+    }
+    $this->project->unmarshal($body);
+    if (!$this->project->unmarshalMaintainers($body, $this->identity()->user(), $this->maintainers)) {
       return false;
     }
     /*
