@@ -58,9 +58,9 @@
     <div class="maintainers-fieldset fieldset">
       <a href="#" class="remove" title="Click to remove this maintainer">&#8855;</a>
 <?php $unique = uniqid(); ?>
-      <label><span>user:</span><input type="text" name="maintainers[<?php echo $unique?>][user]" value="<?php echo e($m->maintainer()->user())?>"<?php echo $more?> /></label>
-      <label><span>name:</span><input type="text" name="maintainers[<?php echo $unique?>][name]" value="<?php echo e($m->maintainer()->name())?>"<?php echo $more?> /></label>
-      <label><span>email:</span><input type="text" name="maintainers[<?php echo $unique?>][email]" value="<?php echo e($m->maintainer()->email())?>"<?php echo $more?> /></label>
+      <label><span>user:</span><input type="text" name="maintainers[<?php echo $unique?>][user]" value="<?php e($m->maintainer()->user())?>"<?php echo $more?> /></label>
+      <label><span>name:</span><input type="text" name="maintainers[<?php echo $unique?>][name]" value="<?php e($m->maintainer()->name())?>"<?php echo $more?> /></label>
+      <label><span>email:</span><input type="text" name="maintainers[<?php echo $unique?>][email]" value="<?php e($m->maintainer()->email())?>"<?php echo $more?> /></label>
       <label>
         <span>type:</span>
         <?php if ($is_locked) $options = array('disabled' => 'true'); else $options = array(); ?>
