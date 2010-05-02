@@ -1,0 +1,14 @@
+This is the source code for the pearhub.org website, where you can register pear packages and have them published.
+
+To make it work, you need to have a couple of dependencies installed on your system, such as svn and git.
+
+You also need to install a cronjob to run the following tasks periodically:
+
+    script/tasks sweep_projects 
+    script/tasks build_pending_releases
+
+You might install them to run every 5 minutes or so, in sequence.
+
+---
+
+All code is copyright by Troels Knak-Nielsen, 2010, and is hereby freely available under the BSD license.
