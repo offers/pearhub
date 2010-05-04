@@ -1,6 +1,13 @@
 This is the source code for the pearhub.org website, where you can register pear packages and have them published.
 
-To make it work, you need to have a couple of dependencies installed on your system, such as svn and git.
+Install
+---
+
+Create a database, and make a copy of `config/development.inc.php` to `config/local.inc.php` . Then edit it.
+
+Run `script/install`
+
+You need to have a couple of dependencies installed on your system, such as svn and git.
 
 You also need to install a cronjob to run the following tasks periodically:
 
