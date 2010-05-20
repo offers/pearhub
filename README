@@ -3,7 +3,8 @@ This is the source code for the pearhub.org website, where you can register pear
 Install
 ---
 
-Create a database, and make a copy of `config/development.inc.php` to `config/local.inc.php` . Then edit it.
+Create a database, and make a copy of `config/development.inc.php` to `config/local.inc.php`. Then edit it.
+Copy `config/pirum.xml.dist` to `config/pirum.xml` and edit it too.
 
 Run `script/install`
 

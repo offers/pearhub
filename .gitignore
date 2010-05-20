@@ -1,5 +1,6 @@
 log/
 var/
+tmp/
 thirdparty/pdoext/
 thirdparty/zf/
 thirdparty/pirum
@@ -10,3 +11,4 @@ www/feed.xml
 /.buildpath
 /.project
 config/local.inc.php
+config/pirum.xml
