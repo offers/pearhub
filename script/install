@@ -20,7 +20,7 @@ ln -s ../var/channel/rest rest
 ln -s ../var/channel/feed.xml feed.xml
 ln -s ../var/channel/channel.xml channel.xml
 popd
-mkdir var/channel && chmod 777 var/channel
+mkdir -p var/channel && chmod 777 var/channel
 pushd var/channel || exit -1
 ln -s ../../config/pirum.xml pirum.xml
 popd
