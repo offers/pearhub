@@ -16,6 +16,7 @@ function create_container() {
   $factory->pdo_dsn = 'mysql:host=localhost;dbname=pearhub';
   $factory->pdo_username = 'root';
   $factory->pdo_password = 'password';
+  $factory->channel = 'pearhub.org';
   if (isset($GLOBALS['sql_log_path'])) {
     $factory->pdo_log_target = $GLOBALS['sql_log_path'];
   }

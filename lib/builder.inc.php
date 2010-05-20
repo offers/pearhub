@@ -1,14 +1,18 @@
 <?php
 class ManifestCompiler {
   protected $manifest;
-  function build($files, $project, $version, $stability, $channel = "pearhub.org") {
+  protected $channel;
+  function __construct($channel) {
+    $this->channel = $channel;
+  }
+  function build($files, $project, $version, $stability) {
     $this->manifest = new XmlWriter();
     $this->manifest->openMemory();
     $this->manifest->setIndent(true);
     $this->manifest->setIndentString('  ');
     $this->manifest->startDocument('1.0', 'UTF-8');
     $this->writeHeader();
-    $this->writeDetails($project, $version, $stability, $channel);
+    $this->writeDetails($project, $version, $stability, $this->channel);
     $this->writeContents($files, $project);
     $this->writeDependencies($project);
     $this->writeFilelist($files, $project);
@@ -203,9 +207,13 @@ class PackageBuilder
 class PackageBuilder {
   protected $shell;
   protected $destination;
+  protected $channel = 'pearhub.org';
   function __construct(Shell $shell, $destination) {
     $this->shell = $shell;
     $this->destination = rtrim($destination, '/');
+  }
+  function setChannel($channel) {
+	$this->channel = $channel;
   }
   function build($local_copy, $files, $project, $version, $stability) {
     if (!is_dir($this->destination)) {
@@ -220,7 +228,7 @@ class PackageBuilder {
     }
     $root = $this->shell->getTempname();
     $this->shell->run('mkdir -p %s', $root);
-    $compiler = new ManifestCompiler($project);
+    $compiler = new ManifestCompiler($this->channel);
     file_put_contents(
       $root . '/package.xml',
       $compiler->build($files, $project, $version, $stability));
