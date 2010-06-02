@@ -6,11 +6,13 @@ class components_Login extends k_Component {
   protected $zend_auth;
   protected $auth_cookies;
   protected $errors;
-  function __construct(k_TemplateFactory $templates, Zend_Auth $zend_auth, AuthenticationCookiesGateway $auth_cookies) {
+  protected $user_factory;
+  function __construct(k_TemplateFactory $templates, Zend_Auth $zend_auth, AuthenticationCookiesGateway $auth_cookies, UserFactory $user_factory) {
     $this->templates = $templates;
     $this->zend_auth = $zend_auth;
     $this->auth_cookies = $auth_cookies;
     $this->errors = array();
+    $this->user_factory = $user_factory;
   }
   function execute() {
     $this->url_state->init("continue", $this->url('/'));
@@ -82,6 +84,6 @@ class components_Login extends k_Component {
     }
   }
   protected function selectUser($openid_identity) {
-    return new k_AuthenticatedUser($openid_identity);
+    return $this->user_factory->create($openid_identity);
   }
 }

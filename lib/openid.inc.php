@@ -65,8 +65,10 @@ class NotAuthorizedComponent extends k_Component {
 
 class CookieIdentityLoader implements k_IdentityLoader {
   protected $gateway;
-  function __construct(AuthenticationCookiesGateway $gateway) {
+  protected $user_factory;
+  function __construct(AuthenticationCookiesGateway $gateway, UserFactory $user_factory) {
     $this->gateway = $gateway;
+    $this->user_factory = $user_factory;
   }
   function load(k_Context $context) {
     if ($context->session('identity')) {
@@ -75,12 +77,24 @@ class CookieIdentityLoader implements k_IdentityLoader {
     if ($context->cookie('user')) {
       $auth = $this->gateway->fetchByHash($context->cookie('user'));
       if ($auth && $auth->validateContext($context)) {
-        $user = new k_AuthenticatedUser($auth->openidIdentifier());
+        $user = $this->user_factory->create($auth->openidIdentifier());
         $context->session()->set('identity', $user);
         return $user;
       }
     }
     return new k_Anonymous();
+  }
+}
+
+class UserFactory {
+  public function create($username) {
+    return new k_AuthenticatedUser($username);
+  }
+}
+
+class AuthenticatedUser extends k_AuthenticatedUser {
+  function isAuthorized() {
+    return false;
   }
 }
 
