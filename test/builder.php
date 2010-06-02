@@ -4,7 +4,8 @@ require_once 'repo.inc.php';
 require_once 'builder.inc.php';
 require_once 'projects.inc.php';
 
-$db = new pdoext_Connection('mysql:host=localhost;dbname=pearhub', 'root');
+$container = create_container();
+$db = $container->get('PDO');
 $gateway = new ProjectGateway($db, new MaintainerGateway($db));
 $project = $gateway->fetch(array('name' => 'konstrukt'));
 $sh = new Shell();
