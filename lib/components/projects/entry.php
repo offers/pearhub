@@ -154,10 +154,16 @@ class components_projects_Entry extends k_Component {
     if ($this->identity()->anonymous()) {
       return false;
     }
+    if (!$this->identity()->isAuthorized()) {
+      return false;
+    }
     return $this->project->owner() == $this->identity()->user();
   }
   function canDelete() {
     if ($this->identity()->anonymous()) {
+      return false;
+    }
+    if (!$this->identity()->isAuthorized()) {
       return false;
     }
     if ($this->project->owner() != $this->identity()->user()) {

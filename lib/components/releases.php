@@ -91,6 +91,9 @@ class components_Releases extends k_Component {
     if ($this->identity()->anonymous()) {
       return false;
     }
+    if (!$this->identity()->isAuthorized()) {
+      return false;
+    }
     $project = $this->context->getProject();
     if ($project->owner() != $this->identity()->user()) {
       return false;

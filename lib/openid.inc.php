@@ -88,7 +88,7 @@ class CookieIdentityLoader implements k_IdentityLoader {
 
 class UserFactory {
   public function create($username) {
-    return new k_AuthenticatedUser($username);
+    return new AuthenticatedUser($username);
   }
 }
 

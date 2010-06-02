@@ -43,6 +43,9 @@ class components_projects_List extends k_Component {
     if ($this->identity()->anonymous()) {
       throw new k_NotAuthorized();
     }
+    if (!$this->canCreate()) {
+      throw new k_Forbidden();
+    }
     if (!$this->project) {
       $this->project = new Project();
     }
@@ -84,6 +87,9 @@ class components_projects_List extends k_Component {
     if ($this->identity()->anonymous()) {
       throw new k_NotAuthorized();
     }
+    if (!$this->canCreate()) {
+      throw new k_Forbidden();
+    }
     $this->project = new Project();
     $this->project->unmarshal($this->body());
     $this->project->unmarshalMaintainers($this->body(), $this->identity()->user(), $this->maintainers);
@@ -117,6 +123,12 @@ class components_projects_List extends k_Component {
         $GLOBALS['EMAIL_NOTIFY'],
         "[pearhub] New project registered",
         var_export($this->body(), true));
+    }
+    return true;
+  }
+  function canCreate() {
+    if ($this->identity()->isAuthorized() === false)  {
+      return false;
     }
     return true;
   }

@@ -18,6 +18,8 @@
 
 <?php echo collection_paginate($projects, array('q')); ?>
 
+<?php if ($context->canCreate()): ?>
 <p>
   <a href="<?php e(url('', array('new'))); ?>">Add new project</a>
 </p>
+<?php endif; ?>
