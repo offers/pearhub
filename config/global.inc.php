@@ -41,7 +41,7 @@ require_once 'viewhelpers.inc.php';
 //
 $debug_log_path = null;
 $debug_enabled = false;
-$GLOBALS['EMAIL_NOTIFY'] = 'troelskn@gmail.com';
+
 if (is_file(dirname(__FILE__) . '/local.inc.php')) {
   require_once dirname(__FILE__) . '/local.inc.php';
 } else {

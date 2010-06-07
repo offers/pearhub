@@ -9,6 +9,9 @@ date_default_timezone_set('Europe/Paris');
 //$sql_log_path = dirname(dirname(__FILE__)).'/log/pdoext.log';
 //$debug_enabled = true;
 
+// set email if you need to be notified on errors
+$GLOBALS['EMAIL_NOTIFY'] = '';
+
 function create_container() {
   $factory = new ApplicationFactory();
   $container = new bucket_Container($factory);

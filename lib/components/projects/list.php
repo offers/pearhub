@@ -118,7 +118,7 @@ class components_projects_List extends k_Component {
       $this->project->errors[] = $ex->getMessage();
       return false;
     }
-    if (isset($GLOBALS['EMAIL_NOTIFY'])) {
+    if (!empty($GLOBALS['EMAIL_NOTIFY'])) {
       mail(
         $GLOBALS['EMAIL_NOTIFY'],
         "[pearhub] New project registered",
