@@ -11,6 +11,10 @@ class RepoLocation {
     $this->url = rtrim($url, '/');
     $this->username = $username;
     $this->password = $password;
+
+    if(false !== strpos($this->url, '@')) {
+        throw new Exception("Repo URL {$this->url} contains '@' which is not allowed");
+    }
   }
   function url() {
     return $this->url;
@@ -41,7 +45,7 @@ class RepoProbe {
     try {
       $this->shell->run('git ls-remote --heads %s', $location->url());
       return 'git';
-    } catch (ProcessExitException $ex) {
+    } catch (Exception $ex) {
       /* squelch */
       if ($this->debug) {
         echo $ex;
