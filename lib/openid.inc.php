@@ -94,7 +94,7 @@ class UserFactory {
 
 class AuthenticatedUser extends k_AuthenticatedUser {
   function isAuthorized() {
-    return false;
+    return true;
   }
 }
 
