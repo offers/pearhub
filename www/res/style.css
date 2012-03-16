@@ -406,3 +406,15 @@ strong, em strong, strong em {
 .pagination span {
   margin: 0 .5em;
 }
+
+#my-projects {
+    margin-top: 10px;
+    text-align: right;
+    width: 100px;
+    float: right;
+    font-weight: bold;
+}
+
+.clear {
+    clear: both;
+}

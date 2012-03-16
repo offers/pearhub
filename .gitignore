@@ -12,3 +12,6 @@ www/feed.xml
 /.project
 config/local.inc.php
 config/pirum.xml
+*.iml
+.idea/*
+*.swp

@@ -29,6 +29,8 @@ class components_projects_List extends k_Component {
       $selection->addCriterion('name', '%' . $this->query('q') . '%', 'like');
       $selection->addCriterion('summary', '%' . $this->query('q') . '%', 'like');
       $selection->addCriterion('description', '%' . $this->query('q') . '%', 'like');
+    } elseif ($this->query('author')) {
+        $selection->addCriterion('owner', urldecode($this->query('author')), '=');
     }
     return $t->render(
       $this,
@@ -127,7 +129,7 @@ class components_projects_List extends k_Component {
     return true;
   }
   function canCreate() {
-    if ($this->identity()->isAuthorized() === false)  {
+    if (!$this->identity()->anonymous() && $this->identity()->isAuthorized() === false)  {
       return false;
     }
     return true;
