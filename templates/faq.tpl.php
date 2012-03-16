@@ -106,7 +106,7 @@ $ git push origin : vX.X.X</pre>
   Is the source code for the site available?
 </p>
 <p class="answer">
-  Yes, you can grab it from <a href="http://github.com/troelskn/pearhub">github.com/troelskn/pearhub</a>.
+  Yes, you can grab it from <a href="https://github.com/offers/pearhub">github.com/offers/pearhub</a>.
 </p>
 
 <p class="question">
