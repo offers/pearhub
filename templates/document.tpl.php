@@ -33,6 +33,12 @@
 <?php endif; ?>
       </div>
 
+    <?php if (!$context->identity()->anonymous()): ?>
+          <div id='my-projects'>
+              <a href='/projects?author=<?=urlencode($context->identity()->user())?>'>My Projects</a>
+          </div>
+    <?php endif; ?>
+
       <div id="crumbtrail">
 <?php
 $tmp = array();
