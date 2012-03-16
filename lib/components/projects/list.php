@@ -127,7 +127,7 @@ class components_projects_List extends k_Component {
     return true;
   }
   function canCreate() {
-    if ($this->identity()->isAuthorized() === false)  {
+    if (!$this->identity()->anonymous() && $this->identity()->isAuthorized() === false)  {
       return false;
     }
     return true;
