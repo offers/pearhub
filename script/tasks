@@ -205,6 +205,11 @@ function task_pirum_build_channel() {
   global $container;
   $builder = $container->get('Pearhub_PirumBuilder');
   $builder->build();
+
+  /* clean up after pirum build in /tmp */
+  $shell = $container->get('Shell');
+  $temp_dir = sys_get_temp_dir() . "/pirum*";
+  $shell->run("rm -rf $temp_dir");
 }
 
 if (realpath($_SERVER['PHP_SELF']) == __FILE__) {
