@@ -23,6 +23,8 @@ function build_release($release, $project) {
   $repo_probe = $container->get('RepoProbe');
   $gateway_releases = $container->get('ReleaseGateway');
   $shell = $container->get('Shell');
+  $local_copy = null;
+
   try {
     $repo = $repo_probe->getRepositoryAccess($project);
     if ($release->mode() == 'auto') {
@@ -36,7 +38,6 @@ function build_release($release, $project) {
     $files->traverse($project->path(), $project->ignore(), $project->destination());
     $builder = $container->get('PackageBuilder');
     $builder->build($local_copy, $files, $project, $release->version(), $stability);
-    $local_copy->destroy($shell);
     $release->setCompleted();
     $gateway_releases->update(
       $release,
@@ -52,6 +53,11 @@ function build_release($release, $project) {
         'version' => $release->version()));
     echo "Caught Exception at " . __FILE__ . " : " . __LINE__ . "\n";
     echo $ex;
+  }
+
+  // Clean up working copy from temp folder
+  if(null !== $local_copy) {
+    $local_copy->destroy($shell);
   }
 }
 
